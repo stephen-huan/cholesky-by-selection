@@ -1,0 +1,136 @@
+% SIAM Shared Information Template
+\documentclass[review,onefignum,onetabnum]{siamart190516}
+
+% This is information that is shared between the main document and any
+% supplement. If no supplement is required, then this information can
+% be included directly in the main document.
+
+
+% Packages and macros go here
+\usepackage{lipsum}
+\usepackage{amssymb}
+\usepackage{amsfonts}
+\usepackage{graphicx}
+\usepackage{epstopdf}
+\usepackage{algorithmic}
+\usepackage{tikz}
+\usepackage{pgfplots}
+\usetikzlibrary{shapes.arrows, patterns, calc}
+\usepackage{tikz-3dplot}
+\usepackage{bbm}
+\usepackage{bm}
+\ifpdf
+  \DeclareGraphicsExtensions{.eps,.pdf,.png,.jpg}
+\else
+  \DeclareGraphicsExtensions{.eps}
+\fi
+
+\definecolor{lightblue}{HTML}{a1b4c7}
+\definecolor{orange}{HTML}{ea8810}
+\definecolor{silver}{HTML}{b0aba8}
+\definecolor{rust}{HTML}{b8420f}
+\definecolor{seagreen}{HTML}{23553c}
+
+\colorlet{lightsilver}{silver!30!white}
+\colorlet{darkorange}{orange!85!black}
+\colorlet{darksilver}{silver!85!black}
+\colorlet{darklightblue}{lightblue!85!black}
+\colorlet{darkrust}{rust!85!black}
+\colorlet{darkseagreen}{seagreen!85!black}
+
+\hypersetup{colorlinks=true,linkcolor=darkrust,citecolor=darkseagreen,urlcolor=darksilver}
+
+% custom commands:
+\newcommand{\todo}[1]{{\color{red} #1}}
+
+\usepackage{mathtools}
+%Names of standard objects
+\newcommand*{\Reals}{\mathbb{R}}
+\newcommand*{\Naturals}{\mathbb{N}}
+
+
+% From https://tex.stackexchange.com/questions/198771/align-in-substack
+\makeatletter
+\newcommand{\subalign}[1]{%
+  \vcenter{%
+    \Let@ \restore@math@cr \default@tag
+    \baselineskip\fontdimen10 \scriptfont\tw@
+    \advance\baselineskip\fontdimen12 \scriptfont\tw@
+    \lineskip\thr@@\fontdimen8 \scriptfont\thr@@
+    \lineskiplimit\lineskip
+    \ialign{\hfil$\m@th\scriptstyle##$&$\m@th\scriptstyle{}##$\hfil\crcr
+      #1\crcr
+    }%
+  }%
+}
+\makeatother
+
+%Names of Variables:
+\newcommand*{\stateP}{\mathbf{x}}
+\newcommand*{\stateD}{\hat{\mathbf{x}}}
+
+\newcommand*{\resP}{\mathbf{r}} 
+\newcommand*{\resD}{\hat{\mathbf{r}}} 
+
+\newcommand*{\resMatP}{\mathbf{R}} 
+\newcommand*{\resMatD}{\hat{\mathbf{R}}} 
+
+
+\newcommand*{\dirP}{\mathbf{p}} 
+\newcommand*{\dirMatP}{\mathbf{P}} 
+\newcommand*{\dirD}{\hat{\mathbf{p}}} 
+\newcommand*{\dirMatD}{\hat{\mathbf{P}}} 
+
+\newcommand*{\rhsP}{\mathbf{b}} 
+\newcommand*{\rhsD}{\hat{\mathbf{b}}} 
+
+\newcommand*{\mat}{\mathbf{A}}
+\newcommand*{\adj}[1]{#1^{\dagger}}
+\newcommand*{\con}[1]{\bar{#1}}
+
+\newcommand*{\alphaP}{\alpha} 
+\newcommand*{\alphaD}{\hat{\alpha}} 
+
+\newcommand*{\alphaMatP}{\bm{\alpha}} 
+\newcommand*{\alphaMatD}{\hat{\bm{\alpha}}} 
+
+
+
+\newcommand*{\betaP}{\beta} 
+\newcommand*{\betaD}{\hat{\beta}} 
+
+\newcommand*{\betaMatP}{\bm{\beta}} 
+\newcommand*{\betaMatD}{\hat{\bm{\beta}}} 
+
+
+% Add a serial/Oxford comma by default.
+\newcommand{\creflastconjunction}{, and~}
+
+% Used for creating new theorem and remark environments
+\newsiamremark{remark}{Remark}
+\newsiamremark{hypothesis}{Hypothesis}
+\newsiamremark{example}{Example}
+\crefname{hypothesis}{Hypothesis}{Hypotheses}
+\newsiamthm{claim}{Claim}
+
+% Sets running headers as well as PDF title and authors
+\headers{Experimental design for fast algorithms}{S. Huan and F. Sch{\"a}fer}
+
+% Title. If the supplement option is on, then "Supplementary Material"
+% is automatically inserted before the title.
+\title{Experimental design for fast linear algebra}
+
+% Authors: full names plus addresses.
+\author{%
+  Stephen\ Huan\thanks{Georgia Institute of Technology \newline \email{florian.schaefer@cc.gatech.edu}} and 
+  Florian\ Sch{\"a}fer\thanks{Georgia Institute of Technology, S1317 CODA, 756 W Peachtree St Atlanta, GA 30332, \newline \email{florian.schaefer@cc.gatech.edu},\newline Corresponding Author} 
+}
+
+\usepackage{amsopn}
+\DeclareMathOperator{\diag}{diag}
+
+
+%%% Local Variables: 
+%%% mode:latex
+%%% TeX-master: "ex_article"
+%%% End: 

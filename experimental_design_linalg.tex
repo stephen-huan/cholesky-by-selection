@@ -1,0 +1,68 @@
+% SIAM Article Template
+
+% Information that is shared between the article and the supplement
+% (title and author information, macros, packages, etc.) goes into
+% ex_shared.tex. If there is no supplement, this file can be included
+% directly.
+
+\input{experimental_design_linalg_shared}
+
+% Optional PDF information
+\ifpdf 
+\hypersetup{
+  pdftitle={m-$\kappa$alculus},
+  pdfauthor={S Huan, F. Sch{\"a}fer}
+}
+\fi
+
+% The next statement enables references to information in the
+% supplement. See the xr-hyperref package for details.
+
+\externaldocument{experimental_linalg_supplement}
+
+% FundRef data to be entered by SIAM
+%<funding-group specific-use="FundRef">
+%<award-group>
+%<funding-source>
+%<named-content content-type="funder-name"> 
+%</named-content> 
+%<named-content content-type="funder-identifier"> 
+%</named-content>
+%</funding-source>
+%<award-id> </award-id>
+%</award-group>
+%</funding-group>
+
+\begin{document}
+
+\maketitle
+
+% REQUIRED
+\begin{abstract}
+  experimental design for linear algebra 
+\end{abstract}
+
+% REQUIRED
+\begin{keywords}
+   \todo{to do}
+\end{keywords}
+
+% REQUIRED
+\begin{AMS}
+  % 68Q25, 68R10, 68U05
+\end{AMS}
+
+\section{Introduction}
+\cite{schafer2017compression} test citation
+
+\section*{Acknowledgments}
+%\todo{add more funding information}
+This research was supported in part through research cyberinfrastructure resources and services provided by the Partnership for an Advanced Computing Environment (PACE) at the Georgia Institute of Technology, Atlanta, Georgia, USA.
+
+\bibliographystyle{siamplain}
+\bibliography{references}
+
+\appendix
+\todo{add proofs, if any, in appendix}
+
+\end{document}
