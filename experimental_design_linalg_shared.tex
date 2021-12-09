@@ -40,6 +40,8 @@
 
 \hypersetup{colorlinks=true,linkcolor=darkrust,citecolor=darkseagreen,urlcolor=darksilver}
 
+\pgfplotsset{compat=1.18}
+
 % custom commands:
 \newcommand{\todo}[1]{{\color{red} #1}}
 
@@ -129,7 +131,17 @@
 
 \usepackage{amsopn}
 \DeclareMathOperator{\diag}{diag}
+\let\trace\relax
+\DeclareMathOperator{\trace}{trace}
+\DeclareMathOperator{\logdet}{logdet}
 
+\DeclareMathOperator*{\argmin}{argmin}
+
+\DeclareMathOperator{\E}{E}
+\DeclareMathOperator{\Var}{Var}
+\DeclareMathOperator{\Cov}{Cov}
+\DeclareMathOperator{\I}{I}
+\DeclareMathOperator{\entropy}{H}
 
 %%% Local Variables: 
 %%% mode:latex

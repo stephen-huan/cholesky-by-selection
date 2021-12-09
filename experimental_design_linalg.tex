@@ -10,7 +10,7 @@
 % Optional PDF information
 \ifpdf 
 \hypersetup{
-  pdftitle={m-$\kappa$alculus},
+  pdftitle={m-calculus},
   pdfauthor={S Huan, F. Sch{\"a}fer}
 }
 \fi
@@ -57,19 +57,314 @@
 
 \section{Greedy selection for directed inference}
 
-\subsection{Problem: Optimal selection}
+A \emph{Gaussian process} is a prior distribution over functions, such that
+for any finite set of points, the corresponding function over the points
+is distributed according to a multivariate Gaussian. In order to generate
+such a distribution over an uncountable number of points consistently, a
+Gaussian process is specified by a \emph{mean function} \( \mu(\bm{x}) \) and
+\emph{covariance function} or \emph{kernel function} \( k(\bm{x}, \bm{y})
+\). For any finite set of points \( X = \{ x_1, \dots x_n \} \), \( f(X)
+\sim \mathcal{N}(\bm{\mu}, \Theta) \), where \( \bm{\mu}_i = \mu(X_i) \) and
+\( \Theta_{ij} = k(X_i, X_j) \). We are focused on performing regression
+with Gaussian processes. This means we have a set of training data points \(
+X_\text{Tr} \) and their corresponding function values \( \bm{y}_\text{Tr}
+\) and want to make predictions at points \( X_\text{Pr} \). To do so,
+we can simply condition the desired prediction \( \bm{y}_\text{Pr} \) on
+the observed outputs and compute the conditional expectation. We can also
+find the conditional variance, which will quantify the uncertainty of our
+prediction. If we block our covariance matrix
+\( \Theta = 
+  \begin{pmatrix} 
+    \Theta_{\text{Tr}, \text{Tr}} & \Theta_{\text{Tr}, \text{Pr}} \\
+    \Theta_{\text{Pr}, \text{Tr}} & \Theta_{\text{Pr}, \text{Pr}}
+  \end{pmatrix}
+\) 
+where \( \Theta_{\text{Tr}, \text{Tr}}, \Theta_{\text{Pr}, \text{Pr}},
+\Theta_{\text{Tr}, \text{Pr}}, \Theta_{\text{Pr}, \text{Tr}} \) are the
+covariance matrices of the training data, testing data, and training and test
+data respectively, then the conditional expectation and covariance are:
+\begin{align}
+  \label{eq:cond_mean}
+  \E[\bm{y}_\text{Pr} \mid \bm{y}_\text{Tr}] &= \bm{\mu}_\text{Pr}
+    + \Theta_{\text{Pr}, \text{Tr}} \Theta_{\text{Tr}, \text{Tr}}^{-1} 
+      (\bm{y}_\text{Tr} - \bm{\mu}_\text{Tr}) \\
+  \label{eq:cond_cov}
+  \Cov[\bm{y}_\text{Pr} \mid \bm{y}_\text{Tr}] &= \Theta_{\text{Pr}, \text{Pr}}
+    - \Theta_{\text{Pr}, \text{Tr}} \Theta_{\text{Tr}, \text{Tr}}^{-1} 
+      \Theta_{\text{Tr}, \text{Pr}}
+\end{align}
 
-\subsection{A greedy approach: }
+Note that calculating the posterior mean and variance requires inverting the
+training covariance matrix \( \Theta_{\text{Tr}, \text{Tr}} \), which costs
+\( \mathcal{O}(N^3) \), where \( N \) is the number of training points. This
+scaling is prohibitive for large datasets, so many \emph{sparse} Gaussian
+process regression techniques have been proposed. These methods often focus
+on selecting a subset of the training data that is most informative about the
+prediction points. If \( s \) points are selected out of the \( N \), then
+the inversion will cost \( \mathcal{O}(s^3) \), which could be substantially
+cheaper if \( s \) is significantly smaller than \( N \). The question is then
+how to select as few points as possible while maintaining predictive accuracy.
+
+\todo{cite sparse Gaussian regression papers}
+
+\subsection{Problem: optimal selection}
+
+One natural criterion is to maximize the \emph{mutual information}
+between the selected points and the target point for prediction. Such
+information-theoretic objectives have seen success in the spacial statistics
+community \cite{krause2008sensor}, who use such criteria to determine the best
+locations to place sensors in a Gaussian process regression context.
+The mutual information, or \emph{information gain} is defined as
+\begin{align}
+  \label{eq:info}  
+  \I[\bm{y}_\text{Pr};\bm{y}_\text{Tr}] &=  \entropy[\bm{y}_\text{Pr}] - 
+    \entropy[\bm{y}_\text{Pr} \mid \bm{y}_\text{Tr}]
+\end{align}
+
+We can use the fact that the entropy of a multivariate Gaussian is
+monotonically increasing with the log determinant of its covariance
+matrix to efficiently compute these entropies. Because the entropy of \(
+\bm{y}_\text{Pr} \) is constant, maximizing the mutual information is
+equivalent to minimizing the conditional entropy. From \cref{eq:cond_cov}
+we see that minimizing the conditional entropy is equivalent to minimizing
+the log determinant of the posterior covariance matrix. Note that for a
+single predictive point, this is monotonic with its variance. So another
+justification is that we are reducing the \emph{conditional variance} of
+the desired point as much as possible. In particular, because our estimator
+is the conditional expectation \cref{eq:cond_mean}, it is unbiased because
+\( \E[\E[\bm{y}_\text{Pr} \mid \bm{y}_\text{Tr}]] = \E[\bm{y}_\text{Pr}]
+\). Because it is unbiased, its expected mean squared error is simply the
+conditional variance since \( \E[(\bm{y}_\text{Pr} - \E[\bm{y}_\text{Pr}
+\mid \bm{y}_\text{Tr}])^2 \mid \bm{y}_\text{Tr}] = \Var[\bm{y}_\text{Pr}
+\mid \bm{y}_\text{Tr}] \) where the expectation is taken under conditioning
+because of the assumption that \( \bm{y}_\text{Pr} \) is distributed
+according to the Gaussian process. So maximizing the mutual information is
+equivalent to minimizing the conditional variance which is in turn equivalent
+to minimizing the expected mean squared error of the prediction.
+
+\subsection{A greedy approach}
+
+We now consider how to efficiently maximize the conditional variance objective
+using a greedy approach. At each iteration, we pick the training point which
+most reduces the conditional variance of the prediction point. Let \( I =
+\{ i_1, i_2 \dots i_j \} \) be the set of indexes of training points selected
+already. For a candidate index \( k \), \todo{elaborate on this argument}, because iterative conditioning of
+the Gaussian process is Schur complementation and Cholesky factorization is
+recursive Schur complementation, we see that the amount selecting \( k \)
+will decrease the variance of \( \bm{y}_\text{Pr} \) is 
+\begin{align}
+  \label{eq:gp_greedy}
+  \frac{\Cov[\bm{y}_\text{Pr}, \bm{y}_{\text{Tr},k}]^2}
+       {\Var[\bm{y}_{\text{Tr}, k}, \bm{y}_{\text{Tr}, k}]} &=  
+  \frac{\Theta_{nk \mid I}^2}{\Theta_{kk \mid I}}              
+\end{align}
+We can efficiently keep track of the conditional variance of each training
+point as well as the conditional covariance of each training point with the
+prediction point by maintaining a partial Cholesky factorization from the
+indices \( I \) already selected. 
+\todo{finish describing algorithm(s), proofs, psuedocode}
 
 \subsection{Near optimality by submodularity}
 
-\section{Greedy selection for \emph{global} approximation by KL minimization}
+\section{Greedy selection for \emph{global} approximation by KL-minimization}
+
+We have a symmetric, positive (semi-)definite kernel matrix \( \Theta \) and
+wish to compute the \emph{Cholesky factorization} of \( \Theta \) into a lower
+triangular factor \( L \) such that \( \Theta = L L^{\top} \). \todo{justify
+importance/applications of Cholesky factorization}. This can be done in \(
+\mathcal{O}(N^3) \) with standard algorithms, which is often prohibitive.
+Instead, we want to do so in a \emph{sparse} manner. As such, we can only get
+an approximate \( L \), \( \hat{L} \) belonging to a pre-specified sparsity
+pattern \( S \) (a set of (row, column) indices that are allowed to be
+nonzero). In order to measure the performance of the estimator, we imagine both
+kernel matrices as the covariance matrices of multivariate Gaussians with mean
+\( \bm{0} \). In order to compare the resulting two distributions, we use the
+\emph{KL divergence} according to \cite{schafer2020sparse}, or the difference
+in information it takes to encode a sample from \( \Theta \) with a coding
+scheme from \( (\hat{L} \hat{L}^{\top})^{-1} \), compared to encoding with the
+optimal coding scheme using \( \Theta \). \todo{use different interpretation
+of KL divergence --- explicit connection to Gaussian process regression}
+\begin{align}
+  \label{eq:L_obj} 
+  L \coloneqq \argmin_{\hat{L} \in S} \, \mathbb{D}_{\text{KL}}
+  \left (
+    \mathcal{N}(\vec{0}, \Theta) \, \Big \| \,
+    \mathcal{N}(\vec{0}, (\hat{L} \hat{L}^{\top})^{-1})
+  \right ) 
+\end{align}
+
+Note that here we are computing the Cholesky factorization
+of \( \Theta^{-1} \). Surprisingly enough, it is possible to
+exactly compute \( L \). First, we re-write the KL divergence:
+\begin{align}
+  \label{eq:KL}  
+  2 \mathbb{D}_{\text{KL}}
+  \left (
+    \mathcal{N}(\vec{0}, \Theta_1) \, \Big \| \,
+    \mathcal{N}(\vec{0}, \Theta_2)
+  \right ) 
+  = \trace(\Theta_2^{-1} \Theta_1) + \logdet(\Theta_2) - \logdet(\Theta_1) - N
+\end{align}
+
+\begin{theorem}
+  \cite{schafer2020sparse}. 
+  The non-zero entries of the \( i \)th
+  column of \( L \) in \cref{eq:L_obj} are:
+  \begin{align}
+    \label{eq:L_col} 
+    L_{s_i, i} = \frac{\Theta_{s_i, s_i}^{-1} \vec{e}_1}
+    {\sqrt{\vec{e}_1^{\top} \Theta_{s_i, s_i}^{-1} \vec{e}_1}}
+  \end{align}
+\end{theorem}
+
+Plugging \( L \) \cref{eq:L_col} back into
+the KL divergence \cref{eq:KL}, we obtain:
+\begin{align}
+  \mathbb{D}_{\text{KL}}
+  \left (
+    \mathcal{N}(\vec{0}, \Theta) \, \Big \| \,
+    \mathcal{N}(\vec{0}, (L L^{\top})^{-1})
+  \right ) 
+  &= -\logdet(L L^{\top}) - \logdet(\Theta) \nonumber
+  \shortintertext{Because  \( L \) is lower triangular, its
+    determinant is just the product of its diagonal entries:} \nonumber
+  &= -2 \sum_{i = 1}^N \log(L_{ii}) - \logdet(\Theta) 
+  \shortintertext{Plugging \cref{eq:L_col} for its diagonal entry,}
+  \label{eq:obj}
+  &= -\sum_{i = 1}^N \log(\bm{e}_1^{\top} \Theta_{s_i, s_i}^{-1} \bm{e}_1) 
+    - \logdet(\Theta) 
+\end{align}
+
+In order to maximize \cref{eq:obj}, we can maximize over each column
+independently, since each term in the sum only depends on a single column.
+We want to maximize \( \bm{e}_1^{\top} \Theta_{s_i, s_i}^{-1} \bm{e}_1
+\), the term corresponding to the diagonal entry in the inverse of the
+submatrix of \( \Theta \) corresponding to the entries we've taken.
+
+Given a sparsity pattern, we can construct \( L \). The question is now how to
+compute a good sparsity pattern such that the resulting \( L \) has as small
+KL divergence as possible. First, we can consider a single column since the KL
+divergence is independent between columns. Throughout this discussion we'll
+assume we're selecting at most \( s \) nonzero entries from each column. In
+order to select nonzero rows for a single column, we can do this greedily, by
+picking the row that locally decreases the KL divergence the most. Once we've
+selected it, we take the next entry according to the same criteria, and so on.
+
+However, if we were to do this naively, we would iterate over the \( N \)
+possible candidate indices \( k \). For each \( k \), we would take the
+new sparsity pattern \( s_i' = s_i \cup \{k\} \), and compute the inverse
+of the submatrix \( \Theta \) indexed at this new sparsity pattern, \(
+\Theta_{s_i', s_i'}^{-1} \). Finally, we would pick the \( k \) with the
+largest top left entry and add it to our sparsity pattern. This would
+cost \( s^3 \) per candidate to invert the resulting matrix, over \( N
+\) candidates and \( s \) rounds, with a cost of \( N s^4 \) per column
+and \( N^2 s^4 \) over all the columns. Luckily, we can do much better
+by taking advantage of Schur complements.
+
+We can cleverly block our matrix in a way to take advantage of the redundancy
+in computing \( \Theta_{s_i', s_i'}^{-1} \). Note that we can assume we have \(
+\Theta_{s_i, s_i}^{-1} \), the inverse of the entries we've selected already.
+Then when we consider \( k \) as a candidate, we're just adding a single row
+and column to this new matrix. If we organize everything, our \( \Theta_{s_i',
+s_i'} \) will be:
+\begin{align}
+  \label{eq:block}
+  P \Theta_{s_i', s_i'} P^{\top} &= 
+  \left ( 
+  \begin{array}{cc|c}
+    \cline{1-1}
+    \multicolumn{1}{|c|}{\Theta_{11}} & \Theta_{12} & \Theta_{13} \\
+    \cline{1-1}
+    \Theta_{21} & \Theta_{22} & \Theta_{23} \\ \hline
+    \Theta_{31} & \Theta_{32} & \Theta_{33}
+  \end{array} 
+  \right )
+\end{align}
+
+Here \( \Theta_{33} \) is the diagonal entry \( \Theta_{ii} \), henceforth
+known as the \emph{special entry}, \( \Theta_{11} \) are the entries we've
+taken already (excluding \( i \)), and \( \Theta_{22} \) is \( \Theta_{kk}
+\), the candidate entry. The off diagonal terms all correspond to the proper
+indexing of \( \Theta_{s_i', s_i'} \), i.e. \( \Theta_{21} \) is \( \Theta \)
+at row \( k \) indexed along the sparsity pattern \( s_i \), \( \Theta_{31} \)
+is \( \Theta \) at row \( i \) indexed along \( s_i \), and \( \Theta_{32} \)
+is the scalar \( \Theta_{ik} \). The terms above the diagonal are symmetric.
+
+Thus, computing \( (\Theta_{s_i', s_i'}^{-1})_{11} \) is equivalent to
+computing \( ((P \Theta_{s_i', s_i'} P^{\top})^{-1})_{33} \) since inverting
+a permuted matrix just permutes its inverse. We can efficiently compute the
+bottom right entry of the block matrix with Schur complementation:
+\begin{align}
+  \nonumber
+  (S/S_{22}) &= (S_{33} - S_{32} S_{22}^{-1} S_{23})^{-1} \\
+  (\Theta_{s_i', s_i'}^{-1})_{11} &= 
+  \left (
+           \Theta_{33} - \Theta_{31} \Theta_{11}^{-1} \Theta_{13} - 
+    \frac{(\Theta_{32} - \Theta_{31} \Theta_{11}^{-1} \Theta_{12})^2} 
+         { \Theta_{22} - \Theta_{21} \Theta_{11}^{-1} \Theta_{12}}
+  \right )^{-1}
+  \nonumber
+  \shortintertext{Recall that we want to
+    maximize this term. So we can minimize}
+  \nonumber
+ & \equiv \min_k \,  
+ \Theta_{33} - \Theta_{31} \Theta_{11}^{-1} \Theta_{13} - 
+       \frac{( \Theta_{32} - \Theta_{31} \Theta_{11}^{-1} \Theta_{12})^2} 
+             { \Theta_{22} - \Theta_{21} \Theta_{11}^{-1} \Theta_{12}}
+  \nonumber
+  \shortintertext{Since \( \Theta_{33} - \Theta_{31}
+    \Theta_{11}^{-1} \Theta_{13} \) is constant over our candidates,}
+ & \equiv \max_k
+ \label{eq:chol_greedy}
+ \frac{( \Theta_{32} - \Theta_{31} \Theta_{11}^{-1} \Theta_{12})^2} 
+       { \Theta_{22} - \Theta_{21} \Theta_{11}^{-1} \Theta_{12}}
+\end{align}
+This is precisely the objective in \cref{eq:gp_greedy} as the numerator is the
+squared covariance between the candidate and the special entry, conditional
+on the entries already selected, while the denominator is the conditional
+variance of the candidate. Hence the sparse Cholesky factorization motivated
+by KL divergence can be viewed as the sparse Gaussian process regression over
+each column, where entries are selected to maximize mutual information with
+the entry on the diagonal of the current column.
+\todo{elaborate on the connection and recycle algorithm}
+
+\subsection{Algorithms for Efficient Schur Complementation}
+
+There are two primary ways we can efficiently compute these quadratic forms.
+
+\subsubsection{Explicit Inverse}
+
+Maintain \( \Theta_{11}^{-1} \) explicitly. When an index \( k \) is added
+to the sparsity set, efficiently update \( \Theta_{11}^{-1} \) with Schur
+complementation in \( \mathcal{O}(s^2) \). Finally, compute the quadratic
+forms by storing the previous values for each candidate and updating based
+on the fact that adding a new row and column only adds \( \mathcal{O}(s)
+\) terms to compute. For each of the \( s \) rounds, it takes \( s^2 \) to
+update the inverse and for each of the \( N \) candidates, it takes \( s \)
+to compute their new quadratic form, costing \( N s^2 + s^3 \) per column
+and \( \mathcal{O}(N^2 s^2 + N s^3 ) \) overall.
+
+\subsubsection{Cholesky Factorization}
+
+Maintain a Cholesky factorization of \( \Theta_{11} \), \( \Theta_{11} = L
+L^{\top} \). When an index is added, update the Cholesky factorization with
+left-looking in \( \mathcal{O}(N s) \). Each quadratic form can be updated
+in \( \mathcal{O}(1) \) given the Cholesky factorization, yielding \( N s^2
+\) per column and \( \mathcal{O}(N^2 s^2) \) overall.
+
+While both approaches have similar time complexity, the explicit inverse
+algorithm uses \( \mathcal{O}(s^2 + N) \) space to store the inverse and
+quadratic forms while the Cholesky factorization uses \( \mathcal{O}(N s)
+\) to store the Cholesky factors (\( N > s \)). Also the explicit inverse
+algorithm computes \( \Theta_{11}^{-1} \), which can be directly used to
+generate the columns of \( L \) according to \cref{eq:L_col} without extra
+computational cost.
 
 \subsection{Review of KL approximation}
 
 \subsection{Supernodes and blocked selection}
 
-\section{Numerical Experiments} 
+\section{Numerical experiments} 
 
 \section*{Acknowledgments}
 %\todo{add more funding information}
