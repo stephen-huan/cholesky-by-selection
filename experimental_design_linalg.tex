@@ -57,22 +57,114 @@
 
 \section{Greedy selection for directed inference}
 
+\subsection{Conditional \textit{k}-th nearest neighbors}
+
+Consider the simple regression algorithm \( k \)th-nearest neighbors (\( k
+\)-NN). Given a training set \( X_\text{Tr} = \{ \bm{x}_1, \dots, \bm{x}_n \}
+\) and corresponding labels \( \bm{y}_\text{Tr} = \{ y_1, \dots, y_n \} \),
+the goal is to estimate the unknown label \( y_\text{Pr} \) of some unseen
+prediction point \( \bm{x}_\text{Pr} \) Stated informally, the \( k \)-NN
+approach is to select the \( k \) points in \( X_\text{Tr} \) \emph{most
+informative} about \( \bm{x}_\text{Pr} \) and combine their results.
+
+\begin{algorithm}
+  \caption{Idealized \( k \)-NN regression}
+  Given \( (X_\text{Tr}, \bm{y}_\text{Tr}) = 
+          \{ (\bm{x}_1, y_1), \dots, (\bm{x}_n, y_n) \} \) 
+  and \( \bm{x}_\text{Pr} \)
+  \begin{enumerate}
+    \item Select the \( k \) points in \( X_\text{Tr} \)
+      most informative about \( \bm{x}_\text{Pr} \)
+    \item Combine the labels of the selected points to generate a prediction
+  \end{enumerate}
+\end{algorithm}
+
+One specific approach is intuitively, points close to \( \bm{x}_\text{Pr}
+\) should be similar to it. So we select the \( k \) closest points in \(
+X_\text{Tr} \) to \( \bm{x}_\text{Pr} \) and pool their labels (e.g., by
+averaging).
+
+\begin{algorithm}
+  \caption{\( k \)-NN regression}
+  \begin{enumerate}
+    \item Select the \( k \) points \( \{ \bm{x}_{i_1}, \dots, \bm{x}_{i_k} \} 
+      \subseteq X_\text{Tr} \) closest to \( \bm{x}_\text{Pr} \) 
+    \item Compute \( \bm{y}_\text{Pr} \) by 
+      \( \frac{1}{k} \sum_{j = 1}^k y_{i_j} \)
+  \end{enumerate}
+\end{algorithm}
+
+However, we can generalize the notion of ``closest'' with the \emph{kernel
+trick}, by using an arbitrary kernel function to measure similarity. For
+example, commonly used kernels like the Gaussian kernel and Mat{\'e}rn family
+of covariance functions are \emph{isotropic}; they depend only on the distance
+between the two vectors. If such isotropic kernels monotonically decrease with
+distance, then selecting points based on the largest kernel similarity recovers
+\( k \)-NN. However, kernels need not be isotropic in general --- they just
+need to capture some sense of ``similarity'', motivating kernel \( k \)-NN.
+
+\todo{not sure whether ``stationary'' or
+``isotropic'' are the right word(s) to use here}
+
+\begin{algorithm}
+  \caption{Kernel \( k \)-NN regression}
+  Given kernel function \( K(\bm{x}, \bm{y}) \) 
+  \begin{enumerate}
+    \item Select the \( k \) points \( \{ \bm{x}_{i_1}, \dots, \bm{x}_{i_k}
+      \} \subseteq X_\text{Tr} \) most similar to \( \bm{x}_\text{Pr} \)
+    \item Compute \( \bm{y}_\text{Pr} \) by an average weighted by similarity
+  \end{enumerate}
+\end{algorithm}
+
+Although the kernel \( k \)-NN approach is more general than its normed
+counterpart, it still suffers from a fundamental issue. Suppose the closest
+point to \( \bm{x}_\text{Pr} \) has many duplicates in the training set. Then
+the algorithm will select the same point multiple times, even though in some
+sense the duplicate point has stopped giving additional information about the
+prediction point. In order to fix this issue, we should be selecting new points
+\emph{conditional} on the points we've already selected. This preserves the
+idealized algorithm of selecting points based on the information they tell us
+about the prediction point --- once we've selected a point, conditioning on
+it reduces the information similar points tells us, encouraging diverse point
+selection.
+
+\begin{algorithm}
+  \caption{\textcolor{lightblue}{Conditional} kernel \( k \)-NN regression}
+  \begin{enumerate}
+    \item Select the \( k \) points \( \{ \bm{x}_{i_1}, \dots, \bm{x}_{i_k} \} 
+      \subseteq X_\text{Tr} \) most \textcolor{lightblue}{informative} to
+      \( \bm{x}_\text{Pr} \) \\ \textcolor{lightblue}{after conditioning on
+      all points selected beforehand}
+    \item Compute \( \bm{y}_\text{Pr} \) by an average weighted by
+      \textcolor{lightblue}{information}
+  \end{enumerate}
+\end{algorithm}
+
+In order to make the notions of conditioning and information precise, we need a
+specific framework. Kernel methods lead naturally to Gaussian processes, whose
+covariance matrices naturally result from kernel functions and allows us to use
+the rigorous statistical and information-theoretic notions of conditioning and
+information.
+
+\todo{mention sensor placement/spatial statistics literature}
+
+\subsection{Sparse Gaussian process regression}
+
 A \emph{Gaussian process} is a prior distribution over functions, such that
 for any finite set of points, the corresponding function over the points
 is distributed according to a multivariate Gaussian. In order to generate
 such a distribution over an uncountable number of points consistently, a
-Gaussian process is specified by a \emph{mean function} \( \mu(\bm{x}) \) and
-\emph{covariance function} or \emph{kernel function} \( k(\bm{x}, \bm{y})
-\). For any finite set of points \( X = \{ x_1, \dots x_n \} \), \( f(X)
-\sim \mathcal{N}(\bm{\mu}, \Theta) \), where \( \bm{\mu}_i = \mu(X_i) \) and
-\( \Theta_{ij} = k(X_i, X_j) \). We are focused on performing regression
-with Gaussian processes. This means we have a set of training data points \(
-X_\text{Tr} \) and their corresponding function values \( \bm{y}_\text{Tr}
-\) and want to make predictions at points \( X_\text{Pr} \). To do so,
-we can simply condition the desired prediction \( \bm{y}_\text{Pr} \) on
-the observed outputs and compute the conditional expectation. We can also
-find the conditional variance, which will quantify the uncertainty of our
-prediction. If we block our covariance matrix
+Gaussian process is specified by a \emph{mean function} \( \mu(\bm{x})
+\) and \emph{covariance function} or \emph{kernel function} \( K(\bm{x},
+\bm{y}) \). For any finite set of points \( X = \{ \bm{x}_1, \dots, \bm{x}_n
+\} \), \( f(X) \sim \mathcal{N}(\bm{\mu}, \Theta) \), where \( \bm{\mu}_i
+= \mu(\bm{x}_i) \) and \( \Theta_{ij} = K(\bm{x}_i, \bm{x}_j) \).
+
+In order to compute a prediction at \( \bm{x}_\text{Pr} \), we can
+simply condition the desired prediction \( \bm{y}_\text{Pr} \) on
+the observed outputs and compute the conditional expectation. We
+can also find the conditional variance, which will quantify the
+uncertainty of our prediction. If we block our covariance matrix
 \( \Theta = 
   \begin{pmatrix} 
     \Theta_{\text{Tr}, \text{Tr}} & \Theta_{\text{Tr}, \text{Pr}} \\
@@ -100,58 +192,84 @@ training covariance matrix \( \Theta_{\text{Tr}, \text{Tr}} \), which costs
 scaling is prohibitive for large datasets, so many \emph{sparse} Gaussian
 process regression techniques have been proposed. These methods often focus
 on selecting a subset of the training data that is most informative about the
-prediction points. If \( s \) points are selected out of the \( N \), then
-the inversion will cost \( \mathcal{O}(s^3) \), which could be substantially
-cheaper if \( s \) is significantly smaller than \( N \). The question is then
-how to select as few points as possible while maintaining predictive accuracy.
+prediction points, which naturally aligns with our \( k \)-NN perspective.
+If \( s \) points are selected out of the \( N \), then the inversion will
+cost \( \mathcal{O}(s^3) \), which could be substantially cheaper if \( s \)
+is significantly smaller than \( N \). The question is then how to select as
+few points as possible while maintaining predictive accuracy.
 
 \todo{cite sparse Gaussian regression papers}
 
 \subsection{Problem: optimal selection}
 
-One natural criterion is to maximize the \emph{mutual information}
-between the selected points and the target point for prediction. Such
-information-theoretic objectives have seen success in the spacial statistics
-community \cite{krause2008sensor}, who use such criteria to determine the best
-locations to place sensors in a Gaussian process regression context.
-The mutual information, or \emph{information gain} is defined as
+The natural criterion justified from the \( k \)-NN perspective is to maximize
+the \emph{mutual information} between the selected points and the target point
+for prediction. Such information-theoretic objectives have seen success in the
+spatial statistics community \cite{krause2008sensor}, who use such criteria to
+determine the best locations to place sensors in a Gaussian process regression
+context. The mutual information, or \emph{information gain} is defined as
 \begin{align}
   \label{eq:info}  
-  \I[\bm{y}_\text{Pr};\bm{y}_\text{Tr}] &=  \entropy[\bm{y}_\text{Pr}] - 
+  \I[\bm{y}_\text{Pr};\bm{y}_\text{Tr}] &= \entropy[\bm{y}_\text{Pr}] - 
     \entropy[\bm{y}_\text{Pr} \mid \bm{y}_\text{Tr}]
 \end{align}
 
 We can use the fact that the entropy of a multivariate Gaussian is
-monotonically increasing with the log determinant of its covariance
-matrix to efficiently compute these entropies. Because the entropy of \(
-\bm{y}_\text{Pr} \) is constant, maximizing the mutual information is
-equivalent to minimizing the conditional entropy. From \cref{eq:cond_cov}
-we see that minimizing the conditional entropy is equivalent to minimizing
-the log determinant of the posterior covariance matrix. Note that for a
-single predictive point, this is monotonic with its variance. So another
-justification is that we are reducing the \emph{conditional variance} of
-the desired point as much as possible. In particular, because our estimator
-is the conditional expectation \cref{eq:cond_mean}, it is unbiased because
-\( \E[\E[\bm{y}_\text{Pr} \mid \bm{y}_\text{Tr}]] = \E[\bm{y}_\text{Pr}]
-\). Because it is unbiased, its expected mean squared error is simply the
-conditional variance since \( \E[(\bm{y}_\text{Pr} - \E[\bm{y}_\text{Pr}
-\mid \bm{y}_\text{Tr}])^2 \mid \bm{y}_\text{Tr}] = \Var[\bm{y}_\text{Pr}
-\mid \bm{y}_\text{Tr}] \) where the expectation is taken under conditioning
-because of the assumption that \( \bm{y}_\text{Pr} \) is distributed
-according to the Gaussian process. So maximizing the mutual information is
-equivalent to minimizing the conditional variance which is in turn equivalent
-to minimizing the expected mean squared error of the prediction.
+monotonically increasing with the log determinant of its covariance matrix to
+efficiently compute these entropies. Because the entropy of \( \bm{y}_\text{Pr}
+\) is constant, maximizing the mutual information is equivalent to minimizing
+the conditional entropy. From \cref{eq:cond_cov} we see that minimizing the
+conditional entropy is equivalent to minimizing the log determinant of the
+posterior covariance matrix. Note that for a single predictive point, this
+is monotonic with its variance. So another justification is that we are
+reducing the \emph{conditional variance} of the desired point as much as
+possible. In particular, because our estimator is the conditional expectation
+\cref{eq:cond_mean}, it is unbiased because \( \E[\E[\bm{y}_\text{Pr} \mid
+\bm{y}_\text{Tr}]] = \E[\bm{y}_\text{Pr}] \). Because it is unbiased, its
+expected mean squared error is simply the conditional variance since \(
+\E[(\bm{y}_\text{Pr} - \E[\bm{y}_\text{Pr} \mid \bm{y}_\text{Tr}])^2 \mid
+\bm{y}_\text{Tr}] = \Var[\bm{y}_\text{Pr} \mid \bm{y}_\text{Tr}] \) where
+the expectation is taken under conditioning because of the assumption that
+\( \bm{y}_\text{Pr} \) is distributed according to the Gaussian process. So
+maximizing the mutual information is equivalent to minimizing the conditional
+variance which is in turn equivalent to minimizing the expected mean squared
+error of the prediction. Another perspective on the objective can be derived
+from comparing the mutual information to the EV-VE identity, which states
+\begin{align*}
+  \textcolor{orange}{\entropy[\bm{y}_\text{Pr}]} &= 
+    \textcolor{lightblue}{\entropy[\bm{y}_\text{Pr} \mid \bm{y}_\text{Tr}]} +
+    \textcolor{rust}{\I[\bm{y}_\text{Pr};\bm{y}_\text{Tr}]} \\
+  \textcolor{orange}{\Var[\bm{y}_\text{Pr}]} &= 
+    \textcolor{lightblue}{\E[\Var[\bm{y}_\text{Pr} \mid \bm{y}_\text{Tr}]]} +
+    \textcolor{rust}{     \Var[\E[\bm{y}_\text{Pr} \mid \bm{y}_\text{Tr}]]} 
+\end{align*}
+
+On the left hand side, entropy is monotone with variance. On the right hand
+side, the expectation of the conditional variance can be interpreted to be
+the fluctuation of the prediction point after conditioning, and is monotone
+with the conditional entropy. Because the expectation of conditional variance
+and variance of conditional expectation add to a constant, minimizing the
+expectation of the conditional variance is equivalent to maximizing the
+variance of conditional expectation, which we see corresponds to the mutual
+information term. Supposing \( \bm{y}_\text{Pr} \) was independent of \(
+\bm{y}_\text{Tr} \), then the conditional expectation becomes simply the
+expectation, whose variance is 0. Thus, the variance of the conditional
+expectation can be interpreted to be the ``information'' shared between \(
+\bm{y}_\text{Pr} \) and \( \bm{y}_\text{Tr} \), as the larger it is, the
+more the prediction for \( \bm{y}_\text{Pr} \) (the conditional expectation)
+depends on the observed results of \( \bm{y}_\text{Tr} \).
 
 \subsection{A greedy approach}
 
-We now consider how to efficiently maximize the conditional variance objective
+We now consider how to efficiently minimize the conditional variance objective
 using a greedy approach. At each iteration, we pick the training point which
-most reduces the conditional variance of the prediction point. Let \( I =
-\{ i_1, i_2 \dots i_j \} \) be the set of indexes of training points selected
-already. For a candidate index \( k \), \todo{elaborate on this argument}, because iterative conditioning of
-the Gaussian process is Schur complementation and Cholesky factorization is
-recursive Schur complementation, we see that the amount selecting \( k \)
-will decrease the variance of \( \bm{y}_\text{Pr} \) is 
+most reduces the conditional variance of the prediction point. Let \( I = \{
+i_1, i_2 \dots i_j \} \) be the set of indexes of training points selected
+already. Let the prediction point have index \( n \), the last index. For a
+candidate index \( k \), \todo{elaborate on this argument}, because iterative
+conditioning of the Gaussian process is Schur complementation and Cholesky
+factorization is recursive Schur complementation, we see that the amount
+selecting \( k \) will decrease the variance of \( \bm{y}_\text{Pr} \) is
 \begin{align}
   \label{eq:gp_greedy}
   \frac{\Cov[\bm{y}_\text{Pr}, \bm{y}_{\text{Tr},k}]^2}
@@ -164,26 +282,30 @@ prediction point by maintaining a partial Cholesky factorization from the
 indices \( I \) already selected. 
 \todo{finish describing algorithm(s), proofs, psuedocode}
 
+\subsection{Supernodes and blocked selection}
+
+We now consider how to efficiently deal with multiple prediction points.
+\todo{justifying objective: mutual information leads to logdet of conditional
+covariance, information geometry perspective of logdet volume of uncertainty,
+scaling factor in probability density function for multivariate Gaussian}
+
 \subsection{Near optimality by submodularity}
 
 \section{Greedy selection for \emph{global} approximation by KL-minimization}
 
-We have a symmetric, positive (semi-)definite kernel matrix \( \Theta \) and
-wish to compute the \emph{Cholesky factorization} of \( \Theta \) into a lower
-triangular factor \( L \) such that \( \Theta = L L^{\top} \). \todo{justify
-importance/applications of Cholesky factorization}. This can be done in \(
-\mathcal{O}(N^3) \) with standard algorithms, which is often prohibitive.
-Instead, we want to do so in a \emph{sparse} manner. As such, we can only get
-an approximate \( L \), \( \hat{L} \) belonging to a pre-specified sparsity
-pattern \( S \) (a set of (row, column) indices that are allowed to be
-nonzero). In order to measure the performance of the estimator, we imagine both
-kernel matrices as the covariance matrices of multivariate Gaussians with mean
-\( \bm{0} \). In order to compare the resulting two distributions, we use the
-\emph{KL divergence} according to \cite{schafer2020sparse}, or the difference
-in information it takes to encode a sample from \( \Theta \) with a coding
-scheme from \( (\hat{L} \hat{L}^{\top})^{-1} \), compared to encoding with the
-optimal coding scheme using \( \Theta \). \todo{use different interpretation
-of KL divergence --- explicit connection to Gaussian process regression}
+We have a symmetric, positive (semi-)definite kernel matrix \( \Theta \)
+and wish to compute the \emph{Cholesky factorization} of \( \Theta \) into
+a lower triangular factor \( L \) such that \( \Theta = L L^{\top} \).
+\todo{justify importance/applications of Cholesky factorization}. This
+can be done in \( \mathcal{O}(N^3) \) with standard algorithms, which is
+often prohibitive. Instead, we want to do so in a \emph{sparse} manner. As
+such, we can only get an approximate \( L \), \( \hat{L} \) belonging to
+a pre-specified sparsity pattern \( S \) (a set of (row, column) indices
+that are allowed to be nonzero). In order to measure the performance of
+the estimator, we imagine both kernel matrices as the covariance matrices
+of multivariate Gaussians with mean \( \bm{0} \). In order to compare the
+resulting two distributions, we use the \emph{KL divergence} according to
+\cite{schafer2020sparse}, or the expected difference in log-densities.
 \begin{align}
   \label{eq:L_obj} 
   L \coloneqq \argmin_{\hat{L} \in S} \, \mathbb{D}_{\text{KL}}
@@ -294,6 +416,7 @@ Thus, computing \( (\Theta_{s_i', s_i'}^{-1})_{11} \) is equivalent to
 computing \( ((P \Theta_{s_i', s_i'} P^{\top})^{-1})_{33} \) since inverting
 a permuted matrix just permutes its inverse. We can efficiently compute the
 bottom right entry of the block matrix with Schur complementation:
+\todo{write Schur complements as explicit conditioning}
 \begin{align}
   \nonumber
   (S/S_{22}) &= (S_{33} - S_{32} S_{22}^{-1} S_{23})^{-1} \\
@@ -327,6 +450,10 @@ by KL divergence can be viewed as the sparse Gaussian process regression over
 each column, where entries are selected to maximize mutual information with
 the entry on the diagonal of the current column.
 \todo{elaborate on the connection and recycle algorithm}
+
+\todo{be more explicit that the objectives themselves are identical,
+not just the greedy objectives (from conditioning being Schur complementation
+being taking the matrix, inverting, taking a submatrix, inverting)}
 
 \subsection{Algorithms for Efficient Schur Complementation}
 
@@ -362,8 +489,6 @@ computational cost.
 
 \subsection{Review of KL approximation}
 
-\subsection{Supernodes and blocked selection}
-
 \section{Numerical experiments} 
 
 \section*{Acknowledgments}
@@ -374,6 +499,10 @@ This research was supported in part through research cyberinfrastructure resourc
 \bibliography{references}
 
 \appendix
+
 \todo{add proofs, if any, in appendix}
+
+\subsection{Iterative conditioning as Schur complementation
+as Cholesky factorization as Orthogonal Matching Pursuit}
 
 \end{document}
