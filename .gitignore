@@ -3,6 +3,7 @@ experimental_design_linalg.bbl
 experimental_design_linalg.blg
 experimental_design_linalg.fdb_latexmk
 experimental_design_linalg.fls
+*.fls
 experimental_design_linalg.log
 experimental_design_linalg.out
 experimental_design_linalg.synctex.gz
