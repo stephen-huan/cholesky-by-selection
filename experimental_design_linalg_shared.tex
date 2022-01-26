@@ -38,7 +38,12 @@
 \colorlet{darkrust}{rust!85!black}
 \colorlet{darkseagreen}{seagreen!85!black}
 
-\hypersetup{colorlinks=true,linkcolor=darkrust,citecolor=darkseagreen,urlcolor=darksilver}
+\hypersetup{
+  colorlinks=true,
+  linkcolor=darkrust,
+  citecolor=darkseagreen,
+  urlcolor=darksilver
+}
 
 \pgfplotsset{compat=1.18}
 
@@ -71,38 +76,36 @@
 \newcommand*{\stateP}{\mathbf{x}}
 \newcommand*{\stateD}{\hat{\mathbf{x}}}
 
-\newcommand*{\resP}{\mathbf{r}} 
-\newcommand*{\resD}{\hat{\mathbf{r}}} 
+\newcommand*{\resP}{\mathbf{r}}
+\newcommand*{\resD}{\hat{\mathbf{r}}}
 
-\newcommand*{\resMatP}{\mathbf{R}} 
-\newcommand*{\resMatD}{\hat{\mathbf{R}}} 
+\newcommand*{\resMatP}{\mathbf{R}}
+\newcommand*{\resMatD}{\hat{\mathbf{R}}}
 
 
-\newcommand*{\dirP}{\mathbf{p}} 
-\newcommand*{\dirMatP}{\mathbf{P}} 
-\newcommand*{\dirD}{\hat{\mathbf{p}}} 
-\newcommand*{\dirMatD}{\hat{\mathbf{P}}} 
+\newcommand*{\dirP}{\mathbf{p}}
+\newcommand*{\dirMatP}{\mathbf{P}}
+\newcommand*{\dirD}{\hat{\mathbf{p}}}
+\newcommand*{\dirMatD}{\hat{\mathbf{P}}}
 
-\newcommand*{\rhsP}{\mathbf{b}} 
-\newcommand*{\rhsD}{\hat{\mathbf{b}}} 
+\newcommand*{\rhsP}{\mathbf{b}}
+\newcommand*{\rhsD}{\hat{\mathbf{b}}}
 
 \newcommand*{\mat}{\mathbf{A}}
 \newcommand*{\adj}[1]{#1^{\dagger}}
 \newcommand*{\con}[1]{\bar{#1}}
 
-\newcommand*{\alphaP}{\alpha} 
-\newcommand*{\alphaD}{\hat{\alpha}} 
+\newcommand*{\alphaP}{\alpha}
+\newcommand*{\alphaD}{\hat{\alpha}}
 
-\newcommand*{\alphaMatP}{\bm{\alpha}} 
-\newcommand*{\alphaMatD}{\hat{\bm{\alpha}}} 
+\newcommand*{\alphaMatP}{\bm{\alpha}}
+\newcommand*{\alphaMatD}{\hat{\bm{\alpha}}}
 
+\newcommand*{\betaP}{\beta}
+\newcommand*{\betaD}{\hat{\beta}}
 
-
-\newcommand*{\betaP}{\beta} 
-\newcommand*{\betaD}{\hat{\beta}} 
-
-\newcommand*{\betaMatP}{\bm{\beta}} 
-\newcommand*{\betaMatD}{\hat{\bm{\beta}}} 
+\newcommand*{\betaMatP}{\bm{\beta}}
+\newcommand*{\betaMatD}{\hat{\bm{\beta}}}
 
 \renewcommand{\vec}[1]{\bm{#1}}
 
@@ -127,9 +130,11 @@
 \title{Experimental design for fast linear algebra}
 
 % Authors: full names plus addresses.
-\author{%
-  Stephen\ Huan\thanks{Georgia Institute of Technology} \and 
-  Florian\ Sch{\"a}fer\thanks{Georgia Institute of Technology, S1317 CODA, 756 W Peachtree St Atlanta, GA 30332, \newline \email{florian.schaefer@cc.gatech.edu},\newline Corresponding Author} 
+\author{
+  Stephen\ Huan\thanks{Georgia Institute of Technology} \and
+  Florian\ Sch{\"a}fer\thanks{Georgia Institute of Technology,
+  S1317 CODA, 756 W Peachtree St Atlanta, GA 30332, \newline
+  \email{florian.schaefer@cc.gatech.edu},\newline Corresponding Author}
 }
 
 
@@ -138,6 +143,7 @@
 \let\trace\relax
 \DeclareMathOperator{\trace}{trace}
 \DeclareMathOperator{\logdet}{logdet}
+\DeclareMathOperator{\chol}{chol}
 
 \DeclareMathOperator*{\argmin}{argmin}
 
@@ -147,7 +153,7 @@
 \DeclareMathOperator{\I}{I}
 \DeclareMathOperator{\entropy}{H}
 
-%%% Local Variables: 
+%%% Local Variables:
 %%% mode:latex
 %%% TeX-master: "ex_article"
-%%% End: 
+%%% End:
