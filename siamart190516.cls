@@ -169,7 +169,10 @@
 %%
 \DeclareOption{translated}{\@translatedtrue} % jan 7 2004
 %\DeclareOption{openbib}{\@openbibtrue}
-\ExecuteOptions{letterpaper,10pt,twoside,onecolumn,leqno,draft,notitlepage}
+
+% MODIFIED TO REMOVE TWOSIDE 
+%\ExecuteOptions{letterpaper,10pt,twoside,onecolumn,leqno,draft,notitlepage}
+\ExecuteOptions{letterpaper,10pt,onecolumn,leqno,draft,notitlepage}
 \ProcessOptions
 %
 % eliminate siam10.clo altogether:
