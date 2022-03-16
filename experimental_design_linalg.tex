@@ -53,15 +53,15 @@
 \end{AMS}
 
 \section{Introduction}
-\cite{schafer2017compression} test citation
+\cite{schafer2020compression} test citation
 
 \section{Greedy selection for directed inference}
 
 \subsection{Conditional \textit{k}-th nearest neighbors}
 
 Consider the simple regression algorithm \( k \)th-nearest neighbors (\( k
-\)-NN). Given a training set \( X_\text{Tr} = \{ \vec{x}_1, \dots, \vec{x}_n
-\} \) and corresponding labels \( \vec{y}_\text{Tr} = \{ y_1, \dots, y_n \}
+\)-NN). Given a training set \( X_\text{Tr} = \{ \vec{x}_1, \dotsc, \vec{x}_n
+\} \) and corresponding labels \( \vec{y}_\text{Tr} = \{ y_1, \dotsc, y_n \}
 \), the goal is to estimate the unknown label \( y_\text{Pr} \) of some unseen
 prediction point \( \vec{x}_\text{Pr} \) Stated informally, the \( k \)-NN
 approach is to select the \( k \) points in \( X_\text{Tr} \) \emph{most
@@ -70,7 +70,7 @@ informative} about \( \vec{x}_\text{Pr} \) and combine their results.
 \begin{algorithm}
   \caption{Idealized \( k \)-NN regression}
   Given \( (X_\text{Tr}, \vec{y}_\text{Tr}) =
-        \{ (\vec{x}_1, y_1), \dots, (\vec{x}_n, y_n) \} \)
+        \{ (\vec{x}_1, y_1), \dotsc, (\vec{x}_n, y_n) \} \)
   and \( \vec{x}_\text{Pr} \)
   \begin{enumerate}
     \item Select the \( k \) points in \( X_\text{Tr} \)
@@ -79,15 +79,19 @@ informative} about \( \vec{x}_\text{Pr} \) and combine their results.
   \end{enumerate}
 \end{algorithm}
 
-One \Ftodo{"specific" and "intuitively" are fluff, meaning that they don't really add information. In order to achieve crisp, high-quality academic writing, it is important to  try to those fluff words as much as possible. It's normal to add them out of reflex initially, so it requires active postprocessing.} specific approach is intuitively, points close to \( \vec{x}_\text{Pr}
-\) should be similar to it. So we select the \( k \) closest points in \(
-X_\text{Tr} \) to \( \vec{x}_\text{Pr} \) and pool their labels (e.g., by
-averaging).
+One \Ftodo{"specific" and "intuitively" are fluff, meaning that they
+don't really add information. In order to achieve crisp, high-quality
+academic writing, it is important to try to those fluff words as much as
+possible. It's normal to add them out of reflex initially, so it requires
+active postprocessing.} specific approach is intuitively, points close
+to \( \vec{x}_\text{Pr} \) should be similar to it. So we select the \(
+k \) closest points in \( X_\text{Tr} \) to \( \vec{x}_\text{Pr} \) and
+pool their labels (e.g., by averaging).
 
 \begin{algorithm}
   \caption{\( k \)-NN regression}
   \begin{enumerate}
-    \item Select the \( k \) points \( \{ \vec{x}_{i_1}, \dots, \vec{x}_{i_k}
+    \item Select the \( k \) points \( \{ \vec{x}_{i_1}, \dotsc, \vec{x}_{i_k}
       \} \subseteq X_\text{Tr} \) closest to \( \vec{x}_\text{Pr} \)
     \item Compute \( \vec{y}_\text{Pr} \) by
       \( \frac{1}{k} \sum_{j = 1}^k y_{i_j} \)
@@ -102,16 +106,15 @@ between the two vectors. If such isotropic kernels monotonically decrease with
 distance, then selecting points based on the largest kernel similarity recovers
 \( k \)-NN. However, kernels need not be isotropic in general --- they just
 need to capture some sense of ``similarity'', motivating kernel \( k \)-NN.
-\Stodo{Testing the Stephen comment command}
 
-\todo{not sure whether ``stationary'' or
+\Stodo{not sure whether ``stationary'' or
 ``isotropic'' are the right word(s) to use here}
 
 \begin{algorithm}
   \caption{Kernel \( k \)-NN regression}
   Given kernel function \( K(\vec{x}, \vec{y}) \)
   \begin{enumerate}
-    \item Select the \( k \) points \( \{ \vec{x}_{i_1}, \dots, \vec{x}_{i_k}
+    \item Select the \( k \) points \( \{ \vec{x}_{i_1}, \dotsc, \vec{x}_{i_k}
       \} \subseteq X_\text{Tr} \) most similar to \( \vec{x}_\text{Pr} \)
     \item Compute \( \vec{y}_\text{Pr} \) by an average weighted by similarity
   \end{enumerate}
@@ -132,7 +135,7 @@ selection.
 \begin{algorithm}
   \caption{\textcolor{lightblue}{Conditional} kernel \( k \)-NN regression}
   \begin{enumerate}
-    \item Select the \( k \) points \( \{ \vec{x}_{i_1}, \dots, \vec{x}_{i_k}
+    \item Select the \( k \) points \( \{ \vec{x}_{i_1}, \dotsc, \vec{x}_{i_k}
       \}  \subseteq X_\text{Tr} \) most \textcolor{lightblue}{informative} to
       \( \vec{x}_\text{Pr} \) \\ \textcolor{lightblue}{after conditioning on
       all points selected beforehand}
@@ -147,7 +150,7 @@ covariance matrices naturally result from kernel functions and allows us to use
 the rigorous statistical and information-theoretic notions of conditioning and
 information.
 
-\todo{mention sensor placement/spatial statistics perspective/literature}
+\Stodo{mention sensor placement/spatial statistics perspective/literature}
 
 \subsection{Sparse Gaussian process regression}
 \label{subsec:gp_reg}
@@ -158,8 +161,8 @@ is distributed according to a multivariate Gaussian. In order to generate
 such a distribution over an uncountable number of points consistently, a
 Gaussian process is specified by a \emph{mean function} \( \mu(\vec{x}) \) and
 \emph{covariance function} or \emph{kernel function} \( K(\vec{x}, \vec{y})
-\). For any finite set of points \( X = \{ \vec{x}_1, \dots, \vec{x}_n \}
-\), \( f(X) \sim \mathcal{N}(\vec{\mu}, \Theta) \), where \( \vec{\mu}_i =
+\). For any finite set of points \( X = \{ \vec{x}_1, \dotsc, \vec{x}_n \}
+\) ,\( f(X) \sim \mathcal{N}(\vec{\mu}, \Theta) \), where \( \vec{\mu}_i =
 \mu(\vec{x}_i) \) and \( \Theta_{ij} = K(\vec{x}_i, \vec{x}_j) \).
 
 In order to compute a prediction at \( \vec{x}_\text{Pr} \), we can
@@ -189,7 +192,31 @@ data respectively, then the conditional expectation and covariance are:
     \Theta_{\text{Pr}, \text{Pr}} -
     \Theta_{\text{Pr}, \text{Tr}} \Theta_{\text{Tr}, \text{Tr}}^{-1}
     \Theta_{\text{Tr}, \text{Pr}}
+  \shortintertext{For brevity of notation, we will
+    often denote the conditional covariance matrix as}
+  \label{eq:cond_cov_notation}
+  \Theta_{\text{Pr}, \text{Pr} \mid \text{Tr}} &:=
+    \Theta_{\text{Pr}, \text{Pr}} -
+    \Theta_{\text{Pr}, \text{Tr}} \Theta_{\text{Tr}, \text{Tr}}^{-1}
+    \Theta_{\text{Tr}, \text{Pr}}
+  \shortintertext{When conditioning on multiple sets, the sets are given in
+    order of computation. Although the resulting covariance matrix is the same,
+    a different order of conditioning means different intermediate results in
+    repeated application of \cref{eq:cond_cov}. In general,}
+  \Theta_{I, J \mid K_1, K_2, \dotsc, K_n} &:=
+    \Cov[\vec{y}_I, \vec{y}_J \mid
+         \vec{y}_{K_1 \cup K_2 \cup \dotsb \cup K_n}]
+  \shortintertext{denotes the covariance between the variables in index
+    sets \( I \) and \( J \), conditional on the variables in \( K_1, K_2,
+    \dots, K_n \). Note that by the quotient rule of Schur complementation:}
+  \label{eq:quotient_rule}
+  \Theta_{I, J \mid K_{1 \dots n}} &=
+    \Theta_{I, J \mid K_{1 \dots n - 1}} -
+    \Theta_{I, K_n \mid K_{1 \dots n - 1}}
+    \Theta_{K_n, K_n \mid K_{1 \dots n - 1}}^{-1}
+    \Theta_{K_n, J \mid K_{1 \dots n - 1}}
 \end{align}
+
 Note that calculating the posterior mean and variance requires inverting the
 training covariance matrix \( \Theta_{\text{Tr}, \text{Tr}} \), which costs
 \( \mathcal{O}(N^3) \), where \( N \) is the number of training points. This
@@ -202,16 +229,17 @@ cost \( \mathcal{O}(s^3) \), which could be substantially cheaper if \( s \)
 is significantly smaller than \( N \). The question is then how to select as
 few points as possible while maintaining predictive accuracy.
 
-\todo{cite sparse Gaussian regression papers}
+\Stodo{cite sparse Gaussian regression papers}
 
 \subsection{Problem: optimal selection}
 
 The natural criterion justified from the \( k \)-NN perspective is to maximize
 the \emph{mutual information} between the selected points and the target point
-for prediction. Such information-theoretic objectives have seen success in the
-spatial statistics community \cite{krause2008sensor}, who use such criteria to
-determine the best locations to place sensors in a Gaussian process regression
-context. The mutual information, or \emph{information gain} is defined as
+for prediction. Such information-theoretic objectives have seen success in
+the spatial statistics community \cite{krause2008nearoptimal}, who use such
+criteria to determine the best locations to place sensors in a Gaussian process
+regression context. The mutual information, or \emph{information gain} is
+defined as
 \begin{align}
   \label{eq:info}
   \I[\vec{y}_\text{Pr};\vec{y}_\text{Tr}] &= \entropy[\vec{y}_\text{Pr}] -
@@ -267,7 +295,7 @@ depends on the observed results of \( \vec{y}_\text{Tr} \).
 We now consider how to efficiently minimize the conditional variance
 objective using a greedy approach. At each iteration, we pick the training
 point which most reduces the conditional variance of the prediction point.
-Let \( I = \{ i_1, i_2, \dots, i_j \} \) be the set of indexes of training
+Let \( I = \{ i_1, i_2, \dotsc, i_j \} \) be the set of indexes of training
 points selected already. Let the prediction point have index \( n + 1 \),
 the last index. For a candidate index \( k \), we update the covariance
 matrix after conditioning on \( y_k \), in addition to the indices already
@@ -291,6 +319,8 @@ that the variance of \( \vec{y}_\text{Pr} \) will decrease after selecting
   \frac{\Cov[\vec{y}_{\text{Tr}}[k], \vec{y}_\text{Pr}]^2}
        {\Var[\vec{y}_{\text{Tr}}[k], \vec{y}_{\text{Tr}}[k]]} &=
   \frac{\Theta_{k, n + 1 \mid I}^2}{\Theta_{kk \mid I}}
+  = \Var[\vec{y}_\text{Pr}]
+    \mathrm{Corr}[\vec{y}_\text{Tr}[k], \vec{y}_\text{Pr}]^2
 \end{align}
 For each candidate \( k \), we need to keep track of its conditional variance
 and conditional covariance with the prediction point after conditioning on
@@ -372,7 +402,7 @@ see that Cholesky factorization is iteratively conditioning the Gaussian
 process. From the iterative conditioning perspective, the \( i \)th column
 of the Cholesky factor corresponds precisely to the corresponding \( \vec{u}
 \) for \( i \) since a iterative sequence of conditioning on \( i_1, i_2
-\dots \) is equivalent to conditioning on \( I \) by the quotient rule.
+\dotsc \) is equivalent to conditioning on \( I \) by the quotient rule.
 
 The Cholesky factorization can be efficiently computed without excess
 dependence on \( N \) with left-looking, so the conditioning only
@@ -528,6 +558,10 @@ covariance of the unknown data can be done directly according to
 \cref{eq:cond_mean} and \cref{eq:cond_cov} in time \( \mathcal{O}(s^3)
 \) using \cref{alg:infer_select}.
 
+This algorithm is in fact the covariance equivalent of the
+signal recovery algorithm orthogonal matching pursuit (OMP)
+\cite{tropp2007signal}, a connection elaborated in \cref{app:omp}.
+
 \begin{algorithm}
   \caption{Gaussian process inference by selection}
   \label{alg:infer_select}
@@ -578,11 +612,11 @@ We now consider how to efficiently deal with multiple prediction points. The
 first question is how to generalize the previous objective for a single point
 \cref{eq:obj_gp} to multiple points. Following the same mutual information
 justification as before, a natural criterion is to minimize the log determinant
-of the prediction points' covariance matrix after conditioning on the selected
-points, or \( \logdet(\Theta_{\text{Pr}, \text{Pr} \mid I}) \). This objective,
-known as D-optimal \cite{krause2008sensor}, has many intuitive interpretations
---- for example, as the volume of the region of uncertainty or as the scaling
-factor in the density function for the Gaussian process.
+of the prediction points' covariance matrix after conditioning on the
+selected points, or \( \logdet(\Theta_{\text{Pr}, \text{Pr} \mid I}) \). This
+objective, known as D-optimal \cite{krause2008nearoptimal}, has many intuitive
+interpretations --- for example, as the volume of the region of uncertainty
+or as the scaling factor in the density function for the Gaussian process.
 
 We now need to be able to efficiently compute the effect of selecting an
 index \( k \) on the log determinant. From \cref{eq:cond_select}, we know
@@ -891,7 +925,7 @@ again uses more memory than the explicit precision algorithm.
 
 We have a covariance matrix \( \Theta \) and wish to compute the Cholesky
 factorization of \( \Theta \) into a lower triangular factor \( L \) such that
-\( \Theta = L L^{\top} \). \todo{justify importance/downstream applications
+\( \Theta = L L^{\top} \). \Stodo{justify importance/downstream applications
 of Cholesky factorization}. This can be done in \( \mathcal{O}(N^3) \) with
 standard algorithms, which is often prohibitive. Recall the problem of
 inference in Gaussian process regression as described in \cref{subsec:gp_reg}
@@ -919,7 +953,7 @@ of (row, column) indices that are allowed to be nonzero. In order to measure
 the performance of the estimator, we treat the matrices as covariance matrices
 of centered Gaussian processes (mean \( \vec{0} \)). In order to compare the
 resulting distributions, we use the \emph{KL-divergence} according to
-\cite{schafer2020sparse}, or the expected difference in log-densities:
+\cite{schafer2021sparse}, or the expected difference in log-densities:
 \begin{align}
   \label{eq:L_obj}
   L \coloneqq \argmin_{\hat{L} \in S} \, \mathbb{D}_{\text{KL}}
@@ -946,7 +980,7 @@ where \( \Theta_1 \) and \( \Theta_2 \) are both of size
 
 \begin{theorem}
   \label{thm:L}
-  \cite{schafer2020sparse}.
+  \cite{schafer2021sparse}.
   The non-zero entries of the \( i \)th
   column of \( L \) in \cref{eq:L_obj} are:
   \begin{align}
@@ -960,7 +994,7 @@ Plugging the optimal \( L \) \cref{eq:L_col} back
 into the KL-divergence \cref{eq:kl}, we obtain:
 \begin{align}
   \label{eq:obj_chol}
-  \mathbb{D}_{\text{KL}}
+  2 \mathbb{D}_{\text{KL}}
   \left (
     \mathcal{N}(\vec{0}, \Theta) \, \Big \| \,
     \mathcal{N}(\vec{0}, (L L^{\top})^{-1})
@@ -1021,23 +1055,28 @@ cost of \( \mathcal{O}(N s^3) \) for the \( N \) columns of \( L \).
 
 We can also use the Gaussian process regression viewpoint to efficiently
 aggregate multiple columns, that is, to use the same sparsity pattern for
-multiple columns. We denote aggregating the column indices \( i_1, \dots, i_m
+multiple columns. We denote aggregating the column indices \( i_1, \dotsc, i_m
 \) into the same group as \( \tilde{i} = \{i_1, i_2, \dots i_m \} \), letting
 \( s_{\tilde{i}} = \bigcup_{i \in \tilde{i}} s_i \) be the aggregated sparsity
-pattern, and letting \( \tilde{s} = s_{\tilde{i}} - \tilde{i} \) be the set of
-selected entries excluding the diagonal entries. Each \( s_i = \tilde{s} \cup
-\, \{ j \in \tilde{i} \mid j \geq i \} \), that is, the sparsity pattern of
-the \( i \) column is the selected entries plus all the diagonal entries lower
-than it. We will enforce that all the selected entries, excluding the indices
-of the diagonals of the columns themselves, are below the lowest index so that
-indices are not selected ``partially'' --- that is, an index could be above
-some indices in the aggregated columns, and therefore invalid to add to their
-column, but below others. That is, we restrict the candidate indices \( k >
-\max \tilde{i} \) so that the selected index can be added to each column in
-\( \tilde{i} \) without violating the lower triangularity of \( L \). We now
-show that the KL-minimization objective on the aggregated indices corresponds
-precisely to \cref{eq:obj_gp_mult}, the objective multiple point Gaussian
-regression with the chain rule of log determinant through conditioning.
+pattern, and letting \( \tilde{s} = s_{\tilde{i}} - \tilde{i} \) be the set
+of selected entries excluding the diagonal entries. Each \( s_i = \tilde{s}
+\cup \, \{ j \in \tilde{i} \mid j \geq i \} \), that is, the sparsity pattern
+of the \( i \) column is the selected entries plus all the diagonal entries
+lower than it. We will enforce that all the selected entries, excluding the
+indices of the diagonals of the columns themselves, are below the lowest index
+so that indices are not selected ``partially'' --- that is, an index could be
+above some indices in the aggregated columns, and therefore invalid to add to
+their column, but below others. That is, we restrict the candidate indices \(
+k > \max \tilde{i} \) so that the selected index can be added to each column
+in \( \tilde{i} \) without violating the lower triangularity of \( L \). It
+is in fact possible to properly account for these partial updates, but the
+reasoning and eventual algorithm becomes more complicated. We defer a detailed
+discussion of the partial update case to \cref{app:partial}.
+
+We now show that the KL-minimization objective on the aggregated indices
+corresponds precisely to \cref{eq:obj_gp_mult}, the objective multiple
+point Gaussian regression with the chain rule of log determinant through
+conditioning.
 \begin{align}
   \label{eq:det_chain}
   \logdet(\Theta) &= \logdet(\Theta_{1, 1 \mid 2}) + \logdet(\Theta_{2, 2})
@@ -1218,8 +1257,8 @@ than its non-aggregated counterpart, at the cost that the resulting sparsity
 pattern will be lower quality (since the algorithm is forced to select the
 same entry for \emph{all} columns in the group).
 
-Unlike the geometric algorithms of \cite{schafer2020sparse,
-schafer2017compression} which rely on the pairwise distance between points,
+Unlike the geometric algorithms of \cite{schafer2021sparse,
+schafer2020compression} which rely on the pairwise distance between points,
 and whose covariance matrix is implicitly determined by a list of points and
 kernel function, this algorithm relies only on the entries of the covariance
 matrix \( \Theta \). Thus, it can factor arbitrary symmetric positive definite
@@ -1229,9 +1268,59 @@ matrices without access to points or an explicit kernel function.
 
 \section{Numerical experiments}
 
-Python code for all numerical experiments can be found at
-\href{https://github.com/stephen-huan/conditional-knn}
+All experiments were run on the PACE Phoenix cluster, with 8
+cores of a Intel(R) Xeon(R) Gold 6226 CPU @ 2.70GHz and 6 GB of
+RAM per core. Python code for all numerical experiments can be
+found at \href{https://github.com/stephen-huan/conditional-knn}
 {https://github.com/stephen-huan/conditional-knn}.
+
+\Stodo{cite python libraries that want citations (e.g. scikit-learn)}
+
+\subsection{\textit{k}th-nearest neighbors selection}
+
+We justify that diverse point selection based on conditional information can
+lead to better performance than simply selecting the nearest neighbor in a toy
+example on the MNIST dataset. We compare \( k \)th-nearest neighbors (KNN)
+directly to conditional \( k \)th-nearest neighbors (CKNN) in the following
+experiment. We randomly select 1000 images to form the training set and 100
+to form the testing set. For each image in the testing set, we select the
+\( k \) ``closest'' training points with either KNN or CKNN. For KNN we use
+the standard Euclidean distance and for CKNN we use Mat{\'e}rn kernel with
+smoothness \( \nu = 1.5 \) and length scale \( l = 2^{10} \). Finally, we
+predict the label of the test point by taking the most frequently occurring
+label in the \( k \) selected points.
+
+\Stodo{cite mnist dataset}
+
+\begin{figure}[h!]
+  \centering
+  \includegraphics[width=0.8\textwidth]{figures/graphs/mnist/k_acc.png}
+  \caption{Accuracy of classification with increasing \( k \).}
+\end{figure}
+
+\Stodo{replace images with pgfplots/tikz}
+
+As \( k \) increases, KNN degrades near-linearly in accuracy. We hypothesize
+that nearby images are more likely to have the same label as a given test
+image. By forcing the algorithm to select more points, it increases the
+likelihood that the algorithm becomes confused by differently labeled
+images. However, CKNN is more accurate than KNN for nearly every \( k
+\), suggesting that conditional selection is able to take advantage of
+selecting more points. We emphasize that the difference in accuracy is
+solely a result of conditional selection --- because the Mat{\'e}rn kernel
+degrades monotonically with distance, sorting by covariance is identical
+to sorting by distance. In addition, we use the mode to aggregate the
+labels of the selected points, rather than performing Gaussian process
+classification. The difference in accuracy can therefore be attributed
+to precisely the difference in which points were selected.
+
+\subsection{Gaussian process regression}
+
+\subsection{Recovery of sparse Cholesky factors}
+
+\subsection{Cholesky factorization}
+
+\subsection{Preconditioning for conjugate gradient}
 
 \section*{Acknowledgments}
 \todo{add more funding information}
@@ -1241,7 +1330,9 @@ Environment (PACE) at the Georgia Institute of Technology, Atlanta, Georgia,
 USA.
 
 \bibliographystyle{siamplain}
-\bibliography{references}
+\bibliography{cholesky}
+
+\newpage
 
 \appendix
 
@@ -1356,7 +1447,7 @@ immediately obtain the equivalent update
 Since this is a rank-one update to the precision \( \Theta^{-1} \), this
 can be computed in \\ \( \mathcal{O}(\text{\# rows}(\Theta^{-1}))^2 \).
 
-\todo{this is not used in the paper but is nice to know +
+\Stodo{this is not used in the paper but is nice to know +
 used in the sensor placement}
 
 \subsection{Updating precision after conditioning}
@@ -1405,6 +1496,397 @@ the Sherman–Morrison–Woodbury formula which states that:
 which is the update in line 18 of \cref{alg:gp_select_mult}.
 Since the update is a rank-one update, it can be computed in \(
 \mathcal{O}(\lvert \text{Pr} \rvert^2) = \mathcal{O}(m^2) \).
+
+\subsection{Updating Cholesky Factorization after Rank-one Downdate}
+\label{app:chol_downdate}
+
+\Stodo{remove because unnecessary, describe insertion insertead}
+
+We use the approach from Lemma 1 of \cite{krause2015more}, slightly adapted
+to use in-place operations and to make no assumption on the particular row
+ordering of the Cholesky factor. Let \( L \) be a Cholesky factorization of \(
+\Theta \), that is, \( L = \chol(\Theta) \). We wish to compute the updated
+Cholesky factor \( L' = \chol(\Theta') \) where \( \Theta' = \Theta - \vec{u}
+\vec{u}^{\top} \). To do so, assume \( L \) and \( L' \) are blocked according
+to the same block structure:
+\begin{align}
+  L &=
+  \begin{pmatrix}
+    r_1 & \vec{0} \\
+    \vec{r}_2 & L_2
+  \end{pmatrix}
+  & L' &=
+  \begin{pmatrix}
+    r_1' & \vec{0} \\
+    \vec{r}_2' & L_2'
+  \end{pmatrix}
+  \shortintertext{Multiplying, we find}
+  L L^{\top} = \Theta &=
+  \begin{pmatrix}
+    r_1^2 & r_1 \vec{r}_2^{\top} \\
+    r_1 \vec{r}_2 & L_2 L_2^{\top} + \vec{r}_2 \vec{r}_2^{\top}
+  \end{pmatrix}
+  \\ L' L'^{\top} = \Theta' &=
+  \begin{pmatrix}
+    r_1'^2 & r_1' \vec{r}_2'^{\top} \\
+    r_1' \vec{r}_2' & L_2' L_2'^{\top} + \vec{r}_2' \vec{r}_2'^{\top}
+  \end{pmatrix}
+  \shortintertext{From here, we solve for
+    \( r'_1 \), \( \vec{r}' \), and \( L_2' \)}
+  r_1'^2 &= \Theta'_{11} = \Theta_{11} - u_1^2 \\
+         &= r_1^2 - u_1^2 \\
+  r_1' &= \sqrt{r_1^2 - u_1^2} \\
+  r_1' \vec{r}_2' &= \Theta'_{2:, 1} = \Theta_{2:, 1} - u_1 \vec{u}_2 \\
+                  &= r_1 \vec{r}_2 - u_1 \vec{u}_2 \\
+  \vec{r}_2' &= \frac{1}{r_1'} (r_1 \vec{r}_2 - u_1 \vec{u}_2) \\
+  L_2' L_2'^{\top} + \vec{r}_2' \vec{r}_2'^{\top} &= \Theta'_{22}
+    = \Theta_{22} - \vec{u}_2 \vec{u}_2^{\top} \\
+  L_2' L_2'^{\top} &= L_2 L_2^{\top} + \vec{r}_2 \vec{r}_2^{\top}
+    - \vec{u}_2 \vec{u}_2^{\top} - \vec{r}_2' \vec{r}_2'^{\top}
+  \shortintertext{After some simplification we find}
+  L_2' L_2'^{\top} &= L_2 L_2^{\top} - \left (
+    \frac{u_1}{r_1'} \vec{r}_2 - \frac{r_1}{r_1'} \vec{u}_2
+  \right ) \left (
+    \frac{u_1}{r_1'} \vec{r}_2 - \frac{r_1}{r_1'} \vec{u}_2
+  \right )^{\top}
+  \shortintertext{which is a rank-one downdate to the subfactor \( L_2 \).
+    Recursively updating \( L_2 \) yields a \( \mathcal{O}(N^2) \) algorithm.
+    We now re-write the algorithm to be in-place to take advantage of BLAS
+    routines. The updates can be summarized as:}
+  r_1' &= \sqrt{r_1^2 - u_1^2} \\
+  \vec{r}' &= \frac{r_1}{r_1'} \vec{r} - \frac{u_1}{r_1'} \vec{u} \\
+  \vec{u}' &= \frac{u_1}{r_1'} \vec{r} - \frac{r_1}{r_1'} \vec{u}
+  \shortintertext{Note that we drop the subscripting on \( \vec{r} \) and \(
+    \vec{u} \). By updating the entire vector on each iteration, we can avoid
+    keeping track of the lower triangular structure of \( L \). We will first
+    update \( \vec{r}' \) and then use it to update \( \vec{u} \). Solving for
+    \( \vec{r} \) in terms of \( \vec{r}' \),}
+  \vec{r} &= \frac{r_1'}{r_1} \vec{r}' + \frac{u_1}{r_1} \vec{u} \\
+  \vec{u}' &= -\frac{u_1}{r_1} \vec{r}' + \frac{r_1'}{u_1} \vec{u}
+  \shortintertext{Thus, the updates proceed sequentally as follows:}
+  \gamma &\gets \sqrt{r_1^2 - u_1^2} \\
+  \alpha &\gets \frac{r_1}{\gamma} \\
+  \beta &\gets \frac{u_1}{\gamma} \\
+  \vec{r} &\gets \alpha \vec{r} - \beta \vec{u} \\
+  \vec{u} &\gets -\frac{\beta}{\alpha} \vec{r} + \frac{1}{\alpha} \vec{u}
+\end{align}
+These can be efficiently performed in-place by
+BLAS as level-one \texttt{daxpy} operations.
+
+\subsection{Partial Updates in the Selection Algorithm}
+\label{app:partial}
+
+In the context of the selection algorithm, we have \( M \) prediction points
+and wish to minimize the log determinant of the resulting covariance matrix
+of the prediction points, conditional on the points we've selected from the
+training data. In the specific context of Cholesky factorization, it is
+possible to add a training point and have it apply \emph{partially} on the
+prediction points. If nonadjacent columns indices are aggregated, a entry
+selected between two indices can be higher than one column, but lower than
+another. Adding the entry to the sparsity pattern would therefore only add
+to some, but not all, columns in the aggregation. We will model this as
+partially conditioning the variables of interest. In particular, if we have
+prediction variables \( y_1, y_2, \dotsc, y_M \), a partial condition ignoring
+the first \( j \) variables on the selected index \( k \) would result in
+\( y_1 , y_2, \dotsc, y_{j}, y_{j + 1 \mid k}, \dotsc, y_{M \mid k} \).
+
+The first question is to compute the resulting covariance matrix. We know \(
+\vec{y} \sim \mathcal{N}(\vec{0}, \Theta) \) and \( \vec{y}_{\mid k} \) has
+conditional distribution according to \cref{eq:cond_cov}, \( \vec{y}_{\mid k}
+\sim \mathcal{N}(\mu, \Theta - \Theta_{:, k} \Theta_{k, k}^{-1} \Theta_{k,
+:}) \). Taking the Cholesky factorization of both covariance matrices, let \(
+L = \chol(\Theta) \) and \( L_{\mid k} = \chol(\Theta_{\mid k}) \). We can
+then view \( \vec{y} \) as \( L \vec{z} \), where \( \vec{z} \) is distributed
+according to \( \mathcal{N}(\vec{0}, I) \). Similarly, \( \vec{y}_{\mid k} =
+L_{\mid k} \vec{z} + \vec{\mu} \). For unconditioned \( y_i \) and \( y_j \), the
+covariance between them is defined to be \( \Theta_{ij} \). Similarly, for
+conditioned \( y_i \) and \( y_j \), the covariance is \( \Theta_{ij \mid k}
+\). The only question is what the covariance between unconditioned \( y_i \)
+and conditioned \( y_j \) is. By definition,
+\begin{align}
+  \Cov[y_i, y_j] &= \E[(y_i - \E[y_i])(y_j - \E[y_j])] \\
+                 &= \E[(L_i \vec{z}) (L_{i \mid k} \vec{z})] \\
+                 &= \E[(L_{1, i} z_1 + \dotsb + L_{N, i} z_N)
+                       (L_{1, j \mid k} z_1 + \dotsb + L_{N, j \mid k} z_N)]
+  \shortintertext{For \( i \neq j \), \( E[z_i z_j] = \E[z_i] \E[z_j] = 0\)
+    since \( z_i \) is independent of \( z_j \) and has mean 0.}
+                 &= \E[L_{1, i} L_{1, j \mid k} z_1^2 + \dotsb +
+                       L_{N, i} L_{N, j \mid k} z_N^2] \\
+                 &= L_{1, i} L_{1, j \mid k}  \E[z_1^2] + \dotsb +
+                    L_{N, i} L_{N, j \mid k} \E[z_N^2]
+  \shortintertext{For any \( i \), \( \E[z_i^2]
+    = \Var[z_i] + \E[z_i]^2 = 1 + 0 = 1 \)}
+                 &= L_{1, i} L_{1, j \mid k} + \dotsb +
+                    L_{N, i} L_{N, j \mid k} \\
+                 &= L_i \cdot L_{j \mid k}
+  \shortintertext{Thus, the new covariance matrix can be written as:}
+  \label{eq:chol_partial}
+  \begin{pmatrix}
+    L_{:j} L_{:j}^{\top} & L_{:j} L_{j: \mid k}^{\top} \\
+    L_{j: \mid k} L_{:j}^{\top} & L_{j: \mid k} L_{j: \mid k}^{\top}
+  \end{pmatrix} &=
+  \begin{pmatrix}
+    L_{:j} \\
+    L_{j: \mid k}
+  \end{pmatrix}
+  \begin{pmatrix}
+    L_{:j} \\
+    L_{j: \mid k}
+  \end{pmatrix}^{\top}
+  \shortintertext{We will denote a partially conditioned matrix as}
+  \Theta_{:, :, \shortmid k}
+\end{align}
+
+\begin{figure}[h!]
+  \centering
+  \begin{tikzpicture}[scale=4]
+    \input{figures/cholesky_factor.tex}
+  \end{tikzpicture}
+  \caption{Illustration of the Cholesky
+    factorization of a partially conditioned matrix.}
+\end{figure}
+
+We can now connect minimization of the log determinant of the partially updated
+covariance matrix to the KL-divergence objective of Cholesky factorization.
+Computing the log determinant of the partially updated covariance
+matrix, we make use of \cref{eq:chol_partial} and make use of the fact
+that the determinant of a  triangular matrix is the product of its
+diagonal entries:
+\begin{align}
+  \label{eq:partial_logdet}
+  \frac{1}{2} \logdet(\Theta_{:, : \shortmid k}) &=
+  \underbrace{\log(L_{11}) + \dotsb + \log(L_{jj})}_{\text{the same}} +
+  \underbrace{
+    \log(L_{j + 1, j + 1 \mid k}) + \dotsb + \log(L_{M, M \mid k})
+  }_{\text{conditioned}}
+  \shortintertext{Comparing to the KL-divergence \cref{eq:obj_chol},
+    \( \mathbb{D}_{\text{KL}}
+      \left (
+        \mathcal{N}(\vec{0}, \Theta) \, \Big \| \,
+        \mathcal{N}(\vec{0}, (L L^{\top})^{-1})
+      \right )
+    \) which is equivalent to maximizing}
+  &= \sum_{i = 1}^M
+      \log \left (
+        \Theta_{ii \mid s_i - \{ i \}}
+      \right )
+  \shortintertext{Recalling that \( k \) is added partially to some \( s_i \),
+    only those \( i > j \)}
+  &= \underbrace{
+      \log \left ( \Theta_{11 \mid s_1 - \{ 1 \}} \right ) + \dotsb +
+      \log \left ( \Theta_{jj \mid s_j - \{ j \}} \right )
+     }_\text{the same} + \\
+  \nonumber
+  &  \underbrace{
+      \log \left ( \Theta_{j + 1, j + 1 \mid s_{j + 1} - \{ j + 1 \}} \right )
+      + \dotsb + \log \left ( \Theta_{MM \mid s_M - \{ M \}} \right )
+     }_\text{conditioned}
+  \shortintertext{Since \( L_{ii} \) is the square root
+    of the variance of the \( i \)th variable conditional
+    on each entry before it in the ordering, we have}
+  2 \log(L_{ii}) &= \log(\Theta_{ii \mid s_i - \{ i \}})
+\end{align}
+So minimizing the log determinant of the partially
+conditioned covariance matrix \cref{eq:partial_logdet} is
+the same as minimizing the KL-divergence \cref{eq:obj_chol}.
+
+\subsection{Algorithm for Partial Updates}
+\label{app:partial_alg}
+
+We now need an efficient algorithm to keep track of partial updates.
+The key idea is to maintain the prediction matrix with selected
+points inserted to maintain proper ordering, and keep track of
+the log determinant throughout selection. We first give how this
+different perspective affects the interpretation of the multiple
+point selection algorithm. In the example, let \( x \) and \( y \)
+be selected points and \( 1 \) and \( 2 \) be prediction points.
+\begin{align}
+  \Theta &=
+  \begin{pmatrix}
+    \Theta_{xx} & \Theta_{xy} & \Theta_{x1} & \Theta_{x2} \\
+    \Theta_{yx} & \Theta_{yy} & \Theta_{y1} & \Theta_{y2} \\
+    \Theta_{1x} & \Theta_{1y} & \Theta_{11} & \Theta_{12} \\
+    \Theta_{2x} & \Theta_{2y} & \Theta_{21} & \Theta_{22}
+  \end{pmatrix}
+  \shortintertext{Computing the log determinant by chain rule,}
+  \logdet(\Theta) &= \log(\Theta_{xx}) + \log(\Theta_{yy \mid x}) +
+    \log(\Theta_{11 \mid x, y}) + \log(\Theta_{22 \mid x, y, 1})
+  \shortintertext{Isolating the objective --- the variances of the
+    prediction points}
+  \log(\Theta_{11 \mid x, y}) + \log(\Theta_{22 \mid x, y, 1}) &=
+    \logdet(\Theta) - \log(\Theta_{xx}) - \log(\Theta_{yy \mid x})
+  \shortintertext{Now consider how inserting \( y \) changed the objective
+    from when it was just \( x \).}
+  \log(\Theta_{11 \mid x}) + \log(\Theta_{22 \mid x, 1}) &=
+    \logdet(\Theta_{-y, -y}) - \log(\Theta_{xx}) \\
+  \Delta &=
+    \logdet(\Theta) - \log(\Theta_{yy \mid x}) - \logdet(\Theta_{-y, -y})
+  \shortintertext{But from \cref{eq:greedy_mult} we know}
+  \Delta &= \log \left (
+      \frac{\Theta_{yy \mid x, 1, 2}}{\Theta_{yy \mid x}}
+    \right )
+  \shortintertext{Substituting,}
+  \log(\Theta_{yy \mid x, 1, 2}) - \log(\Theta_{yy \mid x}) &=
+    \logdet(\Theta) - \log(\Theta_{yy \mid x}) - \logdet(\Theta_{-y, -y}) \\
+  \log(\Theta_{yy \mid x, 1, 2}) &=
+    \logdet(\Theta) - \logdet(\Theta_{-y, -y})
+  \shortintertext{In general,}
+  \label{eq:logdet_diff}
+  \log(\Theta_{kk \mid I, \text{Pr}}) &=
+    \logdet(\Theta) - \logdet(\Theta_{-k, -k})
+\end{align}
+Another way to arrive at the same result is to note that if we inserted
+\( y \) at the \emph{end} of \( \Theta_{-y, -y} \), to compute the log
+determinant of the new, bigger matrix \( \Theta \) we would add the
+variance of \( y \) conditional on every entry in the matrix to the
+old determinant by chain rule. Since the determinant is invariant to
+symmetric permutation, the matrix inserting \( y \) at the end has the
+same determinant as inserting \( y \) where it should be.
+
+So we see that the conditional variance of a candidate point conditional
+on everything else in the matrix is the difference in log determinant
+between the matrix with the candidate inserted and the original matrix.
+The multiple prediction point algorithm can therefore be interpreted as
+we insert the candidate \emph{after} all the previously selected points
+(so it is conditional on all the previous points) and \emph{before}
+the prediction points (which conditions all of them). We then compute
+\( \log(\Theta_{kk \mid I, \text{Pr}}) \) for some candidate \( k \)
+which represents the difference in log determinant and then subtract \(
+\log(\Theta_{kk \mid I}) \) which is the spurious variance introduced by
+inserting \( k \) into the matrix. We do not need to subtract the spurious
+variances from the previously selected points because \( k \) does not
+affect them, and we select candidates by \emph{relative} score.
+
+We now apply this result to partial selection. In the example,
+let \( 1 \) and \( 2 \) be prediction points while \( x \) and \(
+y \) are both a selected points below \( 2 \) but above \( 1 \), where
+\( x \) has already been selected and \( y \) is a candidate.
+\begin{align}
+  \Theta &=
+  \begin{pmatrix}
+    \Theta_{11} & \Theta_{1y} & \Theta_{1x} & \Theta_{12} \\
+    \Theta_{y1} & \Theta_{yy} & \Theta_{yx} & \Theta_{y2} \\
+    \Theta_{x1} & \Theta_{xy} & \Theta_{xx} & \Theta_{x2} \\
+    \Theta_{21} & \Theta_{2y} & \Theta_{2x} & \Theta_{22}
+  \end{pmatrix}
+  \shortintertext{Computing the log determinant by chain rule,}
+  \logdet(\Theta) &= \log(\Theta_{11}) + \log(\Theta_{yy  \mid 1}) +
+    \log(\Theta_{xx \mid 1, y}) + \log(\Theta_{22 \mid 1, y, x})
+  \shortintertext{We see that \( y \) conditions \( 2 \) but not \( 1 \),
+    precisely what we want to encode. However, we have introduced a spurious
+    term \( \log(\Theta_{yy \mid 1}) \) and changed the variance of \( x \),
+    both of which must be subtracted out.}
+  \log(\Theta_{11}) + \log(\Theta_{22 \mid 1, y, x}) &=
+  \logdet(\Theta) - \log(\Theta_{yy \mid 1}) - \log(\Theta_{xx \mid 1, y})
+  \shortintertext{We can substitute \( \log(\Theta_{yy \mid 1, x, 2}) \)
+    for \( \logdet(\Theta) \) by \cref{eq:logdet_diff}. Athough
+    it differs by a constant, this does not change the objective.}
+  &= \log(\Theta_{yy \mid 1, x, 2}) -
+    \log(\Theta_{yy \mid 1}) - \log(\Theta_{xx \mid 1, y})
+\end{align}
+
+As long as we can compute conditional variances of our candidate on each
+\emph{prefix} of the current ordering of prediction points interspersed with
+selected points, we can use the conditional variances to compute the updated
+conditional variances of the selected points by using their conditional
+covariances with the candidate. We are then able to compute every term in the
+objective. To do so, we maintain a partial Cholesky factor whose ordering
+is given by the current ordering. When we select a new point, we insert it
+in its appropriate place in the Cholesky factor. To update the Cholesky
+factor after an insertion efficiently, we left-look to get the column of
+its insertion position, and then update all columns right of the column by
+a rank-one downdate as described in \cref{app:chol_downdate} which touches
+every entry in the Cholesky factor, \( \mathcal{O}(N(m + s) \) per update for
+a total cost of \( \mathcal{O}(N(m + s)(s)) \) over \( s \) selections.
+
+By inspecting the Cholesky factor, we get the covariance of a selected point
+with a candidate, conditional on all the points prior to the selected point in
+the ordering. The conditional variance of the selected point is the diagonal
+entry. We can then compute the new conditional variance given the variance of
+the candidate, conditional on all points prior to the selected point. Suppose
+we are at index \( i \) and the candidate is index \( j \), the updates are as
+follows:
+\begin{align}
+  \Theta_{ii \mid :i - 1} &= (L_{ii})^2 \\
+  \Theta_{ij \mid :i - 1} &= L_{ij} \cdot L_{ii} \\
+  \Theta_{ii \mid :i - 1, j} &= \Theta_{ii \mid :i - 1} -
+    \frac{\Theta_{ij \mid :i - 1}^2}{\Theta_{jj \mid :i - 1}} \\
+  \Theta_{jj \mid :i - 1, i} &= \Theta_{jj \mid :i - 1} -
+    \frac{\Theta_{ij \mid :i - 1}^2}{\Theta_{ii \mid :i - 1}} \\
+                             &= \Theta_{jj \mid :i}
+\end{align}
+Of course, the base case \( \Theta_{jj} \) is simply \(
+K(\vec{x}_j, \vec{x}_j) \), the variance of the \( j \)th point.
+
+For each of the \( N \) candidates, it requires \( m + s \) operations from
+the above updates to compute the objective. Over \( s \) selections, the
+total time is the same as the cost to update the Cholesky factor, matching
+the complexity of the non-partial multiple point algorithm. However, the
+asymptotic work in the non-partial algorithm can be implemented as BLAS
+level-2 calls, while the partial algorithm relies heavily on vector (level-1)
+calls, affecting the constant-factor performance of the algorithm.
+
+\subsection{Equivalence of Selection and Orthogonal Matching Pursuit}
+\label{app:omp}
+
+We show that the single-point selection algorithm described in
+\cref{alg:gp_select} is the covariance space equivalent to the
+feature space orthogonal matching pursuit (OMP) algorithm described
+in \cite{tropp2007signal}. The equivalence comes from the fact
+that Cholesky factorization is Gram-Schmitt in feature space.
+
+\begin{align}
+  \shortintertext{Let \( \Theta \) be a symmetric
+    positive definite matrix such that}
+  \Theta &= F^{\top} F
+  \shortintertext{For some matrix \( F \)
+    whose columns are vectors in feature space,}
+  F &=
+  \begin{pmatrix}
+    \vec{x}_1 & \vec{x}_2 & \hdots & \vec{x}_N
+  \end{pmatrix}
+  \shortintertext{Immediately we have}
+  \Theta_{ij} &= \langle \vec{x}_i, \vec{x}_j \rangle
+  \shortintertext{where \( \langle \cdot, \cdot \rangle \)
+    denotes the ordinary inner product on \( \mathbb{R}^N \).}
+  \shortintertext{It suffices to see a single step of Cholesky
+    factorization. Selecting \( \vec{x}_1 \),}
+  \Theta' &= \Theta - \frac{\vec{x}_1 \vec{x}_1^{\top}}
+    {\Theta_{11}} \\
+  \label{eq:cov_step}
+  \Theta_{ij}' &= \Theta_{ij} -
+    \frac{\Theta_{i1} \Theta_{j1}}{\Theta_{ii}}
+  \shortintertext{Switching to the feature space perspective,
+    if we select \( \vec{x}_1 \) we force the rest of the
+    feature vectors to be orthogonal to \( \vec{x}_1 \),}
+  \vec{x}_i' &= \vec{x}_i -
+    \frac{\langle \vec{x}_i, \vec{x}_1 \rangle}
+         {\langle \vec{x}_1, \vec{x}_1 \rangle} \vec{x}_1 \\
+  \label{eq:feature_step}
+  \langle \vec{x}_i', \vec{x}_j' \rangle &=
+    \langle \vec{x}_i, \vec{x}_j \rangle -
+      \frac{\langle \vec{x}_i, \vec{x}_1 \rangle
+            \langle \vec{x}_j, \vec{x}_1 \rangle}
+          {\langle \vec{x}_1, \vec{x}_1 \rangle}
+  \shortintertext{Comparing \cref{eq:cov_step} and \cref{eq:feature_step},
+    we see that they are the same as expected. As a corollary, the objective
+    of selecting the point \( \vec{x}_k \) that minimizes the residual of some
+    target point \( \vec{x}_\text{Pr} \) can be written as}
+  \lVert
+    \vec{x}_\text{Pr} - \text{proj}_{\vec{x}_k} \vec{x}_\text{Pr}
+  \rVert &= \langle \vec{x}_\text{Pr}, \vec{x}_\text{Pr} \rangle -
+    \frac{\langle \vec{x}_\text{Pr}, \vec{x}_k \rangle^2}
+        {\langle \vec{x}_k, \vec{x}_k \rangle}
+  \shortintertext{Which is precisely the squared
+    covariance of the candidate with the prediction over
+    the variance of the candidate, as in \cref{eq:obj_gp}.}
+  % \shortintertext{By induction, one can show}
+  % F_2' = F_2 - P_1 F_2
+  % \shortintertext{where \( F_2 \) is a set of feature
+  %   vectors being conditioned and \( P_1 \) is the projection
+  %   matrix onto the subspace spanned by \( F_1 \).}
+\end{align}
+This shows the equivalence as the objective is the same.
 
 \section{Derivations in KL-minimization}
 
@@ -1500,7 +1982,7 @@ factor \( L \) computed according to \cref{thm:L}. From \cref{eq:kl},
 \begin{align}
  \nonumber
   \label{eq:kl_L}
-  \mathbb{D}_{\text{KL}}
+  2 \mathbb{D}_{\text{KL}}
   \left (
     \mathcal{N}(\vec{0}, \Theta) \, \Big \| \,
     \mathcal{N}(\vec{0}, (L L^{\top})^{-1})
@@ -1536,7 +2018,7 @@ factor \( L \) computed according to \cref{thm:L}. From \cref{eq:kl},
   &= \sum_{i = 1}^N 1 = N
   \shortintertext{Using \( N \) for \( \trace(L
     L^{\top} \Theta) \) in \cref{eq:kl_L},}
-  \mathbb{D}_{\text{KL}}
+  2 \mathbb{D}_{\text{KL}}
   \left (
     \mathcal{N}(\vec{0}, \Theta) \, \Big \| \,
     \mathcal{N}(\vec{0}, (L L^{\top})^{-1})
@@ -1559,5 +2041,38 @@ factor \( L \) computed according to \cref{thm:L}. From \cref{eq:kl},
     \right ]
     - \logdet(\Theta)
 \end{align}
+So minimizing the KL-divergence (given optimal \( L \)) corresponds to
+minimizing the sum of the (inverse) of the diagonal entries. Intuitively,
+because the Cholesky factorization is iterative conditioning \cref{eq:chol},
+we can view the sum as the accumulated prediction error for a series of
+prediction problems, where each prediction problem is to predict the value
+of the \( i \)th variable given variables \( 1, 2, \dotsc, i - 1 \). This
+gives a natural way to measure the quality of a sparsity pattern as a good
+sparsity pattern should maintain predictive accuracy while subject to
+the constraint that some variables have no interaction with others.
+
+Because the KL-divergence is not symmetric, it matters which way the
+KL-divergence is taken as well as whether both matrices have been
+inverted or not. This seems to imply that there are four possible
+ways to compare two covariance matrices. However, note that
+\begin{align}
+\mathbb{D}_{\text{KL}}
+  \left (
+    \mathcal{N}(\vec{0}, \Theta) \, \Big \| \,
+    \mathcal{N}(\vec{0}, (L L^{\top})^{-1})
+  \right ) &=
+\mathbb{D}_{\text{KL}}
+  \left (
+    \mathcal{N}(\vec{0}, L L^{\top}) \, \Big \| \,
+    \mathcal{N}(\vec{0}, \Theta^{-1})
+  \right )
+\end{align}
+from \cref{eq:kl} and the cyclic property of trace, so inverting both
+matrices implicitly reverses the order of the KL-divergence. There are
+therefore only two possible ways to compare the two, which depends on
+the order of the arguments. A statistical interpretation comes from the
+fact that the KL-divergence can be interpreted as the likelihood-ratio
+test, so the non-symmetry of the order of the arguments corresponds to
+the asymmetry between the null and alternative hypotheses.
 
 \end{document}
