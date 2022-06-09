@@ -990,7 +990,7 @@ Because of sparsity, we can only get an approximate Cholesky factor \( L \),
 of (row, column) indices that are allowed to be nonzero. In order to measure
 the performance of the estimator, we treat the matrices as covariance matrices
 of centered Gaussian processes (mean \( \vec{0} \)). In order to compare the
-resulting distributions, we use the \emph{KL-divergence} according to
+resulting distributions, we use the \emph{KL divergence} according to
 \cite{schafer2021sparse}, or the expected difference in log-densities:
 \begin{align}
   \label{eq:L_obj}
@@ -1332,11 +1332,22 @@ label in the \( k \) selected points.
 
 \begin{figure}[h!]
   \centering
-  \includegraphics[width=0.8\textwidth]{figures/graphs/mnist/k_acc.png}
-  \caption{Accuracy of classification with increasing \( k \).}
+  \begin{tikzpicture}
+    \begin{axis}[
+      width={0.8\linewidth},
+      grid={major},
+      title={Accuracy with increasing \( k \)
+      (\( n = 100, m = 100, l = 1024, \nu = 1.5 \))},
+      xlabel={\( k \)},
+      ylabel={Accuracy (\%)},
+      legend entries={conditional-knn, scikit-knn},
+    ]
+    \addplot [orange]    table {figures/mnist/k_acc_conditional-knn.csv};
+    \addplot [lightblue] table {figures/mnist/k_acc_scikit-knn.csv};
+  \end{axis}
+  \end{tikzpicture}
+  \caption{Accuracy with increasing \( k \)}
 \end{figure}
-
-\Stodo{replace images with pgfplots/tikz}
 
 As \( k \) increases, KNN degrades near-linearly in accuracy. We hypothesize
 that nearby images are more likely to have the same label as a given test
@@ -1352,9 +1363,120 @@ labels of the selected points, rather than performing Gaussian process
 classification. The difference in accuracy can therefore be attributed
 to precisely the difference in which points were selected.
 
-\subsection{Gaussian process regression}
-
 \subsection{Recovery of sparse Cholesky factors}
+
+As noted in \cref{app:omp}, the selection algorithm can be viewed as orthogonal
+matching pursuit \cite{tropp2007signal} in feature space. We experiment
+with the sparse recovery properties of the selection algorithm by randomly
+generating a sparse Cholesky factor \( L \). We prescribe a fixed number
+of nonzeros per column \( s \) over \( N \) columns. For each column, we
+uniformly randomly pick \( s \) entry that satisfies lower triangularity to
+make nonzero. We randomly generate values according to i.i.d. standard normal
+\( \mathcal{N}(0, 1) \). Finally, we fill the diagonal with a ``large``
+positive value (10) to almost guarantee that the resulting matrix \( \Theta =
+L L^{\top} \) is positive definite. The selection algorithms are then given
+\( \Theta \) and \( s \) and are asked to reconstruct \( L \). The strategies
+are as follows: ``cknn'' uses conditional selection on each column to minimize
+the conditional variance of the diagonal entry, ``knn'' selects entries with
+the largest covariance with the diagonal entry, ``corr'' selects entries with
+the highest correlation objective \cref{eq:obj_gp} without accounting for
+conditioning, and ``random'' simply randomly samples entries uniformly. The
+strategies are given either the covariance \( \Theta \) or the precision \(
+\Theta^{-1} \) depending on which results in higher accuracy, in particular,
+the ``cknn'' strategy is given the precision while the rest of the methods
+are given the covariance. Accuracy is measured by taking the cardinality of
+the intersection of the recovered sparsity set with the ground truth sparsity
+set over the cardinality of their union, intersection over union (IOU).
+
+\begin{figure}[h!]
+  \centering
+  \begin{tikzpicture}
+    \begin{axis}[
+      width={0.8\linewidth},
+      grid={major},
+      title={Accuracy with increasing \( N \)
+      (\( s = 32 \))},
+      xlabel={\( N \)},
+      ylabel={Accuracy (IOU)},
+      legend entries={cknn, knn, corr, random},
+      legend pos={south west}
+    ]
+    \addplot [orange]    table {figures/recover/n_score_cknn.csv};
+    \addplot [lightblue] table {figures/recover/n_score_knn.csv};
+    \addplot [seagreen]  table {figures/recover/n_score_corr.csv};
+    \addplot [silver]    table {figures/recover/n_score_random.csv};
+  \end{axis}
+  \end{tikzpicture}
+  \caption{Accuracy with increasing \( N \)}
+\end{figure}
+
+As the number of nonzero entries per column is fixed and the number of rows
+and columns is increased, the ```cknn'' retains high accuracy near perfect
+recovery, and the rest of the methods quickly degrade and asymptote to their
+final accuracies.
+
+\begin{figure}[h!]
+  \centering
+  \begin{tikzpicture}
+    \begin{axis}[
+      width={0.8\linewidth},
+      grid={major},
+      title={Accuracy with increasing \( s \)
+      (\( N = 256 \))},
+      xlabel={\( s \)},
+      ylabel={Accuracy (IOU)},
+      legend entries={cknn, knn, corr, random},
+      legend pos={south east}
+    ]
+    \addplot [orange]    table {figures/recover/s_score_cknn.csv};
+    \addplot [lightblue] table {figures/recover/s_score_knn.csv};
+    \addplot [seagreen]  table {figures/recover/s_score_corr.csv};
+    \addplot [silver]    table {figures/recover/s_score_random.csv};
+  \end{axis}
+  \end{tikzpicture}
+  \caption{Accuracy with increasing \( s \)}
+\end{figure}
+
+If the number of rows and columns is fixed while the number of nonzero entries
+per column is increased, all methods drop in accuracy with increasing density
+into a tipping point where the problem starts to become easier. Accuracy then
+increases until the Cholesky factor becomes fully dense, in which case perfect
+recovery is trivial. The ``cknn'' strategy exhibits the same behavior, but
+maintains much higher accuracy than the rest of the strategies.
+
+\begin{figure}[h!]
+  \centering
+  \begin{tikzpicture}
+    \begin{axis}[
+      width={0.8\linewidth},
+      grid={major},
+      title={Accuracy with increasing \( s \)
+      (\( N = 256 \))},
+      xlabel={\( s \)},
+      ylabel={Accuracy (IOU)},
+      legend entries={cknn-0.00, cknn-0.01, cknn-0.10, cknn-0.20},
+      legend pos={south east}
+    ]
+    \addplot [orange, style=solid]
+      table {figures/recover/noise-s_score_cknn-0.00.csv};
+    \addplot [orange, style=dashed]
+      table {figures/recover/noise-s_score_cknn-0.01.csv};
+    \addplot [orange, style=dotted]
+      table {figures/recover/noise-s_score_cknn-0.10.csv};
+    \addplot [orange, style=dashdotted]
+      table {figures/recover/noise-s_score_cknn-0.20.csv};
+  \end{axis}
+  \end{tikzpicture}
+  \caption{Accuracy with increasing \( s \)}
+\end{figure}
+
+Finally, we experiment with the addition of noise. Noise sampled i.i.d
+from \( \mathcal{N}(0, \sigma^2) \) is added to each entry of \( \Theta
+\) symmetrically (i.e. \( \Theta_{ij} \) receives the same noise as \(
+\Theta_{ji} \)) to preserve the symmetry of \( \Theta \). As expected,
+accuracy degrades with increasing noise, but the algorithm is fairly robust
+to low levels of noise. At higher levels of noise, \( \Theta \) can lose
+positive definiteness, which causes the algorithm to break down.
 
 \subsection{Cholesky factorization}
 
