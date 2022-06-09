@@ -39,12 +39,32 @@
 
 % REQUIRED
 \begin{abstract}
-  experimental design for linear algebra
+  Dense kernel matrices resulting from pointwise evaluations of a kernel
+  function arise naturally in machine learning and statistics. Previous
+  work in constructing sparse transport maps or sparse approximate inverse
+  Cholesky factors for such matrices by minimizing Kullback-Leibler divergence
+  recovers the Vecchia approximation for Gaussian processes. However, this
+  method for Cholesky factorization relies only on geometry to construct the
+  sparsity pattern, ignoring the conditional effect of adding an entry. In this
+  work, we construct the sparsity pattern by leveraging a greedy selection
+  algorithm which selects points that maximize mutual information with target
+  points, conditional on all points selected previously. For selecting $k$
+  points out of $N$, the naive time complexity is $\mathcal{O}(N k^4)$, but
+  by maintaining a partial Cholesky factor we reduce this to $\mathcal{O}(N
+  k^2)$. Furthermore, for multiple ($m$) targets we achieve a time complexity
+  of $\mathcal{O}(N k^2 + N m^2 + m^3)$ which is maintained in the setting
+  of Cholesky factorization where a selected point need not condition every
+  target. We directly apply the selection algorithm to image classification
+  and recovery of sparse Cholesky factors, improving upon $k$-th nearest
+  neighbors in every case. Through Kullback-Leibler minimization we apply
+  the algorithm to Cholesky factorization and Gaussian process regression,
+  improving in high dimensional geometries as well as when preconditioning
+  with the conjugate gradient.
 \end{abstract}
 
 % REQUIRED
 \begin{keywords}
-   \todo{to do}
+  \todo{to do}
 \end{keywords}
 
 % REQUIRED
@@ -216,6 +236,9 @@ data respectively, then the conditional expectation and covariance are:
     \Theta_{K_n, K_n \mid K_{1 \dots n - 1}}^{-1}
     \Theta_{K_n, J \mid K_{1 \dots n - 1}}
 \end{align}
+\Stodo{\( I \) is overloaded to be identity, an index set,
+and mutual information/information gain. \( I \) should
+refer to identity and the other two must be disambiguated.}
 
 Note that calculating the posterior mean and variance requires inverting the
 training covariance matrix \( \Theta_{\text{Tr}, \text{Tr}} \), which costs
@@ -316,11 +339,11 @@ that the variance of \( \vec{y}_\text{Pr} \) will decrease after selecting
 \( k \) is given by \( u_{n + 1}^2 \), or
 \begin{align}
   \label{eq:obj_gp}
-  \frac{\Cov[\vec{y}_{\text{Tr}}[k], \vec{y}_\text{Pr}]^2}
-       {\Var[\vec{y}_{\text{Tr}}[k], \vec{y}_{\text{Tr}}[k]]} &=
+  \frac{\Cov[\vec{y}_{\text{Tr}}[k], \vec{y}_\text{Pr} \mid I]^2}
+       {\Var[\vec{y}_{\text{Tr}}[k] \mid I]} &=
   \frac{\Theta_{k, n + 1 \mid I}^2}{\Theta_{kk \mid I}}
-  = \Var[\vec{y}_\text{Pr}]
-    \mathrm{Corr}[\vec{y}_\text{Tr}[k], \vec{y}_\text{Pr}]^2
+  = \Var[\vec{y}_\text{Pr} \mid I]
+    \Corr[\vec{y}_\text{Tr}[k], \vec{y}_\text{Pr} \mid I]^2
 \end{align}
 For each candidate \( k \), we need to keep track of its conditional variance
 and conditional covariance with the prediction point after conditioning on
@@ -442,7 +465,7 @@ matching the time complexity of the explicit precision approach.
     \WHILE{\( \lvert -I \rvert > 0 \) and \( \lvert I \rvert <s \)}
       \STATE \(
         k \gets \max_{j \in -I}
-        \frac{\Theta_{j, \text{Pr} \mid I}}{\Theta_{jj \mid I}}
+        \frac{\Theta_{j, \text{Pr} \mid I}^2}{\Theta_{jj \mid I}}
       \)
       \STATE \( I \gets I \cup \{ k \} \)
       \STATE \( -I \gets -I - \{ k \} \)
@@ -517,7 +540,7 @@ matching the time complexity of the explicit precision approach.
     \WHILE{\( \lvert -I \rvert > 0 \) and \( \lvert I \rvert <s \)}
       \STATE \(
         k \gets \max_{j \in -I}
-        \frac{\Theta_{j, \text{Pr} \mid I}}{\Theta_{jj \mid I}}
+        \frac{\Theta_{j, \text{Pr} \mid I}^2}{\Theta_{jj \mid I}}
       \)
       \STATE \( I \gets I \cup \{ k \} \)
       \STATE \( -I \gets -I - \{ k \} \)
@@ -551,6 +574,10 @@ Cholesky factorization uses \( \mathcal{O}(N s) \) to store the first \( s \)
 columns of the Cholesky factorization of \( \Theta \), which is always more
 memory than the precision (\( N > s \)). Both algorithms use an additional \(
 \mathcal{O}(N) \) space to store the conditional variances and covariances.
+Although the precision algorithm uses asymptotically less memory than the
+Cholesky algorithm, the Cholesky algorithm is preferred for better constant
+factor speed and ease of implementation.
+\Stodo{what is a good way to say non-asymptotically faster?}
 
 Once the indices have been computed according to \cref{alg:gp_select}
 or \cref{alg:select_chol}, inferring the conditional mean and
@@ -622,6 +649,7 @@ We now need to be able to efficiently compute the effect of selecting an
 index \( k \) on the log determinant. From \cref{eq:cond_select}, we know
 that selecting an index is a rank-one update on the prediction covariance.
 Using the matrix determinant lemma,
+\Stodo{move to appendix}
 \begin{align}
   \label{eq:obj_gp_mult}
   \logdet
@@ -664,6 +692,7 @@ Using the matrix determinant lemma,
       \frac{\Theta_{kk \mid I, \text{Pr}}}{\Theta_{kk \mid I}}
     \right )
 \end{align}
+\Stodo{this maybe should be changed to information gain by flipping the sign}
 The greedy objective \cref{eq:greedy_mult} tells us that to minimize the
 log determinant, we can simply select the index \( k \) with the smallest
 ratio between the conditional variance after conditioning on the previously
@@ -712,9 +741,9 @@ after simplification is \( \mathcal{O}(N s^2 + N m^2 + m^3) \).
 
 For the Cholesky algorithm, two Cholesky factorizations are stored. We first
 compute the Cholesky factorization after selecting each prediction point,
-for a cost of \( (n + m) m \) for each of the \( m \) columns. We then begin
+for a cost of \( (N + m) m \) for each of the \( m \) columns. We then begin
 selecting candidates, which requires updating both Cholesky factors in time \(
-(n + m)(m + s) \) which is dominated by updating the preconditioned Cholesky
+(N + m)(m + s) \) which is dominated by updating the preconditioned Cholesky
 factor. The columns of the Cholesky factors correspond precisely to \( \vec{u}
 \) and \( \vec{u}_\text{Pr} \) and both conditional variances \( \Theta_{jj
 \mid I} \) and \( \Theta_{jj \mid I, \text{Pr}} \) can be computed as above.
@@ -919,7 +948,16 @@ again uses more memory than the explicit precision algorithm.
   \end{algorithmic}
 \end{algorithm}
 \end{minipage}
-\subsection{Near optimality by submodularity}
+
+\subsection{Near optimality by empirical submodularity}
+
+If the objective satisfies the property of submodularity, then it is guaranteed
+that the greedy algorithm produces an objective within a a \( 1 - \frac{1}{e}
+\) of the optimal objective. Unfortunately the information gain objective is
+not submodular in general, see \cref{app:submodular}. However, it is possible
+to empirically observe for a particular point set and choice of kernel function
+whether it is submodular. We note that one-dimensional points with a Mat{\'e}rn
+kernel function seems to be submodular, but not for any higher dimension.
 
 \section{Greedy selection for \emph{global} approximation by KL-minimization}
 
@@ -991,7 +1029,7 @@ where \( \Theta_1 \) and \( \Theta_2 \) are both of size
 \end{theorem}
 
 Plugging the optimal \( L \) \cref{eq:L_col} back
-into the KL-divergence \cref{eq:kl}, we obtain:
+into the KL divergence \cref{eq:kl}, we obtain:
 \begin{align}
   \label{eq:obj_chol}
   2 \mathbb{D}_{\text{KL}}
@@ -1009,7 +1047,7 @@ into the KL-divergence \cref{eq:kl}, we obtain:
 \end{align}
 
 See \cref{app:kl_L} for details. In particular, it is important
-which direction the KL-divergence is or else cancellation of
+which direction the KL divergence is or else cancellation of
 the \( \trace(\Theta_2^{-1} \Theta_1) \) term may not occur.
 
 In order to maximize \cref{eq:obj_chol}, we can ignore \( \logdet(\Theta)
@@ -1035,6 +1073,7 @@ fact that marginalization in covariance is conditioning in precision.
   \nonumber
   (\vec{e}_1^{\top} \Theta_{s_i, s_i}^{-1} \vec{e}_1)^{-1}
          &= ((\Theta_{s_i, s_i}^{-1})_{11})^{-1} \\
+  \label{eq:L_cond_var}
          &= \Theta_{ii \mid s_i - \{ i \}}
 \end{align}
 
@@ -1081,7 +1120,7 @@ conditioning.
   \label{eq:det_chain}
   \logdet(\Theta) &= \logdet(\Theta_{1, 1 \mid 2}) + \logdet(\Theta_{2, 2})
   \shortintertext{where \( \Theta \) is blocked according to
-    \cref{eq:blocking}. The KL-divergence objective for \( \tilde{i} \) is:}
+    \cref{eq:blocking}. The KL divergence objective for \( \tilde{i} \) is:}
   \nonumber
   \sum_{i \in \tilde{i}} \log(\Theta_{ii \mid s_i - \{ i \} })
   &= \log(\Theta_{i_m i_m \mid \tilde{s}}) +
@@ -1105,7 +1144,7 @@ columns, where the prediction points correspond to indices in the
 aggregation and where we restrict the candidates \( k \) to those
 below each column in the aggregation, \( k > \max \tilde{i} \).
 
-Hence the sparse Cholesky factorization motivated by KL-divergence can be
+Hence the sparse Cholesky factorization motivated by KL divergence can be
 viewed as sparse Gaussian process selection over each column, where entries are
 selected to maximize mutual information with the entry on the diagonal of the
 current column. In the aggregated case, the multiple columns in the aggregated
@@ -1264,14 +1303,13 @@ kernel function, this algorithm relies only on the entries of the covariance
 matrix \( \Theta \). Thus, it can factor arbitrary symmetric positive definite
 matrices without access to points or an explicit kernel function.
 
-\subsection{Review of KL approximation}
-
 \section{Numerical experiments}
 
-All experiments were run on the PACE Phoenix cluster, with 8
-cores of a Intel(R) Xeon(R) Gold 6226 CPU @ 2.70GHz and 6 GB of
-RAM per core. Python code for all numerical experiments can be
-found at \href{https://github.com/stephen-huan/conditional-knn}
+All experiments were run on the Partnership for an Advanced Computing
+Environment (PACE) Phoenix cluster at the Georgia Institute of
+Technology, with 8 cores of a Intel(R) Xeon(R) Gold 6226 CPU @ 2.70GHz
+and 6 GB of RAM per core. Python code for all numerical experiments
+can be found at \href{https://github.com/stephen-huan/conditional-knn}
 {https://github.com/stephen-huan/conditional-knn}.
 
 \Stodo{cite python libraries that want citations (e.g. scikit-learn)}
@@ -1319,6 +1357,8 @@ to precisely the difference in which points were selected.
 \subsection{Recovery of sparse Cholesky factors}
 
 \subsection{Cholesky factorization}
+
+\subsection{Gaussian process regression}
 
 \subsection{Preconditioning for conjugate gradient}
 
@@ -1497,10 +1537,10 @@ which is the update in line 18 of \cref{alg:gp_select_mult}.
 Since the update is a rank-one update, it can be computed in \(
 \mathcal{O}(\lvert \text{Pr} \rvert^2) = \mathcal{O}(m^2) \).
 
-\subsection{Updating Cholesky Factorization after Rank-one Downdate}
+\subsection{Updating Cholesky factorization after rank-one downdate}
 \label{app:chol_downdate}
 
-\Stodo{remove because unnecessary, describe insertion insertead}
+\Stodo{remove because unnecessary, describe insertion instead}
 
 We use the approach from Lemma 1 of \cite{krause2015more}, slightly adapted
 to use in-place operations and to make no assumption on the particular row
@@ -1514,8 +1554,8 @@ to the same block structure:
   \begin{pmatrix}
     r_1 & \vec{0} \\
     \vec{r}_2 & L_2
-  \end{pmatrix}
-  & L' &=
+  \end{pmatrix},
+  L' =
   \begin{pmatrix}
     r_1' & \vec{0} \\
     \vec{r}_2' & L_2'
@@ -1539,15 +1579,31 @@ to the same block structure:
   r_1' \vec{r}_2' &= \Theta'_{2:, 1} = \Theta_{2:, 1} - u_1 \vec{u}_2 \\
                   &= r_1 \vec{r}_2 - u_1 \vec{u}_2 \\
   \vec{r}_2' &= \frac{1}{r_1'} (r_1 \vec{r}_2 - u_1 \vec{u}_2) \\
-  L_2' L_2'^{\top} + \vec{r}_2' \vec{r}_2'^{\top} &= \Theta'_{22}
-    = \Theta_{22} - \vec{u}_2 \vec{u}_2^{\top} \\
+  % L_2' L_2'^{\top} + \vec{r}_2' \vec{r}_2'^{\top} &= \Theta'_{22}
+  %   = \Theta_{22} - \vec{u}_2 \vec{u}_2^{\top} \\
   L_2' L_2'^{\top} &= L_2 L_2^{\top} + \vec{r}_2 \vec{r}_2^{\top}
     - \vec{u}_2 \vec{u}_2^{\top} - \vec{r}_2' \vec{r}_2'^{\top}
-  \shortintertext{After some simplification we find}
+  \shortintertext{Plugging in the expresion for \( \vec{r}'_2 \),}
+                   &= L_2 L_2^{\top} + \vec{r}_2 \vec{r}_2^{\top}
+    - \vec{u}_2 \vec{u}_2^{\top} - \left (
+    \frac{r_1}{r_1'} \vec{r_2} - \frac{u_1}{r_1'} \vec{u_2} \right ) \left (
+    \frac{r_1}{r_1'} \vec{r_2} - \frac{u_1}{r_1'} \vec{u_2} \right )^{\top} \\
+                   &=  L_2 L_2^{\top} +
+    \left ( 1 - \frac{r_1^2}{r_1'^2} \right ) \vec{r}_2 \vec{r}_2^{\top} +
+    \frac{r_1 u_1}{r_1'^2} \vec{r_2} \vec{u_2}^{\top} +
+    \frac{u_1 r_1}{r_1'^2} \vec{u_2} \vec{r_2}^{\top} -
+    \left ( 1 + \frac{u_1^2}{r_1'^2} \right ) \vec{u}_2 \vec{u}_2^{\top}
+  \shortintertext{Using \( r_1' = \sqrt{r_1^2 - u_1^2} \),}
+                   &=  L_2 L_2^{\top} -
+      \frac{u_1^2}{r_1'^2} \vec{r}_2 \vec{r}_2^{\top} +
+    \frac{r_1 u_1}{r_1'^2} \vec{r_2} \vec{u_2}^{\top} +
+    \frac{u_1 r_1}{r_1'^2} \vec{u_2} \vec{r_2}^{\top} -
+      \frac{r_1^2}{r_1'^2} \vec{u}_2 \vec{u}_2^{\top}
+  \shortintertext{After factoring we find}
   L_2' L_2'^{\top} &= L_2 L_2^{\top} - \left (
-    \frac{u_1}{r_1'} \vec{r}_2 - \frac{r_1}{r_1'} \vec{u}_2
+    \frac{r_1}{r_1'} \vec{u}_2 - \frac{u_1}{r_1'} \vec{r}_2
   \right ) \left (
-    \frac{u_1}{r_1'} \vec{r}_2 - \frac{r_1}{r_1'} \vec{u}_2
+    \frac{r_1}{r_1'} \vec{u}_2 - \frac{u_1}{r_1'} \vec{r}_2
   \right )^{\top}
   \shortintertext{which is a rank-one downdate to the subfactor \( L_2 \).
     Recursively updating \( L_2 \) yields a \( \mathcal{O}(N^2) \) algorithm.
@@ -1555,25 +1611,52 @@ to the same block structure:
     routines. The updates can be summarized as:}
   r_1' &= \sqrt{r_1^2 - u_1^2} \\
   \vec{r}' &= \frac{r_1}{r_1'} \vec{r} - \frac{u_1}{r_1'} \vec{u} \\
-  \vec{u}' &= \frac{u_1}{r_1'} \vec{r} - \frac{r_1}{r_1'} \vec{u}
+  \vec{u}' &= \frac{r_1}{r_1'} \vec{u} - \frac{u_1}{r_1'} \vec{r}
   \shortintertext{Note that we drop the subscripting on \( \vec{r} \) and \(
     \vec{u} \). By updating the entire vector on each iteration, we can avoid
     keeping track of the lower triangular structure of \( L \). We will first
     update \( \vec{r}' \) and then use it to update \( \vec{u} \). Solving for
     \( \vec{r} \) in terms of \( \vec{r}' \),}
   \vec{r} &= \frac{r_1'}{r_1} \vec{r}' + \frac{u_1}{r_1} \vec{u} \\
-  \vec{u}' &= -\frac{u_1}{r_1} \vec{r}' + \frac{r_1'}{u_1} \vec{u}
+  \shortintertext{Plugging the expression for \( \vec{r} \) into
+    the update for \( \vec{u}' \),}
+  \vec{u}' &= \frac{r_1}{r_1'} \vec{u} - \frac{u_1}{r_1'}
+    \left ( \frac{r_1'}{r_1} \vec{r}' + \frac{u_1}{r_1} \vec{u} \right ) \\
+           &= \frac{r_1^2 - u_1^2}{r_1 r_1'} \vec{u}
+            - \frac{u_1}{r_1} \vec{r}' \\
+           &= \frac{r_1'}{r_1} \vec{u} - \frac{u_1}{r_1} \vec{r}'
   \shortintertext{Thus, the updates proceed sequentally as follows:}
   \gamma &\gets \sqrt{r_1^2 - u_1^2} \\
   \alpha &\gets \frac{r_1}{\gamma} \\
   \beta &\gets \frac{u_1}{\gamma} \\
   \vec{r} &\gets \alpha \vec{r} - \beta \vec{u} \\
-  \vec{u} &\gets -\frac{\beta}{\alpha} \vec{r} + \frac{1}{\alpha} \vec{u}
+  \vec{u} &\gets \frac{1}{\alpha} \vec{u} - \frac{\beta}{\alpha} \vec{r}
 \end{align}
 These can be efficiently performed in-place by
 BLAS as level-one \texttt{daxpy} operations.
 
-\subsection{Partial Updates in the Selection Algorithm}
+\subsection{Updating Cholesky factor after insertion}
+\label{app:chol_insert}
+
+Suppose we have a cholesky factor \( L \) of \( \Theta \) and we insert
+a new point into \( \Theta \). We wish to update the Cholesky \( L \) to
+account for this insertion. Using the recursive conditioning interpretation
+of Cholesky factorization in \cref{eq:chol}, we see that the columns of \( L
+\) before the insertion will remain unchanged, the column at the insertion
+point is a new column given by the conditional covariance of the new point
+with the rest of the points, conditional on the points before it, which can
+be computed with standard left-looking, and the columns of \( L \) after the
+insertion correspond to the Cholesky factor of the conditional covariance,
+conditional on the newly inserted point in addition to the previous points.
+From \cref{eq:cond_select} we know that conditioning on an additional point is
+a rank-one update of the covariance, so we can use rank-one downdating from
+\cref{app:chol_downdate} to update \( L \) for the columns after the insertion
+point, where the vector in the rank-one downdate is the newly inserted column.
+This update touches every value in the Cholesky factor exactly once, so its
+complexity is \( \mathcal{O}(N^2) \) as opposed to the \( \mathcal{O}(N^3)
+\) cost of completely regenerating the Cholesky factor from scratch.
+
+\subsection{Partial updates in the selection algorithm}
 \label{app:partial}
 
 In the context of the selection algorithm, we have \( M \) prediction points
@@ -1647,7 +1730,7 @@ and conditioned \( y_j \) is. By definition,
 \end{figure}
 
 We can now connect minimization of the log determinant of the partially updated
-covariance matrix to the KL-divergence objective of Cholesky factorization.
+covariance matrix to the KL divergence objective of Cholesky factorization.
 Computing the log determinant of the partially updated covariance
 matrix, we make use of \cref{eq:chol_partial} and make use of the fact
 that the determinant of a  triangular matrix is the product of its
@@ -1659,7 +1742,7 @@ diagonal entries:
   \underbrace{
     \log(L_{j + 1, j + 1 \mid k}) + \dotsb + \log(L_{M, M \mid k})
   }_{\text{conditioned}}
-  \shortintertext{Comparing to the KL-divergence \cref{eq:obj_chol},
+  \shortintertext{Comparing to the KL divergence \cref{eq:obj_chol},
     \( \mathbb{D}_{\text{KL}}
       \left (
         \mathcal{N}(\vec{0}, \Theta) \, \Big \| \,
@@ -1688,15 +1771,15 @@ diagonal entries:
 \end{align}
 So minimizing the log determinant of the partially
 conditioned covariance matrix \cref{eq:partial_logdet} is
-the same as minimizing the KL-divergence \cref{eq:obj_chol}.
+the same as minimizing the KL divergence \cref{eq:obj_chol}.
 
-\subsection{Algorithm for Partial Updates}
+\subsection{Algorithm for partial updates}
 \label{app:partial_alg}
 
 We now need an efficient algorithm to keep track of partial updates.
-The key idea is to maintain the prediction matrix with selected
-points inserted to maintain proper ordering, and keep track of
-the log determinant throughout selection. We first give how this
+The key idea is to implicitly maintain the prediction matrix with
+selected points inserted to maintain proper ordering, and keep track
+of the log determinant throughout selection. We first give how this
 different perspective affects the interpretation of the multiple
 point selection algorithm. In the example, let \( x \) and \( y \)
 be selected points and \( 1 \) and \( 2 \) be prediction points.
@@ -1789,15 +1872,19 @@ As long as we can compute conditional variances of our candidate on each
 \emph{prefix} of the current ordering of prediction points interspersed with
 selected points, we can use the conditional variances to compute the updated
 conditional variances of the selected points by using their conditional
-covariances with the candidate. We are then able to compute every term in the
-objective. To do so, we maintain a partial Cholesky factor whose ordering
-is given by the current ordering. When we select a new point, we insert it
-in its appropriate place in the Cholesky factor. To update the Cholesky
-factor after an insertion efficiently, we left-look to get the column of
-its insertion position, and then update all columns right of the column by
-a rank-one downdate as described in \cref{app:chol_downdate} which touches
-every entry in the Cholesky factor, \( \mathcal{O}(N(m + s) \) per update for
-a total cost of \( \mathcal{O}(N(m + s)(s)) \) over \( s \) selections.
+covariances with the candidate. We are then able to compute every term
+in the objective. To do so, we maintain a partial Cholesky factor whose
+ordering is given by the current ordering. When we select a new point, we
+insert it in its appropriate place in the Cholesky factor. To update the
+Cholesky factor after an insertion efficiently, we left-look to get the
+column of its insertion position, and then update all columns right of the
+column by a rank-one downdate as described in \cref{app:chol_insert} which
+touches every entry in the Cholesky factor, \( \mathcal{O}(N(m + s) \) per
+update for a total cost of \( \mathcal{O}(N(m + s)(s)) \) over \( s \)
+selections. In addition, the algorithm can be considerably simplified by
+simply adding the conditional variances of the prediction points, instead
+of starting with a proxy for the log determinant of the entire matrix and
+subtracting out the spurious interactions from the training points.
 
 By inspecting the Cholesky factor, we get the covariance of a selected point
 with a candidate, conditional on all the points prior to the selected point in
@@ -1826,7 +1913,76 @@ asymptotic work in the non-partial algorithm can be implemented as BLAS
 level-2 calls, while the partial algorithm relies heavily on vector (level-1)
 calls, affecting the constant-factor performance of the algorithm.
 
-\subsection{Equivalence of Selection and Orthogonal Matching Pursuit}
+\subsection{Global greedy selection}
+\label{app:global_greedy}
+
+Although each column is essentially independent from the perspective of
+selection, if there is a prescribed budget for the number of nonzeros then
+there is the problem of distributing the nonzeros over the columns. A
+natural method is to distribute as evenly as possible, this is efficient and
+practically useful. However, one principled way of allocating nonzeros is
+to maintain a \emph{global} priority queue over all columns, and selecting
+from this queue determines not only which entry out of the candidate set is
+added as a nonzero, but also which column to select from. This allows the
+algorithm to greedily select the next entry which will decrease the global
+objective \cref{eq:obj_chol} as much as possible. The main change is that
+within a column, any monotonic transformation of the objective will preserve
+the relative ranking of candidates, for example adding a constant, multiplying
+by a constant, taking the log, etc. However, from the global perspective, if
+one column adds a different constant to their objectives than another column,
+the relative ranking of candidates between columns is skewed. Thus, each
+column must maintain an objective that corresponds directly to minimizing the
+global objective \cref{eq:obj_chol}. Here we describe the modifications that
+must be made to the selection algorithms to support global comparison.
+
+\subsubsection{Single column selection}
+
+For a single prediction point, the objective is \( \frac{\Theta_{k, \text{Pr}
+\mid I}^2}{\Theta_{kk \mid I}} \) \cref{eq:obj_gp} which is exactly the amount
+the variance of the prediction point is decreased if the \( k \)th candidate is
+selected, that is, \( \Theta_{\text{Pr}, \text{Pr} \mid I} - \Theta_{\text{Pr},
+\text{Pr} \mid I, k} = \frac{\Theta_{k, \text{Pr} \mid I}^2}{\Theta_{kk \mid
+I}} \). From the global perspective, all other prediction points are untouched,
+so the amount the sum of the log variances of all the prediction points changes
+is
+\begin{align}
+  \min \Delta &= \min \left [
+    \log(\Theta_{\text{Pr}, \text{Pr} \mid I, k}) -
+  \log(\Theta_{\text{Pr}, \text{Pr} \mid I}) \right ] \\
+              &= \min \frac{\Theta_{\text{Pr}, \text{Pr} \mid I, k}}
+                           {\Theta_{\text{Pr}, \text{Pr} \mid I}} \\
+              &= \min \frac{\Theta_{\text{Pr}, \text{Pr} \mid I}
+              - \frac{\Theta_{k, \text{Pr} \mid I}^2}{\Theta_{kk \mid I}}}
+                           {\Theta_{\text{Pr}, \text{Pr} \mid I}} \\
+              &= \min \left [ 1 -
+                \frac{\Theta_{k, \text{Pr} \mid I}^2}
+                     {\Theta_{kk \mid I} \Theta_{\text{Pr}, \text{Pr} \mid I}}
+                 \right ] \\
+  \label{eq:global_obj}
+              &= \max
+                \frac{\Theta_{k, \text{Pr} \mid I}^2}
+                     {\Theta_{kk \mid I} \Theta_{\text{Pr}, \text{Pr} \mid I}}
+\end{align}
+where \cref{eq:global_obj} can be interpreted as the
+\emph{percentage} of the decrease in variance from selecting
+the \( k \)th point to the variance before selecting the point.
+
+\subsubsection{Aggregated selection}
+
+Since the nonadjacent algorithm directly computes the sum of the log of
+the conditional variances of the prediction points, few modifications
+have to be made. One heuristical improvement is to take into account
+for ``bang-for-buck'', that is, to account for the fact that different
+candidates cost a different amount of nonzero entries. Selecting a
+candidate can add between 1 and the number of columns in its aggregated
+group, depending on its relative index. Thus, candidates with larger
+groups will appear to decrease the global variance more, even if they
+are not as efficient as a candidate with a single group. In practice, it
+is better to use the objective \( \frac{\Delta}{n} \) where \( \Delta
+\) is the change in variance after selecting the candidate and \( n \)
+is the number of nonzero entries selecting the candidate adds.
+
+\subsection{Equivalence of selection and orthogonal matching pursuit}
 \label{app:omp}
 
 We show that the single-point selection algorithm described in
@@ -1888,12 +2044,76 @@ that Cholesky factorization is Gram-Schmitt in feature space.
 \end{align}
 This shows the equivalence as the objective is the same.
 
+\subsection{Checking submodularity}
+\label{app:submodular}
+
+Our objective is the mutual information between the prediction and training
+points \cref{eq:info}. A natural question is whether this objective is
+submodular with respect to the training set. The answer is no in general,
+see \cite{krause2008nearoptimal}, section 8.3 for a simple counterexample.
+However, we can empirically check submodularity for particular geometries
+and choices of kernel function. If \( \text{Pr} \) is the set of prediction
+points, \( I \) is a set of indexes, and \( x_1, x_2 \) are additional
+indices not in \( I \), then the set function is submodular if and only if
+\begin{align*}
+  \I(\text{Pr}, I \cup \{ x_2 \}) - \I(I) &\overset{?}{\geq}
+    \I(\text{Pr}, I \cup \{ x_1, x_2 \}) - \I(\text{Pr}, I \cup \{ x_1 \})
+  \shortintertext{Expanding from the definition
+    of mutual information \cref{eq:info},}
+  \entropy[\text{Pr} \mid I] - \entropy[\text{Pr} \mid I \cup \{ x_2 \}]
+    &\overset{?}{\geq}
+    \entropy[\text{Pr} \mid I \cup \{ x_1 \}] -
+    \entropy[\text{Pr} \mid I \cup \{ x_1, x_2 \}]
+  \shortintertext{Since this is the objective \cref{eq:obj_gp_mult}
+    (with additional log),}
+  \frac{\Theta_{x_2, x_2 \mid I}}{\Theta_{x_2, x_2 \mid I, \text{Pr}}}
+    &\overset{?}{\geq}
+    \frac{\Theta_{x_2, x_2 \mid I} -
+          \frac{\Theta_{x_1, x_2 \mid I}^2}{\Theta_{x_1, x_1 \mid I}}}
+         {\Theta_{x_2, x_2 \mid I, \text{Pr}} -
+         \frac{\Theta_{x_1, x_2 \mid I, \text{Pr}}^2}
+              {\Theta_{x_1, x_1 \mid I, \text{Pr}}}}
+    \shortintertext{From the fact that \(
+    \frac{a}{b} \geq \frac{a - c}{b - d} \) if and only if
+     \( \frac{a}{b} \leq \frac{c}{d} \),}
+  \frac{\Theta_{x_2, x_2 \mid I}}{\Theta_{x_2, x_2 \mid I, \text{Pr}}}
+    &\overset{?}{\leq}
+    \frac{\frac{\Theta_{x_1, x_2 \mid I}^2}{\Theta_{x_1, x_1 \mid I}}}
+         {\frac{\Theta_{x_1, x_2 \mid I, \text{Pr}}^2}
+               {\Theta_{x_1, x_1 \mid I, \text{Pr}}}}
+  \shortintertext{Multiplying by \( \frac{\Theta_{x_1, x_1 \mid
+    I}}{\Theta_{x_1, x_1 \mid I, \text{Pr}}} \) on both sides,}
+  \frac{\Theta_{x_1, x_1 \mid I} \Theta_{x_2, x_2 \mid I}}
+       {\Theta_{x_1, x_1 \mid I, \text{Pr}}
+        \Theta_{x_2, x_2 \mid I, \text{Pr}}}
+    &\overset{?}{\leq}
+    \frac{\Theta_{x_1, x_2 \mid I}^2}
+         {\Theta_{x_1, x_2 \mid I, \text{Pr}}^2}
+  \shortintertext{Multiplying by \( \frac{\Theta_{x_1,
+    x_2 \mid I, \text{Pr}}^2}{\Theta_{x_1, x_1 \mid
+    I} \Theta_{x_2, x_2 \mid I}} \) on both sides,}
+  \frac{\Theta_{x_1, x_2 \mid I, \text{Pr}}^2}
+       {\Theta_{x_1, x_1 \mid I, \text{Pr}}
+        \Theta_{x_2, x_2 \mid I, \text{Pr}}}
+    &\overset{?}{\leq}
+    \frac{\Theta_{x_1, x_2 \mid I}^2}
+         {\Theta_{x_1, x_1 \mid I} \Theta_{x_2, x_2 \mid I}}
+  \shortintertext{By definition, this is}
+  \Corr[x_1, x_2 \mid I, \text{Pr}] &\overset{?}{\leq}
+    \Corr[x_1, x_2 \mid I]
+\end{align*}
+so the mutual information objective is submodular if and only if
+conditioning on additional point(s) decreases the correlation between
+every pair of points. Intuitively, this corresponds to the screening
+effect observed in spatial statistics literature --- conditioning on
+a nearby point decreases the correlation for far away points.
+
 \section{Derivations in KL-minimization}
 
 \subsection{Linear-algebraic formulation of objective}
 \label{app:kl_obj}
 
-We want to show that the KL-divergence between two multivariate
+We want to show that the KL divergence between two multivariate
 Gaussians centered at \( \vec{0} \) with covariance matrices
 \( \Theta_1 \) and \( \Theta_2 \) can be written as
 \begin{align}
@@ -1908,7 +2128,7 @@ Gaussians centered at \( \vec{0} \) with covariance matrices
     \pi(\vec{x}) \) for \( \vec{x} \sim \mathcal{N}(\vec{0}, \Theta) \) is}
   \log \pi(\vec{x}) &= -\frac{1}{2} (N \log(2 \pi) + \logdet(\Theta) +
     \vec{x}^{\top} \Theta^{-1} \vec{x})
-  \shortintertext{By the definition of KL-divergence,}
+  \shortintertext{By the definition of KL divergence,}
   2 \mathbb{D}_{\text{KL}}
   \left (
     \mathcal{N}(\vec{0}, \Theta_1) \, \Big \| \,
@@ -1977,10 +2197,9 @@ as desired.
 \subsection{Reduction for optimal factor}
 \label{app:kl_L}
 
-We wish to compute the KL-divergence between \( \Theta \) and the Cholesky
+We wish to compute the KL divergence between \( \Theta \) and the Cholesky
 factor \( L \) computed according to \cref{thm:L}. From \cref{eq:kl},
 \begin{align}
- \nonumber
   \label{eq:kl_L}
   2 \mathbb{D}_{\text{KL}}
   \left (
@@ -1995,10 +2214,9 @@ factor \( L \) computed according to \cref{thm:L}. From \cref{eq:kl},
   \shortintertext{Focusing on \( \trace(L \Theta
     L^{\top}) \) and expanding on the columns of \( L \),}
   \trace(L \Theta L^{\top}) &= \sum_{i = 1}^N
-    \left ( L_{s_i, i}^{\top} \Theta_{s_i, s_i} L_{s_i, i} \right )
+    L_{s_i, i}^{\top} \Theta_{s_i, s_i} L_{s_i, i}
   \shortintertext{Plugging in \( L_{s_i, i} \) from \cref{thm:L},}
   &= \sum_{i = 1}^N
-  \left [
     \left (
       \frac{\left ( \Theta_{s_i, s_i}^{-1} \vec{e}_1 \right )^{\top}}
         {\sqrt{\vec{e}_1^{\top} \Theta_{s_i, s_i}^{-1} \vec{e}_1}}
@@ -2007,15 +2225,14 @@ factor \( L \) computed according to \cref{thm:L}. From \cref{eq:kl},
     \left (
       \frac{\Theta_{s_i, s_i}^{-1} \vec{e}_1}
         {\sqrt{\vec{e}_1^{\top} \Theta_{s_i, s_i}^{-1} \vec{e}_1}}
-    \right )
-  \right ] \\
+    \right ) \\
   &= \sum_{i = 1}^N
-  \left [
     \frac{\vec{e}_1^{\top} \Theta_{s_i, s_i}^{-1}
           \Theta_{s_i, s_i} \Theta_{s_i, s_i}^{-1}
-          \vec{e}_1}{\vec{e}_1^{\top} \Theta_{s_i, s_i}^{-1} \vec{e}_1}
-  \right ] \\
+          \vec{e}_1}{\vec{e}_1^{\top} \Theta_{s_i, s_i}^{-1} \vec{e}_1} \\
   &= \sum_{i = 1}^N 1 = N
+\end{align}
+\begin{align}
   \shortintertext{Using \( N \) for \( \trace(L
     L^{\top} \Theta) \) in \cref{eq:kl_L},}
   2 \mathbb{D}_{\text{KL}}
@@ -2041,18 +2258,48 @@ factor \( L \) computed according to \cref{thm:L}. From \cref{eq:kl},
     \right ]
     - \logdet(\Theta)
 \end{align}
-So minimizing the KL-divergence (given optimal \( L \)) corresponds to
-minimizing the sum of the (inverse) of the diagonal entries. Intuitively,
-because the Cholesky factorization is iterative conditioning \cref{eq:chol},
-we can view the sum as the accumulated prediction error for a series of
-prediction problems, where each prediction problem is to predict the value
-of the \( i \)th variable given variables \( 1, 2, \dotsc, i - 1 \). This
+So minimizing the KL divergence (given optimal \( L \)) corresponds to
+minimizing the sum of the inverse of the diagonal entries. We can give
+an intuitive view of this result by making use of \cref{eq:L_cond_var}
+and expanding the log determinant by the chain rule \cref{eq:det_chain}.
+\begin{align}
+  \sum_{i = 1}^N
+    \left [
+      \log \left (
+        (\vec{e}_1^{\top} \Theta_{s_i, s_i}^{-1} \vec{e}_1)^{-1}
+      \right )
+    \right ]
+    - \logdet(\Theta)
+  &= \sum_{i = 1}^N
+    \left [
+      \log \left ( \Theta_{ii \mid s_i - \{ i \}} \right )
+    \right ]
+    - \logdet(\Theta) \\
+  &= \sum_{i = 1}^N
+      \log \left ( \Theta_{ii \mid s_i - \{ i \}} \right ) -
+    \sum_{i = 1}^N
+      \log \left ( \Theta_{ii \mid i + 1:} \right ) \\
+  &= \sum_{i = 1}^N
+    \left [
+      \log \left ( \Theta_{ii \mid s_i - \{ i \}} \right ) -
+      \log \left ( \Theta_{ii \mid i + 1:} \right )
+    \right ]
+\end{align}
+We can view this sum as the accumulated \emph{difference} in prediction
+error for a series of prediction problems, where each prediction problem
+is to predict the value of the \( i \)th variable given variables \( i +
+1, i + 2, \dotsc, N \). The left term \( \log \left ( \Theta_{ii \mid s_i
+- \{ i \}} \right ) \) is restricted to only using those variables in the
+sparsity pattern \( s_i \), while the right term \( \log \left ( \Theta_{ii
+\mid i + 1:} \right ) \) is able to use every variable after \( i \). The
+left term will necessarily have greater variance than the right, and the
+goal is to minimize the accumulated deviation. Thus, the KL divergence
 gives a natural way to measure the quality of a sparsity pattern as a good
-sparsity pattern should maintain predictive accuracy while subject to
-the constraint that some variables have no interaction with others.
+sparsity pattern should maintain predictive accuracy while subject to the
+constraint that some variables have no interaction with others.
 
-Because the KL-divergence is not symmetric, it matters which way the
-KL-divergence is taken as well as whether both matrices have been
+Because the KL divergence is not symmetric, it matters which way the
+KL divergence is taken as well as whether both matrices have been
 inverted or not. This seems to imply that there are four possible
 ways to compare two covariance matrices. However, note that
 \begin{align}
@@ -2068,10 +2315,10 @@ ways to compare two covariance matrices. However, note that
   \right )
 \end{align}
 from \cref{eq:kl} and the cyclic property of trace, so inverting both
-matrices implicitly reverses the order of the KL-divergence. There are
+matrices implicitly reverses the order of the KL divergence. There are
 therefore only two possible ways to compare the two, which depends on
 the order of the arguments. A statistical interpretation comes from the
-fact that the KL-divergence can be interpreted as the likelihood-ratio
+fact that the KL divergence can be interpreted as the likelihood-ratio
 test, so the non-symmetry of the order of the arguments corresponds to
 the asymmetry between the null and alternative hypotheses.
 
