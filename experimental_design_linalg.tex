@@ -73,7 +73,157 @@
 \end{AMS}
 
 \section{Introduction}
-\cite{schafer2020compression} test citation
+
+\paragraph{The problem and existing work}
+
+This work is concerned with Gaussian process regression in the setting of \(
+N \) points in \( D \) dimension space, whose covariance matrix \( \Theta
+\in \mathbb{R}^{N \times N} \) is induced by a prescribed kernel function.
+Gaussian processes enjoy widespread application in spatial statistics and
+geostatistics \cite{rue2005gaussian}, machine learning through kernel
+machines \cite{rasmussen2006gaussian}, and Bayesian experimental design
+\cite{wu2018exploiting}, e.g. in sensor placement \cite{krause2008nearoptimal}.
+However, statistical inference with Gaussian processes often requires the
+log determinant or inverse of the covariance matrix, at a computational time
+cost of \( \mathcal{O}(N^3) \) and a memory cost of \( \mathcal{O}(N^2) \)
+to store the \emph{dense} \( N \times N \) covariance matrix.
+
+Many approaches have been developed to address this computational bottleneck.
+The machine learning community has developed many sparse (in the sense of
+selecting a subset of \( k \) points of out the \( N \) total, \( k \ll N
+\)) algorithms that greedily select the next point to include by maximizing
+a information-theoretic objective \cite{smola2000sparse, herbrich2002fast,
+seeger2003fast}. Similar algorithms have been developed in the context of
+sensor placement \cite{krause2008nearoptimal, clark2018greedy} where it is
+assumed the target phenomena is modeled by a Gaussian process or is otherwise
+linearly dependent on the \( k \) selected measurements. More recent work
+exploits the empirical observation that the marginal log-likelihood is
+approximately linear, giving a principled way to determine the number of
+selected points without viewing the whole dataset \cite{bartels2022adaptive}.
+These greedy methods often leverage linear-algebraic factorization for
+efficient computation, particularly the Cholesky factorization \cite{
+herbrich2002fast, seeger2003fast, bartels2022adaptive} or the closely
+related QR factorization \cite{clark2018greedy}. Since both the covariance
+matrix \( \Theta \) and its precision \( \Theta^{-1} \) are by definition
+positive-definite, a Cholesky factor \( L \) always exists. Another approach is
+to directly leverage the Cholesky factor itself, through incomplete Cholesky
+factorization of the covariance \( \Theta \) \cite{schafer2020compression,
+chenparallel, chow2015finegrained} or a sparse approximate Cholesky
+factorization of the precision \( \Theta^{-1} \) \cite{schafer2021sparse}.
+As noted in \cite{schafer2021sparse}, the Cholesky factor of the precision
+is often much sparser than the factor of the covariance, because the
+precision encodes conditional independence while the covariance encodes
+marginal independence. In the special case of the Mat{\'e}rn kernel function
+with half-integer smoothness, the covariance matrix \( \Theta \) admits
+a sparse, banded factorization, allowing for an exact algorithm linear
+in both time and space with the number of points, and only additionally
+depending on the smoothness parameter \( \nu \) \cite{chen2022kernel}. From
+the perspective of transport maps, the Cholesky factor \( L \) satisfying
+\( \Theta^{-1} = L^{\top} L \) can be viewed as a linear transport map
+mapping an arbitrary multivariate Gaussian distribution \( \vec{x} \sim
+\mathcal{N}(\vec{0}, \Theta) \) to the standard Gaussian \( \vec{z} \sim
+\mathcal{N}(\vec{0}, I_N) \) through \( \vec{z} = L \vec{x} \). Thus, one
+generalization of Cholesky factorization to nonlinear and non-Gaussian
+distributions is the Knothe-Rosenblatt rearrangement, which preserves
+lower triangularity (variables only interact with those before them in
+the ordering), some sense of positive-definiteness (the diagonal of the
+Jacobian is positive), and sparsity, particularly in the inverse mapping
+\cite{spantini2018inference}. These triangular transport maps have been
+applied to problems in spatial statistics, particularly for simulation and
+sampling problems \cite{marzouk2016introduction, katzfuss2022scalable}.
+
+\paragraph{Vecchia approximation}
+
+Many of these existing approaches can be viewed through the lens of an early
+approach for fast Gaussian process regression, the Vecchia approximation
+\cite{vecchia1988estimation, katzfuss2021general}. The key observation is a
+decomposition of the joint likelihood \( \pi \).
+\begin{align}
+  \label{eq:joint}
+  \pi(\vec{x}) &= \pi(x_1) \pi(x_2 \mid x_1) \dots
+    \pi(x_N \mid x_1, x_2, \dotsc, x_{N - 1})
+  \shortintertext{Assuming that there are many points, the key assumption
+    is that many of the points contribute little additional information,
+    conditional on a carefully chosen subset of the points. Letting \(
+    s_i \) denote the indices of training points to include for the \(
+    i \)th variable, the Vecchia approximation proposes to approximate
+    \cref{eq:joint} by the sparse approximation}
+  \pi(\vec{x}) &\approx \pi(x_1) \pi(x_2 \mid x_{s_2}) \dots
+    \pi(x_N \mid x_{s_N})
+\end{align}
+Note that \( s_i \) is often restricted to a subset of the indices
+\( 1, \dotsc, i - 1 \) to maintain lower triangularity. Indices in
+sparsity set \( s_i \) are often chosen to be the closest points to
+\( \vec{x}_i \) by Euclidean distance \cite{vecchia1988estimation,
+schafer2020compression, schafer2021sparse, katzfuss2022scalable}. This
+choice can be justified by noting that popular kernel functions like the
+Mat{\'e}rn family of kernel functions decay exponentially with increasing
+distance. For more general kernel functions, geostatisticians have long
+observed the ``screening effect'', or the observation that conditional
+on points close to the point of interest, far away points are nearly
+conditionally independent \cite{stein2002screening, stein20112010}.
+Possible manifestations of this effect include the observed linearity
+of the marginal log-likelihood \cite{bartels2022adaptive}, approximate
+submodularity of common information-theoretic criteria \cite{das2011submodular,
+jagalur-mohan2021batch}, and exponential decay in error for Cholesky
+factorization \cite{schafer2020compression, schafer2021sparse}.
+
+\begin{figure}[h!]
+  \centering
+  \input{figures/screening/uncond.tex}%
+  \input{figures/screening/cond.tex}
+  \caption{An illustration of the screening effect with the Mat{\'e}rn
+    kernel with a length scale of 1 and smoothness \( \nu = \frac{5}{2}
+    \). The first figure shows the unconditional covariance with the point
+    at (0, 0). The second figure shows the conditional covariance after
+    conditioning on the four points in orange.}
+  \label{fig:screen}
+\end{figure}
+
+From the Vecchia approximation, the joint likelihood can be factored into
+\( N \) independent regression problems, where each regression problem is
+to approximate the conditional distribution of the \( i \)th variable.
+Independence allows for embarrassingly parallel algorithms, which is
+exploited in both Gaussian process regression \cite{katzfuss2021general}
+and Cholesky factorization \cite{schafer2021sparse}. The difference is
+that while the Gaussian process perspective emphasizes local regression
+problems and sparsity in point selection (or variable interaction),
+Cholesky factorization emphasizes minimizing the global Kullback-Leibler
+(KL) divergence and sparsity in the resulting matrix factor.
+
+\paragraph{Sparsity selection by geometry}
+
+In the original Vecchia paper, the sparsity
+sets are determined by Euclidean distance.
+
+screening and conditional independence.
+
+\paragraph{conditional selection / experimental design / omp}
+
+omp: \cite{tropp2007signal, tropp2006algorithms,
+hao2021efficient, siegel2022optimal, baptista2019greedy}
+
+\begin{figure}[h]
+  \centering
+  \input{figures/selection/knn.tex}%
+  \input{figures/selection/cknn.tex}
+  \caption{Here, the \textcolor{lightblue}{blue} points are the
+    \textcolor{lightblue}{candidates}, or training points, the
+    \textcolor{orange}{orange} point is the \textcolor{orange}{unknown} point,
+    or the point to make a prediction at, and the \textcolor{seagreen}{green}
+    points are the \( k \) \textcolor{seagreen}{selected} points. The
+    \textcolor{rust}{red} line is the \textcolor{rust}{conditional mean}
+    \( \mu \), conditional on the \( k \) selected points, and the \( \mu
+    - 2 \sigma \) to \( \mu + 2 \sigma \) confidence interval is shaded
+    for the conditional variance \( \sigma^2 \).}
+  \label{fig:select}
+\end{figure}
+
+\paragraph{Main results}
+
+\paragraph{Outline}
+
+The remainder of the paper is organized as follows.
 
 \section{Greedy selection for directed inference}
 

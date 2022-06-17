@@ -1,4 +1,20 @@
 
+@article{baptista2019greedy,
+  title = {Some Greedy Algorithms for Sparse Polynomial Chaos Expansions},
+  author = {Baptista, Ricardo and Stolbunov, Valentin and Nair, Prasanth B.},
+  year = {2019},
+  month = jun,
+  journal = {Journal of Computational Physics},
+  volume = {387},
+  pages = {303--325},
+  issn = {0021-9991},
+  doi = {10.1016/j.jcp.2019.01.035},
+  abstract = {Compressed sensing algorithms approximate functions using limited evaluations by searching for a sparse representation among a dictionary of basis functions. Orthogonal matching pursuit (OMP) is a greedy algorithm for selecting basis functions whose computational cost scales with the size of the dictionary. For polynomial chaos (PC) approximations, the size of the dictionary grows quickly with the number of model inputs and the maximum polynomial degree, making them often prohibitive to use with greedy methods. We propose two new algorithms for efficiently constructing sparse PC expansions for problems with high-dimensional inputs. The first algorithm is a parallel OMP method coupled with an incremental QR factorization scheme, wherein the model construction step is interleaved with a {$\nu$}-fold cross-validation procedure. The second approach is a randomized greedy algorithm that leverages a probabilistic argument to only evaluate a subset of basis functions from the dictionary at each iteration of the incremental algorithm. The randomized algorithm is demonstrated to recover model outputs with a similar level of sparsity and accuracy as OMP, but with a cost that is independent of the dictionary size. Both algorithms are validated with a numerical comparison of their performance on a series of algebraic test problems and PDEs with high-dimensional inputs.},
+  langid = {english},
+  keywords = {Compressed sensing,Greedy algorithms,Polynomial chaos,Stochastic models,Uncertainty quantification},
+  file = {/home/stephenhuan/Zotero/storage/NHSE4JJV/Baptista et al. - 2019 - Some greedy algorithms for sparse polynomial chaos.pdf;/home/stephenhuan/Zotero/storage/ZVQTT36W/S0021999119300865.html}
+}
+
 @article{bartels2022adaptive,
   title = {Adaptive {{Cholesky Gaussian Processes}}},
   author = {Bartels, Simon and {Stensbo-Smidt}, Kristoffer and {Moreno-Mu{\~n}oz}, Pablo and Boomsma, Wouter and Frellsen, Jes and Hauberg, S{\o}ren},
@@ -11,7 +27,7 @@
   abstract = {We present a method to fit exact Gaussian process models to large datasets by considering only a subset of the data. Our approach is novel in that the size of the subset is selected on the fly during exact inference with little computational overhead. From an empirical observation that the log-marginal likelihood often exhibits a linear trend once a sufficient subset of a dataset has been observed, we conclude that many large datasets contain redundant information that only slightly affects the posterior. Based on this, we provide probabilistic bounds on the full model evidence that can identify such subsets. Remarkably, these bounds are largely composed of terms that appear in intermediate steps of the standard Cholesky decomposition, allowing us to modify the algorithm to adaptively stop the decomposition once enough data have been observed. Empirically, we show that our method can be directly plugged into well-known inference schemes to fit exact Gaussian process models to large datasets.},
   archiveprefix = {arXiv},
   keywords = {Computer Science - Machine Learning},
-  file = {/Users/stephenhuan/Zotero/storage/42PD2UV3/Bartels et al. - 2022 - Adaptive Cholesky Gaussian Processes.pdf;/Users/stephenhuan/Zotero/storage/WS2Y7FYF/2202.html}
+  file = {/home/stephenhuan/Zotero/storage/42PD2UV3/Bartels et al. - 2022 - Adaptive Cholesky Gaussian Processes.pdf;/home/stephenhuan/Zotero/storage/WS2Y7FYF/2202.html}
 }
 
 @article{borodin2014weakly,
@@ -26,7 +42,7 @@
   abstract = {Submodular functions are well-studied in combinatorial optimization, game theory and economics. The natural diminishing returns property makes them suitable for many applications. We study an extension of monotone submodular functions, which we call \{\textbackslash em weakly submodular functions\}. Our extension includes some (mildly) supermodular functions. We show that several natural functions belong to this class and relate our class to some other recent submodular function extensions. We consider the optimization problem of maximizing a weakly submodular function subject to uniform and general matroid constraints. For a uniform matroid constraint, the "standard greedy algorithm" achieves a constant approximation ratio where the constant (experimentally) converges to 5.95 as the cardinality constraint increases. For a general matroid constraint, a simple local search algorithm achieves a constant approximation ratio where the constant (analytically) converges to 10.22 as the rank of the matroid increases.},
   archiveprefix = {arXiv},
   keywords = {Computer Science - Data Structures and Algorithms,Computer Science - Discrete Mathematics,Mathematics - Combinatorics},
-  file = {/Users/stephenhuan/Zotero/storage/MWBI8ICD/Borodin et al. - 2014 - Weakly Submodular Functions.pdf;/Users/stephenhuan/Zotero/storage/XP96W9UP/1401.html}
+  file = {/home/stephenhuan/Zotero/storage/MWBI8ICD/Borodin et al. - 2014 - Weakly Submodular Functions.pdf;/home/stephenhuan/Zotero/storage/XP96W9UP/1401.html}
 }
 
 @article{chen2021multiscale,
@@ -42,14 +58,48 @@
   doi = {10.1145/3450626.3459851},
   abstract = {Many computer graphics applications boil down to solving sparse systems of linear equations. While the current arsenal of numerical solvers available in various specialized libraries and for different computer architectures often allow efficient and scalable solutions to image processing, modeling and simulation applications, an increasing number of graphics problems face large-scale and ill-conditioned sparse linear systems --- a numerical challenge which typically chokes both direct factorizations (due to high memory requirements) and iterative solvers (because of slow convergence). We propose a novel approach to the efficient preconditioning of such problems which often emerge from the discretization over unstructured meshes of partial differential equations with heterogeneous and anisotropic coefficients. Our numerical approach consists in simply performing a fine-to-coarse ordering and a multiscale sparsity pattern of the degrees of freedom, using which we apply an incomplete Cholesky factorization. By further leveraging supernodes for cache coherence, graph coloring to improve parallelism and partial diagonal shifting to remedy negative pivots, we obtain a preconditioner which, combined with a conjugate gradient solver, far exceeds the performance of existing carefully-engineered libraries for graphics problems involving bad mesh elements and/or high contrast of coefficients. We also back the core concepts behind our simple solver with theoretical foundations linking the recent method of operator-adapted wavelets used in numerical homogenization to the traditional Cholesky factorization of a matrix, providing us with a clear bridge between incomplete Cholesky factorization and multiscale analysis that we leverage numerically.},
   keywords = {incomplete cholesky decomposition,numerical solvers,preconditioned conjugate gradient,wavelets},
-  file = {/Users/stephenhuan/Zotero/storage/AAGUCTVS/Chen et al. - 2021 - Multiscale cholesky preconditioning for ill-condit.pdf}
+  file = {/home/stephenhuan/Zotero/storage/AAGUCTVS/Chen et al. - 2021 - Multiscale cholesky preconditioning for ill-condit.pdf}
+}
+
+@misc{chen2022kernel,
+  title = {Kernel {{Packet}}: {{An Exact}} and {{Scalable Algorithm}} for {{Gaussian Process Regression}} with {{Mat\'ern Correlations}}},
+  shorttitle = {Kernel {{Packet}}},
+  author = {Chen, Haoyuan and Ding, Liang and Tuo, Rui},
+  year = {2022},
+  month = mar,
+  number = {arXiv:2203.03116},
+  eprint = {2203.03116},
+  eprinttype = {arxiv},
+  primaryclass = {cs, stat},
+  publisher = {{arXiv}},
+  doi = {10.48550/arXiv.2203.03116},
+  abstract = {We develop an exact and scalable algorithm for one-dimensional Gaussian process regression with Mat\textbackslash 'ern correlations whose smoothness parameter \$\textbackslash nu\$ is a half-integer. The proposed algorithm only requires \$\textbackslash mathcal\{O\}(\textbackslash nu\^3 n)\$ operations and \$\textbackslash mathcal\{O\}(\textbackslash nu n)\$ storage. This leads to a linear-cost solver since \$\textbackslash nu\$ is chosen to be fixed and usually very small in most applications. The proposed method can be applied to multi-dimensional problems if a full grid or a sparse grid design is used. The proposed method is based on a novel theory for Mat\textbackslash 'ern correlation functions. We find that a suitable rearrangement of these correlation functions can produce a compactly supported function, called a "kernel packet". Using a set of kernel packets as basis functions leads to a sparse representation of the covariance matrix that results in the proposed algorithm. Simulation studies show that the proposed algorithm, when applicable, is significantly superior to the existing alternatives in both the computational time and predictive accuracy.},
+  archiveprefix = {arXiv},
+  keywords = {Computer Science - Machine Learning,Statistics - Machine Learning,Statistics - Methodology},
+  file = {/home/stephenhuan/Zotero/storage/6235J9ZW/Chen et al. - 2022 - Kernel Packet An Exact and Scalable Algorithm for.pdf;/home/stephenhuan/Zotero/storage/GF347VV6/2203.html}
 }
 
 @misc{chenparallel,
   title = {Parallel {{Gaussian Process Regression}} with {{Low-Rank Covariance Matrix Approximations}}},
   author = {Chen, Jie and Cao, Nannan and Low, Kian Hsiang and Ouyang, Ruofei and Tan, Colin Keng-yan and Jaillet, Patrick},
   abstract = {Gaussian processes (GP) are Bayesian nonparametric models that are widely used for probabilistic regression. Unfortunately, it cannot scale well with large data nor perform real-time predictions due to its cubic time cost in the data size. This paper presents two parallel GP regression methods that exploit low-rank covariance matrix approximations for distributing the computational load among parallel machines to achieve time efficiency and scalability. We theoretically guarantee the predictive performances of our proposed parallel GPs to be equivalent to that of some centralized approximate GP regression methods: The computation of their centralized counterparts can be distributed among parallel machines, hence achieving greater time efficiency and scalability. We analytically compare the properties of our parallel GPs such as time, space, and communication complexity. Empirical evaluation on two real-world datasets in a cluster of 20 computing nodes shows that our parallel GPs are significantly more time-efficient and scalable than their centralized counterparts and exact/full GP while achieving predictive performances comparable to full GP. 1},
-  file = {/Users/stephenhuan/Zotero/storage/C5FPUFZW/Chen et al. - Parallel Gaussian Process Regression with Low-Rank.pdf;/Users/stephenhuan/Zotero/storage/HV2EG8ZB/summary.html}
+  file = {/home/stephenhuan/Zotero/storage/C5FPUFZW/Chen et al. - Parallel Gaussian Process Regression with Low-Rank.pdf;/home/stephenhuan/Zotero/storage/HV2EG8ZB/summary.html}
+}
+
+@article{chow2015finegrained,
+  title = {Fine-{{Grained Parallel Incomplete LU Factorization}}},
+  author = {Chow, Edmond and Patel, Aftab},
+  year = {2015},
+  month = jan,
+  journal = {SIAM Journal on Scientific Computing},
+  volume = {37},
+  number = {2},
+  pages = {C169-C193},
+  issn = {1064-8275, 1095-7197},
+  doi = {10.1137/140968896},
+  abstract = {This paper presents a new fine-grained parallel algorithm for computing an incomplete LU factorization. All nonzeros in the incomplete factors can be computed in parallel and asynchronously, using one or more sweeps that iteratively improve the accuracy of the factorization. Unlike existing parallel algorithms, the amount of parallelism is large irrespective of the ordering of the matrix, and matrix ordering can be used to enhance the accuracy of the factorization rather than to increase parallelism. Numerical tests show that very few sweeps are needed to construct a factorization that is an effective preconditioner.},
+  langid = {english},
+  file = {/home/stephenhuan/Zotero/storage/YE9RC2A7/Chow and Patel - 2015 - Fine-Grained Parallel Incomplete LU Factorization.pdf}
 }
 
 @article{clark2018greedy,
@@ -64,7 +114,7 @@
   abstract = {The problem of optimally placing sensors under a cost constraint arises naturally in the design of industrial and commercial products, as well as in scientific experiments. We consider a relaxation of the full optimization formulation of this problem and then extend a well-established QR-based greedy algorithm for the optimal sensor placement problem without cost constraints. We demonstrate the effectiveness of this algorithm on data sets related to facial recognition, climate science, and fluid mechanics. This algorithm is scalable and often identifies sparse sensors with near optimal reconstruction performance, while dramatically reducing the overall cost of the sensors. We find that the cost-error landscape varies by application, with intuitive connections to the underlying physics. Additionally, we include experiments for various pre-processing techniques and find that a popular technique based on the singular value decomposition is often sub-optimal.},
   archiveprefix = {arXiv},
   keywords = {Mathematics - Optimization and Control},
-  file = {/Users/stephenhuan/Zotero/storage/RERP7Q62/Clark et al. - 2018 - Greedy Sensor Placement with Cost Constraints.pdf;/Users/stephenhuan/Zotero/storage/J62LJAED/1805.html}
+  file = {/home/stephenhuan/Zotero/storage/RERP7Q62/Clark et al. - 2018 - Greedy Sensor Placement with Cost Constraints.pdf;/home/stephenhuan/Zotero/storage/J62LJAED/1805.html}
 }
 
 @article{das2011submodular,
@@ -80,7 +130,7 @@
   abstract = {We study the problem of selecting a subset of k random variables from a large set, in order to obtain the best linear prediction of another variable of interest. This problem can be viewed in the context of both feature selection and sparse approximation. We analyze the performance of widely used greedy heuristics, using insights from the maximization of submodular functions and spectral analysis. We introduce the submodularity ratio as a key quantity to help understand why greedy algorithms perform well even when the variables are highly correlated. Using our techniques, we obtain the strongest known approximation guarantees for this problem, both in terms of the submodularity ratio and the smallest k-sparse eigenvalue of the covariance matrix. We further demonstrate the wide applicability of our techniques by analyzing greedy algorithms for the dictionary selection problem, and significantly improve the previously known guarantees. Our theoretical analysis is complemented by experiments on real-world and synthetic data sets; the experiments show that the submodularity ratio is a stronger predictor of the performance of greedy algorithms than other spectral parameters.},
   archiveprefix = {arXiv},
   keywords = {Computer Science - Data Structures and Algorithms,Statistics - Machine Learning},
-  file = {/Users/stephenhuan/Zotero/storage/JIW3JBQ3/Das and Kempe - 2011 - Submodular meets Spectral Greedy Algorithms for S.pdf;/Users/stephenhuan/Zotero/storage/SNYPRETM/1102.html}
+  file = {/home/stephenhuan/Zotero/storage/JIW3JBQ3/Das and Kempe - 2011 - Submodular meets Spectral Greedy Algorithms for S.pdf;/home/stephenhuan/Zotero/storage/SNYPRETM/1102.html}
 }
 
 @article{gill1974methods,
@@ -95,7 +145,42 @@
   issn = {0025-5718},
   doi = {10.2307/2005923},
   abstract = {In recent years, several algorithms have appeared for modifying the factors of a matrix following a rank-one change. These methods have always been given in the context of specific applications and this has probably inhibited their use over a wider field. In this report, several methods are described for modifying Cholesky factors. Some of these have been published previously while others appear for the first time. In addition, a new algorithm is presented for modifying the complete orthogonal factorization of a general matrix, from which the conventional \$QR\$ factors are obtained as a special case. A uniform notation has been used and emphasis has been placed on illustrating the similarity between different methods.},
-  file = {/Users/stephenhuan/Zotero/storage/E3UBS3L8/Gill et al. - 1974 - Methods for Modifying Matrix Factorizations.pdf}
+  file = {/home/stephenhuan/Zotero/storage/E3UBS3L8/Gill et al. - 1974 - Methods for Modifying Matrix Factorizations.pdf}
+}
+
+@article{guinness2018permutation,
+  title = {Permutation and {{Grouping Methods}} for {{Sharpening Gaussian Process Approximations}}},
+  author = {Guinness, Joseph},
+  year = {2018},
+  month = oct,
+  journal = {Technometrics},
+  volume = {60},
+  number = {4},
+  eprint = {1609.05372},
+  eprinttype = {arxiv},
+  primaryclass = {stat},
+  pages = {415--429},
+  issn = {0040-1706, 1537-2723},
+  doi = {10.1080/00401706.2018.1437476},
+  abstract = {Vecchia's approximate likelihood for Gaussian process parameters depends on how the observations are ordered, which can be viewed as a deficiency because the exact likelihood is permutation-invariant. This article takes the alternative standpoint that the ordering of the observations can be tuned to sharpen the approximations. Advantageously chosen orderings can drastically improve the approximations, and in fact, completely random orderings often produce far more accurate approximations than default coordinate-based orderings do. In addition to the permutation results, automatic methods for grouping calculations of components of the approximation are introduced, having the result of simultaneously improving the quality of the approximation and reducing its computational burden. In common settings, reordering combined with grouping reduces Kullback-Leibler divergence from the target model by a factor of 80 and computation time by a factor of 2 compared to ungrouped approximations with default ordering. The claims are supported by theory and numerical results with comparisons to other approximations, including tapered covariances and stochastic partial differential equation approximations. Computational details are provided, including efficiently finding the orderings and ordered nearest neighbors, and profiling out linear mean parameters and using the approximations for prediction and conditional simulation. An application to space-time satellite data is presented.},
+  archiveprefix = {arXiv},
+  keywords = {Statistics - Computation,Statistics - Methodology},
+  file = {/home/stephenhuan/Zotero/storage/TCT93VG4/Guinness - 2018 - Permutation and Grouping Methods for Sharpening Ga.pdf;/home/stephenhuan/Zotero/storage/U94S5XUJ/1609.html}
+}
+
+@article{hao2021efficient,
+  title = {An Efficient Greedy Training Algorithm for Neural Networks and Applications in {{PDEs}}},
+  author = {Hao, Wenrui and Jin, Xianlin and Siegel, Jonathan W. and Xu, Jinchao},
+  year = {2021},
+  month = jul,
+  journal = {arXiv:2107.04466 [cs, math]},
+  eprint = {2107.04466},
+  eprinttype = {arxiv},
+  primaryclass = {cs, math},
+  abstract = {Recently, neural networks have been widely applied for solving partial differential equations. However, the resulting optimization problem brings many challenges for current training algorithms. This manifests itself in the fact that the convergence order that has been proven theoretically cannot be obtained numerically. In this paper, we develop a novel greedy training algorithm for solving PDEs which builds the neural network architecture adaptively. It is the first training algorithm that observes the convergence order of neural networks numerically. This innovative algorithm is tested on several benchmark examples in both 1D and 2D to confirm its efficiency and robustness.},
+  archiveprefix = {arXiv},
+  keywords = {65N30; 65N22; 65H20,Mathematics - Numerical Analysis},
+  file = {/home/stephenhuan/Zotero/storage/H5URQJDI/Hao et al. - 2021 - An efficient greedy training algorithm for neural .pdf;/home/stephenhuan/Zotero/storage/NAHXIYXX/2107.html}
 }
 
 @inproceedings{herbrich2002fast,
@@ -106,7 +191,7 @@
   year = {2002},
   volume = {15},
   publisher = {{MIT Press}},
-  file = {/Users/stephenhuan/Zotero/storage/BMFNUXUY/Herbrich et al. - 2002 - Fast Sparse Gaussian Process Methods The Informat.pdf}
+  file = {/home/stephenhuan/Zotero/storage/BMFNUXUY/Herbrich et al. - 2002 - Fast Sparse Gaussian Process Methods The Informat.pdf}
 }
 
 @article{jagalur-mohan2021batch,
@@ -122,7 +207,40 @@
   abstract = {We propose and analyze batch greedy heuristics for cardinality constrained maximization of non-submodular non-decreasing set functions. We consider the standard greedy paradigm, along with its distributed greedy and stochastic greedy variants. Our theoretical guarantees are characterized by the combination of submodularity and supermodularity ratios. We argue how these parameters define tight modular bounds based on incremental gains, and provide a novel reinterpretation of the classical greedy algorithm using the minorize-maximize (MM) principle. Based on that analogy, we propose a new class of methods exploiting any plausible modular bound. In the context of optimal experimental design for linear Bayesian inverse problems, we bound the submodularity and supermodularity ratios when the underlying objective is based on mutual information. We also develop novel modular bounds for the mutual information in this setting, and describe certain connections to polyhedral combinatorics. We discuss how algorithms using these modular bounds relate to established statistical notions such as leverage scores and to more recent efforts such as volume sampling. We demonstrate our theoretical findings on synthetic problems and on a real-world climate monitoring example.},
   archiveprefix = {arXiv},
   keywords = {Computer Science - Data Structures and Algorithms,Computer Science - Discrete Mathematics,Computer Science - Machine Learning,Mathematics - Optimization and Control},
-  file = {/Users/stephenhuan/Zotero/storage/7M2IDN9K/Jagalur-Mohan and Marzouk - 2021 - Batch greedy maximization of non-submodular functi.pdf;/Users/stephenhuan/Zotero/storage/IGLFEWWA/2006.html}
+  file = {/home/stephenhuan/Zotero/storage/7M2IDN9K/Jagalur-Mohan and Marzouk - 2021 - Batch greedy maximization of non-submodular functi.pdf;/home/stephenhuan/Zotero/storage/IGLFEWWA/2006.html}
+}
+
+@article{katzfuss2021general,
+  title = {A {{General Framework}} for {{Vecchia Approximations}} of {{Gaussian Processes}}},
+  author = {Katzfuss, Matthias and Guinness, Joseph},
+  year = {2021},
+  month = feb,
+  journal = {Statistical Science},
+  volume = {36},
+  number = {1},
+  pages = {124--141},
+  publisher = {{Institute of Mathematical Statistics}},
+  issn = {0883-4237, 2168-8745},
+  doi = {10.1214/19-STS755},
+  abstract = {Gaussian processes (GPs) are commonly used as models for functions, time series, and spatial fields, but they are computationally infeasible for large datasets. Focusing on the typical setting of modeling data as a GP plus an additive noise term, we propose a generalization of the Vecchia (J. Roy. Statist. Soc. Ser. B 50 (1988) 297\textendash 312) approach as a framework for GP approximations. We show that our general Vecchia approach contains many popular existing GP approximations as special cases, allowing for comparisons among the different methods within a unified framework. Representing the models by directed acyclic graphs, we determine the sparsity of the matrices necessary for inference, which leads to new insights regarding the computational properties. Based on these results, we propose a novel sparse general Vecchia approximation, which ensures computational feasibility for large spatial datasets but can lead to considerable improvements in approximation accuracy over Vecchia's original approach. We provide several theoretical results and conduct numerical comparisons. We conclude with guidelines for the use of Vecchia approximations in spatial statistics.},
+  keywords = {computational complexity,covariance approximation,directed acyclic graphs,large datasets,Sparsity,spatial statistics},
+  file = {/home/stephenhuan/Zotero/storage/GF9ZFIUE/Katzfuss and Guinness - 2021 - A General Framework for Vecchia Approximations of .pdf;/home/stephenhuan/Zotero/storage/2GDUMKXU/19-STS755.html}
+}
+
+@misc{katzfuss2022scalable,
+  title = {Scalable {{Bayesian}} Transport Maps for High-Dimensional Non-{{Gaussian}} Spatial Fields},
+  author = {Katzfuss, Matthias and Sch{\"a}fer, Florian},
+  year = {2022},
+  month = feb,
+  number = {arXiv:2108.04211},
+  eprint = {2108.04211},
+  eprinttype = {arxiv},
+  primaryclass = {stat},
+  institution = {{arXiv}},
+  abstract = {A multivariate distribution can be described by a triangular transport map from the target distribution to a simple reference distribution. We propose Bayesian nonparametric inference on the transport map by modeling its components using Gaussian processes. This enables regularization and and uncertainty quantification of the map estimation, while still resulting in a closed-form and invertible posterior map. We then focus on inferring the distribution of a nonstationary spatial field from a small number of replicates. We develop specific transport-map priors that are highly flexible and are motivated by the behavior of a large class of stochastic processes. Our approach is scalable to high-dimensional fields due to data-dependent sparsity and parallel computations. We also discuss extensions, including Dirichlet process mixtures for flexible marginals. We present numerical results to demonstrate the accuracy, scalability, and usefulness of our methods, including an analysis of non-Gaussian climate-model output.},
+  archiveprefix = {arXiv},
+  keywords = {Statistics - Applications,Statistics - Computation,Statistics - Methodology},
+  file = {/home/stephenhuan/Zotero/storage/8NHVURKB/Katzfuss and Schäfer - 2022 - Scalable Bayesian transport maps for high-dimensio.pdf;/home/stephenhuan/Zotero/storage/ITSD2DJJ/2108.html}
 }
 
 @article{krause2008nearoptimal,
@@ -136,7 +254,7 @@
   pages = {235--284},
   issn = {1532-4435},
   abstract = {When monitoring spatial phenomena, which can often be modeled as Gaussian processes (GPs), choosing sensor locations is a fundamental task. There are several common strategies to address this task, for example, geometry or disk models, placing sensors at the points of highest entropy (variance) in the GP model, and A-, D-, or E-optimal design. In this paper, we tackle the combinatorial optimization problem of maximizing the mutual information between the chosen locations and the locations which are not selected. We prove that the problem of finding the configuration that maximizes mutual information is NP-complete. To address this issue, we describe a polynomial-time approximation that is within (1-1/e) of the optimum by exploiting the submodularity of mutual information. We also show how submodularity can be used to obtain online bounds, and design branch and bound search procedures. We then extend our algorithm to exploit lazy evaluations and local structure in the GP, yielding significant speedups. We also extend our approach to find placements which are robust against node failures and uncertainties in the model. These extensions are again associated with rigorous theoretical approximation guarantees, exploiting the submodularity of the objective function. We demonstrate the advantages of our approach towards optimizing mutual information in a very extensive empirical study on two real-world data sets.},
-  file = {/Users/stephenhuan/Zotero/storage/V2QNNH9L/Krause et al. - 2008 - Near-Optimal Sensor Placements in Gaussian Process.pdf}
+  file = {/home/stephenhuan/Zotero/storage/V2QNNH9L/Krause et al. - 2008 - Near-Optimal Sensor Placements in Gaussian Process.pdf}
 }
 
 @incollection{krause2013submodular,
@@ -151,7 +269,7 @@
   doi = {10.1017/CBO9781139177801.004},
   isbn = {978-1-139-17780-1},
   langid = {english},
-  file = {/Users/stephenhuan/Zotero/storage/8UL9IH6B/Krause and Golovin - 2013 - Submodular Function Maximization.pdf}
+  file = {/home/stephenhuan/Zotero/storage/8UL9IH6B/Krause and Golovin - 2013 - Submodular Function Maximization.pdf}
 }
 
 @inproceedings{krause2015more,
@@ -168,7 +286,55 @@
   abstract = {Learning covariance matrices of Gaussian distributions is at the heart of most variable-metric randomized algorithms for continuous optimization. If the search space dimensionality is high, updating the covariance or its factorization is computationally expensive. Therefore, we adopt an algorithm from numerical mathematics for rank-one updates of Cholesky factors. Our methods results in a quadratic time covariance matrix update scheme with minimal memory requirements. The numerically stable algorithm leads to triangular Cholesky factors. Systems of linear equations where the linear transformation is defined by a triangular matrix can be solved in quadratic time. This can be exploited to avoid the additional iterative update of the inverse Cholesky factor required in some covariance matrix adaptation algorithms proposed in the literature. When used together with the (1+1)-CMA-ES and the multi-objective CMA-ES, the new method leads to a memory reduction by a factor of almost four and a faster covariance matrix update. The numerical stability and runtime improvements are demonstrated on a set of benchmark functions.},
   isbn = {978-1-4503-3434-1},
   keywords = {cholesky factorization,cma-es,covariance matrix adaptation,rank-one update},
-  file = {/Users/stephenhuan/Zotero/storage/XAC3J7RD/Krause and Igel - 2015 - A More Efficient Rank-one Covariance Matrix Update.pdf}
+  file = {/home/stephenhuan/Zotero/storage/XAC3J7RD/Krause and Igel - 2015 - A More Efficient Rank-one Covariance Matrix Update.pdf}
+}
+
+@article{kyng2016approximate,
+  title = {Approximate {{Gaussian Elimination}} for {{Laplacians}}: {{Fast}}, {{Sparse}}, and {{Simple}}},
+  shorttitle = {Approximate {{Gaussian Elimination}} for {{Laplacians}}},
+  author = {Kyng, Rasmus and Sachdeva, Sushant},
+  year = {2016},
+  month = may,
+  journal = {arXiv:1605.02353 [cs]},
+  eprint = {1605.02353},
+  eprinttype = {arxiv},
+  primaryclass = {cs},
+  abstract = {We show how to perform sparse approximate Gaussian elimination for Laplacian matrices. We present a simple, nearly linear time algorithm that approximates a Laplacian by a matrix with a sparse Cholesky factorization, the version of Gaussian elimination for symmetric matrices. This is the first nearly linear time solver for Laplacian systems that is based purely on random sampling, and does not use any graph theoretic constructions such as low-stretch trees, sparsifiers, or expanders. The crux of our analysis is a novel concentration bound for matrix martingales where the differences are sums of conditionally independent variables.},
+  archiveprefix = {arXiv},
+  keywords = {Computer Science - Data Structures and Algorithms},
+  file = {/home/stephenhuan/Zotero/storage/Z4NRXCLK/Kyng and Sachdeva - 2016 - Approximate Gaussian Elimination for Laplacians F.pdf;/home/stephenhuan/Zotero/storage/2NG6PYBS/1605.html}
+}
+
+@article{marzouk2016introduction,
+  title = {An Introduction to Sampling via Measure Transport},
+  author = {Marzouk, Youssef and Moselhy, Tarek and Parno, Matthew and Spantini, Alessio},
+  year = {2016},
+  journal = {arXiv:1602.05023 [math, stat]},
+  eprint = {1602.05023},
+  eprinttype = {arxiv},
+  primaryclass = {math, stat},
+  pages = {1--41},
+  doi = {10.1007/978-3-319-11259-6_23-1},
+  abstract = {We present the fundamentals of a measure transport approach to sampling. The idea is to construct a deterministic coupling---i.e., a transport map---between a complex "target" probability measure of interest and a simpler reference measure. Given a transport map, one can generate arbitrarily many independent and unweighted samples from the target simply by pushing forward reference samples through the map. We consider two different and complementary scenarios: first, when only evaluations of the unnormalized target density are available, and second, when the target distribution is known only through a finite collection of samples. We show that in both settings the desired transports can be characterized as the solutions of variational problems. We then address practical issues associated with the optimization--based construction of transports: choosing finite-dimensional parameterizations of the map, enforcing monotonicity, quantifying the error of approximate transports, and refining approximate transports by enriching the corresponding approximation spaces. Approximate transports can also be used to "Gaussianize" complex distributions and thus precondition conventional asymptotically exact sampling schemes. We place the measure transport approach in broader context, describing connections with other optimization--based samplers, with inference and density estimation schemes using optimal transport, and with alternative transformation--based approaches to simulation. We also sketch current work aimed at the construction of transport maps in high dimensions, exploiting essential features of the target distribution (e.g., conditional independence, low-rank structure). The approaches and algorithms presented here have direct applications to Bayesian computation and to broader problems of stochastic simulation.},
+  archiveprefix = {arXiv},
+  keywords = {Mathematics - Probability,Statistics - Computation,Statistics - Methodology},
+  file = {/home/stephenhuan/Zotero/storage/CD4D23JI/Marzouk et al. - 2016 - An introduction to sampling via measure transport.pdf;/home/stephenhuan/Zotero/storage/9B67627H/1602.html}
+}
+
+@article{pasadakis2021multiway,
+  title = {Multiway \$p\$-Spectral Graph Cuts on {{Grassmann}} Manifolds},
+  author = {Pasadakis, Dimosthenis and Alappat, Christie Louis and Schenk, Olaf and Wellein, Gerhard},
+  year = {2021},
+  month = nov,
+  journal = {Machine Learning},
+  eprint = {2008.13210},
+  eprinttype = {arxiv},
+  issn = {0885-6125, 1573-0565},
+  doi = {10.1007/s10994-021-06108-1},
+  abstract = {Nonlinear reformulations of the spectral clustering method have gained a lot of recent attention due to their increased numerical benefits and their solid mathematical background. We present a novel direct multiway spectral clustering algorithm in the \$p\$-norm, for \$p \textbackslash in (1, 2]\$. The problem of computing multiple eigenvectors of the graph \$p\$-Laplacian, a nonlinear generalization of the standard graph Laplacian, is recasted as an unconstrained minimization problem on a Grassmann manifold. The value of \$p\$ is reduced in a pseudocontinuous manner, promoting sparser solution vectors that correspond to optimal graph cuts as \$p\$ approaches one. Monitoring the monotonic decrease of the balanced graph cuts guarantees that we obtain the best available solution from the \$p\$-levels considered. We demonstrate the effectiveness and accuracy of our algorithm in various artificial test-cases. Our numerical examples and comparative results with various state-of-the-art clustering methods indicate that the proposed method obtains high quality clusters both in terms of balanced graph cut metrics and in terms of the accuracy of the labelling assignment. Furthermore, we conduct studies for the classification of facial images and handwritten characters to demonstrate the applicability in real-world datasets.},
+  archiveprefix = {arXiv},
+  keywords = {68R10 (Primary); 90C27 (Secondary),Computer Science - Machine Learning,G.2.1,G.2.2,Statistics - Machine Learning},
+  file = {/home/stephenhuan/Zotero/storage/FRSR38QR/Pasadakis et al. - 2021 - Multiway $p$-spectral graph cuts on Grassmann mani.pdf;/home/stephenhuan/Zotero/storage/7KXEUST7/2008.html}
 }
 
 @book{rasmussen2006gaussian,
@@ -183,7 +349,20 @@
   lccn = {QA274.4 .R37 2006},
   keywords = {Data processing,Gaussian processes,Machine learning,Mathematical models},
   annotation = {OCLC: ocm61285753},
-  file = {/Users/stephenhuan/Zotero/storage/JFJMRP5T/Rasmussen and Williams - 2006 - Gaussian processes for machine learning.pdf}
+  file = {/home/stephenhuan/Zotero/storage/JFJMRP5T/Rasmussen and Williams - 2006 - Gaussian processes for machine learning.pdf}
+}
+
+@book{rue2005gaussian,
+  title = {Gaussian {{Markov Random Fields}}: {{Theory}} and {{Applications}}},
+  shorttitle = {Gaussian {{Markov Random Fields}}},
+  author = {Rue, Havard and Held, Leonhard},
+  year = {2005},
+  month = feb,
+  publisher = {{Chapman and Hall/CRC}},
+  address = {{New York}},
+  doi = {10.1201/9780203492024},
+  abstract = {Gaussian Markov Random Field (GMRF) models are most widely used in spatial statistics - a very active area of research in which few up-to-date reference works are available. This is the first book on the subject that provides a unified framework of GMRFs with particular emphasis on the computational aspects. This book includes extensive case-studie},
+  isbn = {978-0-429-20882-9}
 }
 
 @article{schafer2020compression,
@@ -198,7 +377,7 @@
   abstract = {Dense kernel matrices \$\textbackslash Theta \textbackslash in \textbackslash mathbb\{R\}\^\{N \textbackslash times N\}\$ obtained from point evaluations of a covariance function \$G\$ at locations \$\textbackslash\{ x\_\{i\} \textbackslash\}\_\{1 \textbackslash leq i \textbackslash leq N\} \textbackslash subset \textbackslash mathbb\{R\}\^\{d\}\$ arise in statistics, machine learning, and numerical analysis. For covariance functions that are Green's functions of elliptic boundary value problems and homogeneously-distributed sampling points, we show how to identify a subset \$S \textbackslash subset \textbackslash\{ 1 , \textbackslash dots , N \textbackslash\}\^2\$, with \$\textbackslash\# S = O ( N \textbackslash log (N) \textbackslash log\^\{d\} ( N /\textbackslash epsilon ) )\$, such that the zero fill-in incomplete Cholesky factorisation of the sparse matrix \$\textbackslash Theta\_\{ij\} 1\_\{( i, j ) \textbackslash in S\}\$ is an \$\textbackslash epsilon\$-approximation of \$\textbackslash Theta\$. This factorisation can provably be obtained in complexity \$O ( N \textbackslash log( N ) \textbackslash log\^\{d\}( N /\textbackslash epsilon) )\$ in space and \$O ( N \textbackslash log\^\{2\}( N ) \textbackslash log\^\{2d\}( N /\textbackslash epsilon) )\$ in time, improving upon the state of the art for general elliptic operators; we further present numerical evidence that \$d\$ can be taken to be the intrinsic dimension of the data set rather than that of the ambient space. The algorithm only needs to know the spatial configuration of the \$x\_\{i\}\$ and does not require an analytic representation of \$G\$. Furthermore, this factorization straightforwardly provides an approximate sparse PCA with optimal rate of convergence in the operator norm. Hence, by using only subsampling and the incomplete Cholesky factorization, we obtain, at nearly linear complexity, the compression, inversion and approximate PCA of a large class of covariance matrices. By inverting the order of the Cholesky factorization we also obtain a solver for elliptic PDE with complexity \$O ( N \textbackslash log\^\{d\}( N /\textbackslash epsilon) )\$ in space and \$O ( N \textbackslash log\^\{2d\}( N /\textbackslash epsilon) )\$ in time, improving upon the state of the art for general elliptic operators.},
   archiveprefix = {arXiv},
   keywords = {65F30; 42C40; 65F50; 65N55; 65N75; 60G42; 68Q25; 68W40,Computer Science - Computational Complexity,Computer Science - Data Structures and Algorithms,Mathematics - Numerical Analysis,Mathematics - Probability},
-  file = {/Users/stephenhuan/Zotero/storage/5INEG2VG/Schäfer et al. - 2020 - Compression, inversion, and approximate PCA of den.pdf;/Users/stephenhuan/Zotero/storage/KVKESGZB/1706.html}
+  file = {/home/stephenhuan/Zotero/storage/5INEG2VG/Schäfer et al. - 2020 - Compression, inversion, and approximate PCA of den.pdf;/home/stephenhuan/Zotero/storage/KVKESGZB/1706.html}
 }
 
 @article{schafer2021sparse,
@@ -213,7 +392,7 @@
   abstract = {We propose to compute a sparse approximate inverse Cholesky factor \$L\$ of a dense covariance matrix \$\textbackslash Theta\$ by minimizing the Kullback-Leibler divergence between the Gaussian distributions \$\textbackslash mathcal\{N\}(0, \textbackslash Theta)\$ and \$\textbackslash mathcal\{N\}(0, L\^\{-\textbackslash top\} L\^\{-1\})\$, subject to a sparsity constraint. Surprisingly, this problem has a closed-form solution that can be computed efficiently, recovering the popular Vecchia approximation in spatial statistics. Based on recent results on the approximate sparsity of inverse Cholesky factors of \$\textbackslash Theta\$ obtained from pairwise evaluation of Green's functions of elliptic boundary-value problems at points \$\textbackslash\{x\_\{i\}\textbackslash\}\_\{1 \textbackslash leq i \textbackslash leq N\} \textbackslash subset \textbackslash mathbb\{R\}\^\{d\}\$, we propose an elimination ordering and sparsity pattern that allows us to compute \$\textbackslash epsilon\$-approximate inverse Cholesky factors of such \$\textbackslash Theta\$ in computational complexity \$\textbackslash mathcal\{O\}(N \textbackslash log(N/\textbackslash epsilon)\^d)\$ in space and \$\textbackslash mathcal\{O\}(N \textbackslash log(N/\textbackslash epsilon)\^\{2d\})\$ in time. To the best of our knowledge, this is the best asymptotic complexity for this class of problems. Furthermore, our method is embarrassingly parallel, automatically exploits low-dimensional structure in the data, and can perform Gaussian-process regression in linear (in \$N\$) space complexity. Motivated by the optimality properties of our methods, we propose methods for applying it to the joint covariance of training and prediction points in Gaussian-process regression, greatly improving stability and computational cost. Finally, we show how to apply our method to the important setting of Gaussian processes with additive noise, sacrificing neither accuracy nor computational complexity.},
   archiveprefix = {arXiv},
   keywords = {Mathematics - Numerical Analysis,Mathematics - Optimization and Control,Mathematics - Statistics Theory,Statistics - Computation},
-  file = {/Users/stephenhuan/Zotero/storage/CRD5BVVU/Schäfer et al. - 2021 - Sparse Cholesky factorization by Kullback-Leibler .pdf;/Users/stephenhuan/Zotero/storage/IWBR5KXD/2004.html}
+  file = {/home/stephenhuan/Zotero/storage/CRD5BVVU/Schäfer et al. - 2021 - Sparse Cholesky factorization by Kullback-Leibler .pdf;/home/stephenhuan/Zotero/storage/IWBR5KXD/2004.html}
 }
 
 @article{schafer2021sparsea,
@@ -228,7 +407,7 @@
   abstract = {In this work, we show that solvers of elliptic boundary value problems in \$d\$ dimensions can be approximated to accuracy \$\textbackslash epsilon\$ from only \$\textbackslash mathcal\{O\}\textbackslash left(\textbackslash log(N)\textbackslash log\^\{d\}(N / \textbackslash epsilon)\textbackslash right)\$ matrix-vector products with carefully chosen vectors (right-hand sides). The solver is only accessed as a black box, and the underlying operator may be unknown and of an arbitrarily high order. Our algorithm (1) has complexity \$\textbackslash mathcal\{O\}\textbackslash left(N\textbackslash log\^2(N)\textbackslash log\^\{2d\}(N / \textbackslash epsilon)\textbackslash right)\$ and represents the solution operator as a sparse Cholesky factorization with \$\textbackslash mathcal\{O\}\textbackslash left(N\textbackslash log(N)\textbackslash log\^\{d\}(N / \textbackslash epsilon)\textbackslash right)\$ nonzero entries, (2) allows for embarrassingly parallel evaluation of the solution operator and the computation of its log-determinant, (3) allows for \$\textbackslash mathcal\{O\}\textbackslash left(\textbackslash log(N)\textbackslash log\^\{d\}(N / \textbackslash epsilon)\textbackslash right)\$ complexity computation of individual entries of the matrix representation of the solver that in turn enables its recompression to an \$\textbackslash mathcal\{O\}\textbackslash left(N\textbackslash log\^\{d\}(N / \textbackslash epsilon)\textbackslash right)\$ complexity representation. As a byproduct, our compression scheme produces a homogenized solution operator with near-optimal approximation accuracy. We include rigorous proofs of these results, and to the best of our knowledge, the proposed algorithm achieves the best trade-off between accuracy \$\textbackslash epsilon\$ and the number of required matrix-vector products of the original solver.},
   archiveprefix = {arXiv},
   keywords = {65N55; 65N22; 65N15,Mathematics - Numerical Analysis},
-  file = {/Users/stephenhuan/Zotero/storage/PYWHFH9I/Schäfer and Owhadi - 2021 - Sparse recovery of elliptic solvers from matrix-ve.pdf;/Users/stephenhuan/Zotero/storage/5H88B7EV/2110.html}
+  file = {/home/stephenhuan/Zotero/storage/PYWHFH9I/Schäfer and Owhadi - 2021 - Sparse recovery of elliptic solvers from matrix-ve.pdf;/home/stephenhuan/Zotero/storage/5H88B7EV/2110.html}
 }
 
 @inproceedings{seeger2003fast,
@@ -237,7 +416,22 @@
   author = {Seeger, Matthias and Williams, Christopher K. I.},
   year = {2003},
   abstract = {We present a method for the sparse greedy approximation of Bayesian Gaussian process regression, featuring a novel heuristic for very fast forward selection motivated by active learning. We show how a large number of hyperparameters can be adjusted automatically by maximizing the marginal likelihood of the training data. Our method is essentially as fast as an equivalent one which selects the "support" patterns at random, yet has the potential to outperform random selection on hard curve fitting tasks and at the very least leads to a more stable behaviour of first-level inference which makes the subsequent gradient-based optimization of hyperparameters much easier. In line with the development of our method, we present a simple view on sparse approximations for GP models and their underlying assumptions and show relations to other methods.},
-  file = {/Users/stephenhuan/Zotero/storage/MUVJGZ6P/Seeger and Williams - 2003 - Fast Forward Selection to Speed Up Sparse Gaussian.pdf;/Users/stephenhuan/Zotero/storage/VJALLGBH/summary.html}
+  file = {/home/stephenhuan/Zotero/storage/MUVJGZ6P/Seeger and Williams - 2003 - Fast Forward Selection to Speed Up Sparse Gaussian.pdf;/home/stephenhuan/Zotero/storage/VJALLGBH/summary.html}
+}
+
+@article{siegel2022optimal,
+  title = {Optimal {{Convergence Rates}} for the {{Orthogonal Greedy Algorithm}}},
+  author = {Siegel, Jonathan W. and Xu, Jinchao},
+  year = {2022},
+  month = jan,
+  journal = {arXiv:2106.15000 [cs, math, stat]},
+  eprint = {2106.15000},
+  eprinttype = {arxiv},
+  primaryclass = {cs, math, stat},
+  abstract = {We analyze the orthogonal greedy algorithm when applied to dictionaries \$\textbackslash mathbb\{D\}\$ whose convex hull has small entropy. We show that if the metric entropy of the convex hull of \$\textbackslash mathbb\{D\}\$ decays at a rate of \$O(n\^\{-\textbackslash frac\{1\}\{2\}-\textbackslash alpha\})\$ for \$\textbackslash alpha {$>$} 0\$, then the orthogonal greedy algorithm converges at the same rate on the variation space of \$\textbackslash mathbb\{D\}\$. This improves upon the well-known \$O(n\^\{-\textbackslash frac\{1\}\{2\}\})\$ convergence rate of the orthogonal greedy algorithm in many cases, most notably for dictionaries corresponding to shallow neural networks. These results hold under no additional assumptions on the dictionary beyond the decay rate of the entropy of its convex hull. In addition, they are robust to noise in the target function and can be extended to convergence rates on the interpolation spaces of the variation norm. We show empirically that the predicted rates are obtained for the dictionary corresponding to shallow neural networks with Heaviside activation function in two dimensions. Finally, we show that these improved rates are sharp and prove a negative result showing that the iterates generated by the orthogonal greedy algorithm cannot in general be bounded in the variation norm of \$\textbackslash mathbb\{D\}\$.},
+  archiveprefix = {arXiv},
+  keywords = {41A46; 41A25; 46N30,Computer Science - Information Theory,Mathematics - Statistics Theory},
+  file = {/home/stephenhuan/Zotero/storage/XQEWATPB/Siegel and Xu - 2022 - Optimal Convergence Rates for the Orthogonal Greed.pdf;/home/stephenhuan/Zotero/storage/M6QXJPMH/2106.html}
 }
 
 @inproceedings{smola2000sparse,
@@ -247,7 +441,57 @@
   year = {2000},
   volume = {13},
   publisher = {{MIT Press}},
-  file = {/Users/stephenhuan/Zotero/storage/L5EKJK8D/Smola and Bartlett - 2000 - Sparse Greedy Gaussian Process Regression.pdf}
+  file = {/home/stephenhuan/Zotero/storage/L5EKJK8D/Smola and Bartlett - 2000 - Sparse Greedy Gaussian Process Regression.pdf}
+}
+
+@article{spantini2018inference,
+  title = {Inference via Low-Dimensional Couplings},
+  author = {Spantini, Alessio and Bigoni, Daniele and Marzouk, Youssef},
+  year = {2018},
+  month = jul,
+  journal = {arXiv:1703.06131 [stat]},
+  eprint = {1703.06131},
+  eprinttype = {arxiv},
+  primaryclass = {stat},
+  abstract = {We investigate the low-dimensional structure of deterministic transformations between random variables, i.e., transport maps between probability measures. In the context of statistics and machine learning, these transformations can be used to couple a tractable "reference" measure (e.g., a standard Gaussian) with a target measure of interest. Direct simulation from the desired measure can then be achieved by pushing forward reference samples through the map. Yet characterizing such a map---e.g., representing and evaluating it---grows challenging in high dimensions. The central contribution of this paper is to establish a link between the Markov properties of the target measure and the existence of low-dimensional couplings, induced by transport maps that are sparse and/or decomposable. Our analysis not only facilitates the construction of transformations in high-dimensional settings, but also suggests new inference methodologies for continuous non-Gaussian graphical models. For instance, in the context of nonlinear state-space models, we describe new variational algorithms for filtering, smoothing, and sequential parameter inference. These algorithms can be understood as the natural generalization---to the non-Gaussian case---of the square-root Rauch-Tung-Striebel Gaussian smoother.},
+  archiveprefix = {arXiv},
+  keywords = {Statistics - Computation,Statistics - Machine Learning,Statistics - Methodology},
+  file = {/home/stephenhuan/Zotero/storage/49BLH2IS/Spantini et al. - 2018 - Inference via low-dimensional couplings.pdf;/home/stephenhuan/Zotero/storage/YZYAEMZL/1703.html}
+}
+
+@article{stein2002screening,
+  title = {The Screening Effect in {{Kriging}}},
+  author = {Stein, Michael L.},
+  year = {2002},
+  month = feb,
+  journal = {The Annals of Statistics},
+  volume = {30},
+  number = {1},
+  pages = {298--323},
+  publisher = {{Institute of Mathematical Statistics}},
+  issn = {0090-5364, 2168-8966},
+  doi = {10.1214/aos/1015362194},
+  abstract = {When predicting the value of a stationary random field at a location x in some region in which one has a large number of observations, it may be difficult to compute the optimal predictor. One simple way to reduce the computational burden is to base the predictor only on those observations nearest to x. As long as the number of observations used in the predictor is sufficiently large, one might generally expect the best predictor based on these observations to be nearly optimal relative to the best predictor using all observations. Indeed, this phenomenon has been empirically observed in numerous circumstances and is known as the screening effect in the geostatistical literature. For linear predictors, when observations are on a regular grid, this work proves that there generally is a screening effect as the grid becomes increasingly dense. This result requires that, at high frequencies, the spectral density of the random field not decay faster than algebraically and not vary too quickly. Examples demonstrate that there may be no screening effect if these conditions on the spectral density are violated.},
+  keywords = {60G25,62M20,62M40,asymptotics,best linear prediction,Random field,regular variation,self-affine,Self-similar},
+  file = {/home/stephenhuan/Zotero/storage/FT6CMLRT/Stein - 2002 - The screening effect in Kriging.pdf;/home/stephenhuan/Zotero/storage/GGXC4YK4/1015362194.html}
+}
+
+@article{stein20112010,
+  title = {2010 {{Rietz}} Lecture: {{When}} Does the Screening Effect Hold?},
+  shorttitle = {2010 {{Rietz}} Lecture},
+  author = {Stein, Michael L.},
+  year = {2011},
+  month = dec,
+  journal = {The Annals of Statistics},
+  volume = {39},
+  number = {6},
+  pages = {2795--2819},
+  publisher = {{Institute of Mathematical Statistics}},
+  issn = {0090-5364, 2168-8966},
+  doi = {10.1214/11-AOS909},
+  abstract = {When using optimal linear prediction to interpolate point observations of a mean square continuous stationary spatial process, one often finds that the interpolant mostly depends on those observations located nearest to the predictand. This phenomenon is called the screening effect. However, there are situations in which a screening effect does not hold in a reasonable asymptotic sense, and theoretical support for the screening effect is limited to some rather specialized settings for the observation locations. This paper explores conditions on the observation locations and the process model under which an asymptotic screening effect holds. A series of examples shows the difficulty in formulating a general result, especially for processes with different degrees of smoothness in different directions, which can naturally occur for spatial-temporal processes. These examples lead to a general conjecture and two special cases of this conjecture are proven. The key condition on the process is that its spectral density should change slowly at high frequencies. Models not satisfying this condition of slow high-frequency change should be used with caution.},
+  keywords = {60G25,62M15,62M30,fixed-domain asymptotics,kriging,Space–time process,spectral analysis},
+  file = {/home/stephenhuan/Zotero/storage/FTG5T79S/Stein - 2011 - 2010 Rietz lecture When does the screening effect.pdf;/home/stephenhuan/Zotero/storage/4SLZTSFR/11-AOS909.html}
 }
 
 @article{tropp2006algorithms,
@@ -264,7 +508,7 @@
   doi = {10.1016/j.sigpro.2005.05.030},
   abstract = {A simultaneous sparse approximation problem requests a good approximation of several input signals at once using different linear combinations of the same elementary signals. At the same time, the problem balances the error in approximation against the total number of elementary signals that participate. These elementary signals typically model coherent structures in the input signals, and they are chosen from a large, linearly dependent collection.},
   langid = {english},
-  file = {/Users/stephenhuan/Zotero/storage/DH9HWWNA/Tropp et al. - 2006 - Algorithms for simultaneous sparse approximation. .pdf}
+  file = {/home/stephenhuan/Zotero/storage/DH9HWWNA/Tropp et al. - 2006 - Algorithms for simultaneous sparse approximation. .pdf}
 }
 
 @article{tropp2007signal,
@@ -280,7 +524,24 @@
   doi = {10.1109/TIT.2007.909108},
   abstract = {This paper demonstrates theoretically and empirically that a greedy algorithm called Orthogonal Matching Pursuit (OMP) can reliably recover a signal with \$m\$ nonzero entries in dimension \$d\$ given \$ \textbackslash rm O(m \textbackslash ln d)\$ random linear measurements of that signal. This is a massive improvement over previous results, which require \$\textbackslash rm O(m\^2)\$ measurements. The new results for OMP are comparable with recent results for another approach called Basis Pursuit (BP). In some settings, the OMP algorithm is faster and easier to implement, so it is an attractive alternative to BP for signal recovery problems.},
   keywords = {Algorithms,approximation,basis pursuit,Blood,compressed sensing,Compressed sensing,Greedy algorithms,group testing,Matching pursuit algorithms,Mathematics,orthogonal matching pursuit,Performance evaluation,Reliability theory,Signal processing,signal recovery,sparse approximation,Testing,Vectors},
-  file = {/Users/stephenhuan/Zotero/storage/9XKDSFHX/Tropp and Gilbert - 2007 - Signal Recovery From Random Measurements Via Ortho.pdf;/Users/stephenhuan/Zotero/storage/AIPX7H8X/4385788.html}
+  file = {/home/stephenhuan/Zotero/storage/9XKDSFHX/Tropp and Gilbert - 2007 - Signal Recovery From Random Measurements Via Ortho.pdf;/home/stephenhuan/Zotero/storage/AIPX7H8X/4385788.html}
+}
+
+@article{vecchia1988estimation,
+  title = {Estimation and {{Model Identification}} for {{Continuous Spatial Processes}}},
+  author = {Vecchia, A. V.},
+  year = {1988},
+  journal = {Journal of the Royal Statistical Society: Series B (Methodological)},
+  volume = {50},
+  number = {2},
+  pages = {297--312},
+  issn = {2517-6161},
+  doi = {10.1111/j.2517-6161.1988.tb01729.x},
+  abstract = {Formal parameter estimation and model identification procedures for continuous domain spatial processes are introduced. The processes are assumed to be adequately described by a linear model with residuals that follow a second-order stationary Gaussian random field and data are assumed to consist of noisy observations of the process at arbitrary sampling locations. A general class of two-dimensional rational spectral density functions with elliptic contours is used to model the spatial covariance function. An iterative estimation procedure alleviates many of the computational difficulties of conventional maximum likelihood estimation for non-lattice data. The procedure is applied to several generated data sets and to an actual ground-water data set.},
+  langid = {english},
+  keywords = {anisotropy,gaussian process,measurement error,non-lattice data,spatial correlation,spatial regression},
+  annotation = {\_eprint: https://onlinelibrary.wiley.com/doi/pdf/10.1111/j.2517-6161.1988.tb01729.x},
+  file = {/home/stephenhuan/Zotero/storage/TFBI2YZI/Vecchia - 1988 - Estimation and Model Identification for Continuous.pdf;/home/stephenhuan/Zotero/storage/5UGP2IT8/j.2517-6161.1988.tb01729.html}
 }
 
 @article{wu2018exploiting,
@@ -295,7 +556,7 @@
   abstract = {An exciting branch of machine learning research focuses on methods for learning, optimizing, and integrating unknown functions that are difficult or costly to evaluate. A popular Bayesian approach to this problem uses a Gaussian process (GP) to construct a posterior distribution over the function of interest given a set of observed measurements, and selects new points to evaluate using the statistics of this posterior. Here we extend these methods to exploit derivative information from the unknown function. We describe methods for Bayesian optimization (BO) and Bayesian quadrature (BQ) in settings where first and second derivatives may be evaluated along with the function itself. We perform sampling-based inference in order to incorporate uncertainty over hyperparameters, and show that both hyperparameter and function uncertainty decrease much more rapidly when using derivative information. Moreover, we introduce techniques for overcoming ill-conditioning issues that have plagued earlier methods for gradient-enhanced Gaussian processes and kriging. We illustrate the efficacy of these methods using applications to real and simulated Bayesian optimization and quadrature problems, and show that exploting derivatives can provide substantial gains over standard methods.},
   archiveprefix = {arXiv},
   keywords = {Statistics - Machine Learning},
-  file = {/Users/stephenhuan/Zotero/storage/3KWVKWBJ/Wu et al. - 2018 - Exploiting gradients and Hessians in Bayesian opti.pdf;/Users/stephenhuan/Zotero/storage/4AKRF3RX/1704.html}
+  file = {/home/stephenhuan/Zotero/storage/3KWVKWBJ/Wu et al. - 2018 - Exploiting gradients and Hessians in Bayesian opti.pdf;/home/stephenhuan/Zotero/storage/4AKRF3RX/1704.html}
 }
 
 @article{wu2021domain,
@@ -310,7 +571,7 @@
   abstract = {Researchers have been facing a difficult problem that data generation mechanisms could be influenced by internal or external factors leading to the training and test data with quite different distributions, consequently traditional classification or regression from the training set is unable to achieve satisfying results on test data. In this paper, we address this nontrivial domain generalization problem by finding a central subspace in which domain-based covariance is minimized while the functional relationship is simultaneously maximally preserved. We propose a novel variance measurement for multiple domains so as to minimize the difference between conditional distributions across domains with solid theoretical demonstration and supports, meanwhile, the algorithm preserves the functional relationship via maximizing the variance of conditional expectations given output. Furthermore, we also provide a fast implementation that requires much less computation and smaller memory for large-scale matrix operations, suitable for not only domain generalization but also other kernel-based eigenvalue decompositions. To show the practicality of the proposed method, we compare our methods against some well-known dimension reduction and domain generalization techniques on both synthetic data and real-world applications. We show that for small-scale datasets, we are able to achieve better quantitative results indicating better generalization performance over unseen test datasets. For large-scale problems, the proposed fast implementation maintains the quantitative performance but at a substantially lower computational cost.},
   archiveprefix = {arXiv},
   keywords = {Computer Science - Machine Learning,Statistics - Machine Learning},
-  file = {/Users/stephenhuan/Zotero/storage/TKVPCC9D/Wu - 2021 - Domain Generalization via Domain-based Covariance .pdf;/Users/stephenhuan/Zotero/storage/E2JRI79M/2110.html}
+  file = {/home/stephenhuan/Zotero/storage/TKVPCC9D/Wu - 2021 - Domain Generalization via Domain-based Covariance .pdf;/home/stephenhuan/Zotero/storage/E2JRI79M/2110.html}
 }
 
 
