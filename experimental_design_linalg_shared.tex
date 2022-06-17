@@ -1,5 +1,5 @@
 % SIAM Shared Information Template
-\documentclass[preprint,onefignum,onetabnum]{siamart190516}
+\documentclass[preprint,onefignum,onetabnum]{siamart220329}
 
 % This is information that is shared between the main document and any
 % supplement. If no supplement is required, then this information can
@@ -58,6 +58,13 @@
 \newcommand*{\Reals}{\mathbb{R}}
 \newcommand*{\Naturals}{\mathbb{N}}
 
+\makeatletter
+\renewcommand{\paragraph}{%
+  \@startsection{paragraph}{4}%
+  {\z@}{1.0ex \@plus .5ex \@minus .2ex}{-.7em}%
+  {\normalfont\normalsize\bfseries}%
+}
+\makeatother
 
 % From https://tex.stackexchange.com/questions/198771/align-in-substack
 \makeatletter
@@ -126,11 +133,12 @@
 \newsiamthm{claim}{Claim}
 
 % Sets running headers as well as PDF title and authors
-\headers{Experimental design for fast algorithms}{S. Huan and F. Sch{\"a}fer}
+\headers{Factorization by greedy conditional selection}{
+S Huan, J Guinness, M Katzfuss, H Owhadi, F. Sch{\"a}fer}
 
 % Title. If the supplement option is on, then "Supplementary Material"
 % is automatically inserted before the title.
-\title{Experimental design for fast linear algebra}
+\title{Sparse Cholesky factorization by greedy conditional selection}
 
 % Authors: full names plus addresses.
 \author{

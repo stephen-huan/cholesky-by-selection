@@ -10,8 +10,8 @@
 % Optional PDF information
 \ifpdf
 \hypersetup{
-  pdftitle={Experimental design for sparse Cholesky},
-  pdfauthor={S Huan, J Guinness, M Katzfuss, H Owhadi, F. Sch{\"a}fer}
+  pdftitle={Sparse Cholesky factorization by greedy conditional selection},
+  pdfauthor={S. Huan, J. Guinness, M. Katzfuss, H. Owhadi, F. Sch{\"a}fer}
 }
 \fi
 
@@ -289,14 +289,14 @@ maximizing the mutual information is equivalent to minimizing the conditional
 variance which is in turn equivalent to minimizing the expected mean squared
 error of the prediction. Another perspective on the objective can be derived
 from comparing the mutual information to the EV-VE identity, which states
-\begin{align*}
+\begin{align}
   \textcolor{orange}{\entropy[\vec{y}_\text{Pr}]} &=
     \textcolor{lightblue}{\entropy[\vec{y}_\text{Pr} \mid \vec{y}_\text{Tr}]} +
     \textcolor{rust}{\I[\vec{y}_\text{Pr};\vec{y}_\text{Tr}]} \\
   \textcolor{orange}{\Var[\vec{y}_\text{Pr}]} &=
     \textcolor{lightblue}{\E[\Var[\vec{y}_\text{Pr} \mid \vec{y}_\text{Tr}]]} +
     \textcolor{rust}{     \Var[\E[\vec{y}_\text{Pr} \mid \vec{y}_\text{Tr}]]}
-\end{align*}
+\end{align}
 On the left hand side, entropy is monotone with variance. On the right hand
 side, the expectation of the conditional variance can be interpreted to be
 the fluctuation of the prediction point after conditioning, and is monotone
