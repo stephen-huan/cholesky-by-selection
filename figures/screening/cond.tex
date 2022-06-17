@@ -1,0 +1,12 @@
+\begin{tikzpicture}
+  \begin{axis}[
+    width={0.49\linewidth},
+    grid={major},
+    xmin=-2, xmax=2, ymin=-2, ymax=2, zmin=-0.1, zmax=1,
+  ]
+  \addplot3 [only marks, orange]
+    table {figures/screening/matern_cond_points.csv};
+  \addplot3 [mesh, seagreen]
+    table {figures/screening/matern_cond.csv};
+  \end{axis}
+\end{tikzpicture}

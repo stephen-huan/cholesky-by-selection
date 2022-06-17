@@ -1,0 +1,20 @@
+\begin{tikzpicture}
+  \begin{axis}[
+    width={0.49\linewidth},
+    axis lines={none},
+  ]
+  \addplot [only marks, lightblue, mark size=2]
+    table {figures/selection/train.csv};
+  \addplot [only marks, orange, mark size=4]
+    table {figures/selection/test.csv};
+  \addplot [only marks, seagreen, mark size=4]
+    table {figures/selection/knn_selected.csv};
+  \addplot [rust, style={ultra thick}]
+    table {figures/selection/knn_mean.csv};
+  \addplot [name path=upper, rust, forget plot, line width=0pt]
+    table {figures/selection/knn_std_upper.csv};
+  \addplot [name path=lower, rust, forget plot, line width=0pt]
+    table {figures/selection/knn_std_lower.csv};
+  \addplot [rust!15] fill between [of=upper and lower];
+\end{axis}
+\end{tikzpicture}

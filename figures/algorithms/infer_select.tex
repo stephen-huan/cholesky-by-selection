@@ -1,0 +1,39 @@
+\begin{algorithmic}[1]
+  \REQUIRE \(
+    \vec{x}_\text{Tr}, \vec{y}_\text{Tr},
+    \vec{x}_\text{Pr}, K(\cdot, \cdot), s
+  \)
+  \ENSURE \(
+      \E[\vec{y}_\text{Pr} \mid \vec{y}_\text{Tr}],
+    \Cov[\vec{y}_\text{Pr} \mid \vec{y}_\text{Tr}]
+  \)
+
+  \STATE Compute \( I \) using \cref{alg:gp_select} or \cref{alg:select_chol}
+  \STATE \(
+    \Theta_{\text{Tr}, \text{Tr}} \gets
+    K(\vec{x}_\text{Tr}[I], \vec{x}_\text{Tr}[I])
+  \)
+  \STATE \(
+    \Theta_{\text{Pr}, \text{Pr}} \gets
+    K(\vec{x}_\text{Pr}, \vec{x}_\text{Pr})
+  \)
+  \STATE \(
+    \Theta_{\text{Tr}, \text{Pr}} \gets
+    K(\vec{x}_\text{Tr}[I], \vec{x}_\text{Pr})
+  \)
+  \STATE \(
+    \E[\vec{y}_\text{Pr} \mid \vec{y}_\text{Tr}] \gets
+    \Theta_{\text{Pr}, \text{Tr}} \Theta_{\text{Tr}, \text{Tr}}^{-1}
+    \vec{y}_\text{Tr}[I]
+  \)
+  \STATE \(
+    \Cov[\vec{y}_\text{Pr} \mid \vec{y}_\text{Tr}] \gets
+    \Theta_{\text{Pr}, \text{Pr}} -
+    \Theta_{\text{Tr}, \text{Pr}}^{\top} \Theta_{\text{Tr}, \text{Tr}}^{-1}
+    \Theta_{\text{Tr}, \text{Pr}}
+  \)
+  \RETURN \(
+      \E[\vec{y}_\text{Pr} \mid \vec{y}_\text{Tr}],
+    \Cov[\vec{y}_\text{Pr} \mid \vec{y}_\text{Tr}]
+  \)
+\end{algorithmic}

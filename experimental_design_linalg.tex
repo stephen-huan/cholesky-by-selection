@@ -439,74 +439,7 @@ matching the time complexity of the explicit precision approach.
 \begin{algorithm}[H]
   \caption{Point selection by \\ explicit precision}
   \label{alg:gp_select}
-  \begin{algorithmic}[1]
-    \REQUIRE \( \vec{x}_\text{Tr}, \vec{x}_\text{Pr}, K(\cdot, \cdot), s \)
-    \ENSURE \( I \)
-
-    \STATE \( n \gets \lvert \vec{x}_\text{Tr} \rvert \)
-    \STATE \(
-      \vec{x} \gets
-      \begin{pmatrix}
-        \vec{x}_\text{Tr} \\
-        \vec{x}_\text{Pr}
-      \end{pmatrix}
-    \)
-    \STATE \( I \gets \emptyset \)
-    \STATE \( -I \gets \{ 1, 2, \dotsc, n \} \)
-    \STATE \( \Theta_{I, I}^{-1} \gets \mathbb{R}^{0 \times 0} \)
-    \STATE \(
-      \Theta_{\text{Tr}, \text{Pr} \mid I} \gets
-      K(\vec{x}_\text{Tr}, \vec{x}_\text{Pr})
-    \)
-    \STATE \(
-      \diag(\Theta_{\text{Tr}, \text{Tr} \mid I}) \gets
-      \diag(K(\vec{x}_\text{Tr}, \vec{x}_\text{Tr}))
-    \)
-    \WHILE{\( \lvert -I \rvert > 0 \) and \( \lvert I \rvert <s \)}
-      \STATE \(
-        k \gets \max_{j \in -I}
-        \frac{\Theta_{j, \text{Pr} \mid I}^2}{\Theta_{jj \mid I}}
-      \)
-      \STATE \( I \gets I \cup \{ k \} \)
-      \STATE \( -I \gets -I - \{ k \} \)
-      \STATE \(
-        \vec{v} \gets \Theta_{I, I}^{-1}
-        K(\vec{x}_\text{Tr}[I - \{ k \}], \vec{x}_\text{Tr}[k])
-      \)
-      \STATE \(
-        \Theta_{I, I}^{-1} \gets
-        \begin{pmatrix}
-          \Theta_{I, I}^{-1} +
-          \frac{\vec{v} \vec{v}^{\top}}{\Theta_{kk \mid I}} &
-          \frac{-\vec{v}}{\Theta_{kk \mid I}} \\
-          \frac{-\vec{v}^{\top}}{\Theta_{kk \mid I}} &
-          \frac{1}{\Theta_{kk \mid I}}
-        \end{pmatrix}
-      \)
-      \STATE \(
-        \Theta_{:, k \mid I} \gets
-        K(\vec{x}, \vec{x}_k) -
-        K(\vec{x}, \vec{x}_{I - \{ k \}}) \vec{v}
-      \)
-      \STATE \(
-        \vec{u} \gets
-        \frac{\Theta_{:, k \mid I}}{\sqrt{\Theta_{kk \mid I}}}
-      \)
-      \FOR{\( j \in -I \)}
-        \STATE \(
-          \Theta_{jj \mid I} \gets
-          \Theta_{jj \mid I} -
-          \vec{u}_j^2
-        \)
-        \STATE \(
-          \Theta_{j, \text{Pr} \mid I} \gets
-          \Theta_{j, \text{Pr} \mid I} -
-          \vec{u}_j \vec{u}_{n + 1}
-        \)
-      \ENDFOR
-    \ENDWHILE
-    \RETURN \( I \)
-  \end{algorithmic}
+  \input{figures/algorithms/gp_select.tex}
 \end{algorithm}
 \end{minipage}
 \hfill
@@ -514,57 +447,7 @@ matching the time complexity of the explicit precision approach.
 \begin{algorithm}[H]
   \caption{Point selection by \\ Cholesky factorization}
   \label{alg:select_chol}
-  \begin{algorithmic}[1]
-    \REQUIRE \( \vec{x}_\text{Tr}, \vec{x}_\text{Pr}, K(\cdot, \cdot), s \)
-    \ENSURE \( I \)
-
-    \STATE \( n \gets \lvert \vec{x}_\text{Tr} \rvert \)
-    \STATE \(
-      \vec{x} \gets
-      \begin{pmatrix}
-        \vec{x}_\text{Tr} \\
-        \vec{x}_\text{Pr}
-      \end{pmatrix}
-    \)
-    \STATE \( I \gets \emptyset \)
-    \STATE \( -I \gets \{ 1, 2, \dotsc, n \} \)
-    \STATE \( L \gets \vec{0}^{(n + 1) \times s} \)
-    \STATE \(
-      \Theta_{\text{Tr}, \text{Pr} \mid I} \gets
-      K(\vec{x}_\text{Tr}, \vec{x}_\text{Pr})
-    \)
-    \STATE \(
-      \diag(\Theta_{\text{Tr}, \text{Tr} \mid I}) \gets
-      \diag(K(\vec{x}_\text{Tr}, \vec{x}_\text{Tr}))
-    \)
-    \WHILE{\( \lvert -I \rvert > 0 \) and \( \lvert I \rvert <s \)}
-      \STATE \(
-        k \gets \max_{j \in -I}
-        \frac{\Theta_{j, \text{Pr} \mid I}^2}{\Theta_{jj \mid I}}
-      \)
-      \STATE \( I \gets I \cup \{ k \} \)
-      \STATE \( -I \gets -I - \{ k \} \)
-      \STATE \( i \gets \lvert I \rvert \)
-      \STATE \(
-        L_{:, i} \gets
-        K(\vec{x}, \vec{x}_k) - L_{:, :i - 1} L_{k, :i - 1}^{\top}
-      \)
-      \STATE \( L_{:, i} \gets \frac{L{:, i}}{\sqrt{L_{k, i}}} \)
-      \FOR{\( j \in -I \)}
-        \STATE \(
-          \Theta_{jj \mid I} \gets
-          \Theta_{jj \mid I} -
-          L_{j, i}^2
-        \)
-        \STATE \(
-          \Theta_{j, \text{Pr} \mid I} \gets
-          \Theta_{j, \text{Pr} \mid I} -
-          L_{j, i} L_{n, i}
-        \)
-      \ENDFOR
-    \ENDWHILE
-    \RETURN \( I \)
-  \end{algorithmic}
+  \input{figures/algorithms/select_chol.tex}
 \end{algorithm}
 \end{minipage}
 
@@ -592,45 +475,7 @@ signal recovery algorithm orthogonal matching pursuit (OMP)
 \begin{algorithm}
   \caption{Gaussian process inference by selection}
   \label{alg:infer_select}
-  \begin{algorithmic}[1]
-    \REQUIRE \(
-      \vec{x}_\text{Tr}, \vec{y}_\text{Tr},
-      \vec{x}_\text{Pr}, K(\cdot, \cdot), s
-    \)
-    \ENSURE \(
-        \E[\vec{y}_\text{Pr} \mid \vec{y}_\text{Tr}],
-      \Cov[\vec{y}_\text{Pr} \mid \vec{y}_\text{Tr}]
-    \)
-
-    \STATE Compute \( I \) using \cref{alg:gp_select} or \cref{alg:select_chol}
-    \STATE \(
-      \Theta_{\text{Tr}, \text{Tr}} \gets
-      K(\vec{x}_\text{Tr}[I], \vec{x}_\text{Tr}[I])
-    \)
-    \STATE \(
-      \Theta_{\text{Pr}, \text{Pr}} \gets
-      K(\vec{x}_\text{Pr}, \vec{x}_\text{Pr})
-    \)
-    \STATE \(
-      \Theta_{\text{Tr}, \text{Pr}} \gets
-      K(\vec{x}_\text{Tr}[I], \vec{x}_\text{Pr})
-    \)
-    \STATE \(
-      \E[\vec{y}_\text{Pr} \mid \vec{y}_\text{Tr}] \gets
-      \Theta_{\text{Pr}, \text{Tr}} \Theta_{\text{Tr}, \text{Tr}}^{-1}
-      \vec{y}_\text{Tr}[I]
-    \)
-    \STATE \(
-      \Cov[\vec{y}_\text{Pr} \mid \vec{y}_\text{Tr}] \gets
-      \Theta_{\text{Pr}, \text{Pr}} -
-      \Theta_{\text{Tr}, \text{Pr}}^{\top} \Theta_{\text{Tr}, \text{Tr}}^{-1}
-      \Theta_{\text{Tr}, \text{Pr}}
-    \)
-    \RETURN \(
-        \E[\vec{y}_\text{Pr} \mid \vec{y}_\text{Tr}],
-      \Cov[\vec{y}_\text{Pr} \mid \vec{y}_\text{Tr}]
-    \)
-  \end{algorithmic}
+  \input{figures/algorithms/infer_select.tex}
 \end{algorithm}
 
 \subsection{Supernodes and blocked selection}
@@ -767,115 +612,7 @@ again uses more memory than the explicit precision algorithm.
 \begin{algorithm}[H]
   \caption{Multiple prediction point selection by explicit precision}
   \label{alg:gp_select_mult}
-  \begin{algorithmic}[1]
-    \REQUIRE \( \vec{x}_\text{Tr}, \vec{x}_\text{Pr}, K(\cdot, \cdot), s \)
-    \ENSURE \( I \)
-
-    \STATE \( n \gets \lvert \vec{x}_\text{Tr} \rvert \)
-    \STATE \( m \gets \lvert \vec{x}_\text{Pr} \rvert \)
-    \STATE \(
-      \vec{x} \gets
-      \begin{pmatrix}
-        \vec{x}_\text{Tr} \\
-        \vec{x}_\text{Pr}
-      \end{pmatrix}
-    \)
-    \STATE \( I \gets \emptyset \)
-    \STATE \( -I \gets \{ 1, 2, \dotsc, n \} \)
-    \STATE \( \Theta_{I, I}^{-1} \gets \mathbb{R}^{0 \times 0} \)
-    \STATE \(
-      \Theta_{\text{Pr}, \text{Pr} \mid I}^{-1} \gets
-      K(\vec{x}_\text{Pr}, \vec{x}_\text{Pr})
-    \)
-    \STATE \(
-      \Theta_{\text{Tr}, \text{Pr} \mid I} \gets
-      K(\vec{x}_\text{Tr}, \vec{x}_\text{Pr})
-    \)
-    \STATE \(
-      \diag(\Theta_{\text{Tr}, \text{Tr} \mid I}) \gets
-      \diag(K(\vec{x}_\text{Tr}, \vec{x}_\text{Tr}))
-    \)
-    \STATE \(
-      \diag(\Theta_{\text{Tr}, \text{Tr} \mid I, \text{Pr}}) \gets
-      \diag(\Theta_{\text{Tr}, \text{Tr} \mid I})
-    \) \\  \(
-      - \diag(
-        \Theta_{\text{Tr}, \text{Pr} \mid I}
-        \Theta_{\text{Pr}, \text{Pr} \mid I}^{-1}
-        \Theta_{\text{Pr}, \text{Tr} \mid I}
-      )
-    \)
-    \WHILE{\( \lvert -I \rvert > 0 \) and \( \lvert I \rvert <s \)}
-      \STATE \(
-        k \gets \min_{j \in -I}
-        \frac{\Theta_{jj \mid I, \text{Pr}}}{\Theta_{jj \mid I}}
-      \)
-      \STATE \( I \gets I \cup \{ k \} \)
-      \STATE \( -I \gets -I - \{ k \} \)
-      \STATE \(
-        \vec{v} \gets \Theta_{I, I}^{-1}
-        K(\vec{x}_\text{Tr}[I - \{ k \}], \vec{x}_\text{Tr}[k])
-      \)
-      \STATE \(
-        \Theta_{I, I}^{-1} \gets
-        \begin{pmatrix}
-          \Theta_{I, I}^{-1} +
-          \frac{\vec{v} \vec{v}^{\top}}{\Theta_{kk \mid I}} &
-          \frac{-\vec{v}}{\Theta_{kk \mid I}} \\
-          \frac{-\vec{v}^{\top}}{\Theta_{kk \mid I}} &
-          \frac{1}{\Theta_{kk \mid I}}
-        \end{pmatrix}
-      \)
-      \STATE \(
-        \vec{w} \gets \Theta_{\text{Pr}, \text{Pr} \mid I}^{-1}
-        \Theta_{k, \text{Pr} \mid I}^{\top}
-      \)
-      \STATE \(
-        \Theta_{\text{Pr}, \text{Pr} \mid I}^{-1} \gets
-        \Theta_{\text{Pr}, \text{Pr} \mid I}^{-1} +
-        \frac{\vec{w} \vec{w}^{\top}}{\Theta_{kk \mid I, \text{Pr}}}
-      \)
-      \STATE \(
-        \Theta_{:, k \mid I} \gets
-          K(\vec{x}, \vec{x}_k) -
-          K(\vec{x}, \vec{x}_{I - \{ k \}}) \vec{v}
-      \)
-      \STATE \(
-          \Theta_{:, k \mid I, \text{Pr}} \gets
-          \Theta_{:, k \mid I} -
-          \Theta_{:, \text{Pr} \mid I} \vec{w}
-      \)
-      \STATE \(
-        \vec{u} \gets
-        \frac{\Theta_{:, k \mid I}}{\sqrt{\Theta_{kk \mid I}}}
-      \)
-      \STATE \(
-        \vec{u}_\text{Pr} \gets
-        \frac{\Theta_{:, k \mid I, \text{Pr}}}
-             {\sqrt{\Theta_{kk \mid I, \text{Pr}}}}
-      \)
-      \FOR{\( j \in -I \)}
-        \STATE \(
-          \Theta_{jj \mid I} \gets
-          \Theta_{jj \mid I} -
-          \vec{u}_j^2
-        \)
-        \STATE \(
-          \Theta_{jj \mid I, \text{Pr}} \gets
-          \Theta_{jj \mid I, \text{Pr}} -
-          (\vec{u}_\text{Pr})_j^2
-        \)
-        \FOR{\( c \in \{ 1, 2, \dotsc, m \} \)}
-          \STATE \(
-            \Theta_{j, \text{Pr}[c] \mid I} \gets
-            \Theta_{j, \text{Pr}[c] \mid I} -
-            \vec{u}_j \vec{u}_{n + c}
-          \)
-        \ENDFOR
-      \ENDFOR
-    \ENDWHILE
-    \RETURN \( I \)
-  \end{algorithmic}
+  \input{figures/algorithms/gp_select_mult.tex}
 \end{algorithm}
 \end{minipage}
 \hfill
@@ -883,69 +620,13 @@ again uses more memory than the explicit precision algorithm.
 \begin{algorithm}[H]
   \caption{Multiple prediction point selection by Cholesky factorization}
   \label{alg:select_mult_chol}
-  \begin{algorithmic}[1]
-    \REQUIRE \( \vec{x}_\text{Tr}, \vec{x}_\text{Pr}, K(\cdot, \cdot), s \)
-    \ENSURE \( I \)
-
-    \STATE \( n \gets \lvert \vec{x}_\text{Tr} \rvert \)
-    \STATE \( m \gets \lvert \vec{x}_\text{Pr} \rvert \)
-    \STATE \(
-      \vec{x} \gets
-      \begin{pmatrix}
-        \vec{x}_\text{Tr} \\
-        \vec{x}_\text{Pr}
-      \end{pmatrix}
-    \)
-    \STATE \( I \gets \emptyset \)
-    \STATE \( -I \gets \{ 1, 2, \dotsc, n \} \)
-    \STATE \( L \gets \vec{0}^{(n + m) \times s} \)
-    \STATE \( L_\text{Pr} \gets \vec{0}^{(n + m) \times (s + m)} \)
-    \STATE \(
-      \diag(\Theta_{\text{Tr}, \text{Tr} \mid I}) \gets
-      \diag(K(\vec{x}_\text{Tr}, \vec{x}_\text{Tr}))
-    \)
-    \STATE \(
-      \diag(\Theta_{\text{Tr}, \text{Tr} \mid I, \text{Pr}}) \gets
-      \diag(\Theta_{\text{Tr}, \text{Tr} \mid I})
-    \)
-    \FOR{\( i \in \{ 1, 2, \dotsc, m \} \)}
-      \STATE Update \( L_\text{Pr} \) and \( \diag(\Theta_{\text{Tr}, \text{Tr}
-        \mid I, \text{Pr}}) \) with \( k = n + i \) by \cref{alg:chol_update}.
-    \ENDFOR
-    \WHILE{\( \lvert -I \rvert > 0 \) and \( \lvert I \rvert <s \)}
-      \STATE \(
-        k \gets \max_{j \in -I}
-        \frac{\Theta_{j, \text{Pr} \mid I}}{\Theta_{jj \mid I}}
-      \)
-      \STATE \( I \gets I \cup \{ k \} \)
-      \STATE \( -I \gets -I - \{ k \} \)
-      \STATE \( i \gets \lvert I \rvert \)
-      \STATE Update \( L \) and \( \diag(\Theta_{\text{Tr}, \text{Tr}
-        \mid I}) \) by \\ \cref{alg:chol_update}.
-      \STATE Update \( L_\text{Pr} \) and \( \diag(\Theta_{\text{Tr}, \text{Tr}
-        \mid I, \text{Pr}}) \) with \( i = i + m \) by \cref{alg:chol_update}.
-    \ENDWHILE
-    \RETURN \( I \)
-  \end{algorithmic}
+  \input{figures/algorithms/select_mult_chol.tex}
 \end{algorithm}
 
 \begin{algorithm}[H]
   \caption{Update Cholesky factor}
   \label{alg:chol_update}
-  \begin{algorithmic}
-    \REQUIRE \( \vec{x}, K(\cdot, \cdot), i, k, L, \diag(\Theta) \)
-    \ENSURE \( L_{:, i}, \diag(\Theta_{\mid k}) \)
-
-    \STATE \( n \gets \lvert \diag(\Theta) \rvert \)
-    \STATE \(
-      L_{:, i} \gets
-      K(\vec{x}, \vec{x}_k) - L_{:, :i - 1} L_{k, :i - 1}^{\top}
-    \)
-    \STATE \( L_{:, i} \gets \frac{L{:, i}}{\sqrt{L_{k, i}}} \)
-    \FOR{\( j \in \{ 1, 2, \dotsc, n \} \)}
-      \STATE \( \Theta_{jj} \gets \Theta_{jj} - L_{j, i}^2 \)
-    \ENDFOR
-  \end{algorithmic}
+  \input{figures/algorithms/chol_update.tex}
 \end{algorithm}
 \end{minipage}
 
@@ -1332,20 +1013,7 @@ label in the \( k \) selected points.
 
 \begin{figure}[h!]
   \centering
-  \begin{tikzpicture}
-    \begin{axis}[
-      width={0.8\linewidth},
-      grid={major},
-      title={Accuracy with increasing \( k \)
-      (\( n = 100, m = 100, l = 1024, \nu = 1.5 \))},
-      xlabel={\( k \)},
-      ylabel={Accuracy (\%)},
-      legend entries={conditional-knn, scikit-knn},
-    ]
-    \addplot [orange]    table {figures/mnist/k_acc_conditional-knn.csv};
-    \addplot [lightblue] table {figures/mnist/k_acc_scikit-knn.csv};
-  \end{axis}
-  \end{tikzpicture}
+  \input{figures/mnist/accuracy_k.tex}
   \caption{Accuracy with increasing \( k \)}
 \end{figure}
 
@@ -1390,23 +1058,7 @@ set over the cardinality of their union, intersection over union (IOU).
 
 \begin{figure}[h!]
   \centering
-  \begin{tikzpicture}
-    \begin{axis}[
-      width={0.8\linewidth},
-      grid={major},
-      title={Accuracy with increasing \( N \)
-      (\( s = 32 \))},
-      xlabel={\( N \)},
-      ylabel={Accuracy (IOU)},
-      legend entries={cknn, knn, corr, random},
-      legend pos={south west}
-    ]
-    \addplot [orange]    table {figures/recover/n_score_cknn.csv};
-    \addplot [lightblue] table {figures/recover/n_score_knn.csv};
-    \addplot [seagreen]  table {figures/recover/n_score_corr.csv};
-    \addplot [silver]    table {figures/recover/n_score_random.csv};
-  \end{axis}
-  \end{tikzpicture}
+  \input{figures/recover/accuracy_n.tex}
   \caption{Accuracy with increasing \( N \)}
 \end{figure}
 
@@ -1417,23 +1069,7 @@ final accuracies.
 
 \begin{figure}[h!]
   \centering
-  \begin{tikzpicture}
-    \begin{axis}[
-      width={0.8\linewidth},
-      grid={major},
-      title={Accuracy with increasing \( s \)
-      (\( N = 256 \))},
-      xlabel={\( s \)},
-      ylabel={Accuracy (IOU)},
-      legend entries={cknn, knn, corr, random},
-      legend pos={south east}
-    ]
-    \addplot [orange]    table {figures/recover/s_score_cknn.csv};
-    \addplot [lightblue] table {figures/recover/s_score_knn.csv};
-    \addplot [seagreen]  table {figures/recover/s_score_corr.csv};
-    \addplot [silver]    table {figures/recover/s_score_random.csv};
-  \end{axis}
-  \end{tikzpicture}
+  \input{figures/recover/accuracy_s.tex}
   \caption{Accuracy with increasing \( s \)}
 \end{figure}
 
@@ -1446,27 +1082,7 @@ maintains much higher accuracy than the rest of the strategies.
 
 \begin{figure}[h!]
   \centering
-  \begin{tikzpicture}
-    \begin{axis}[
-      width={0.8\linewidth},
-      grid={major},
-      title={Accuracy with increasing \( s \)
-      (\( N = 256 \))},
-      xlabel={\( s \)},
-      ylabel={Accuracy (IOU)},
-      legend entries={cknn-0.00, cknn-0.01, cknn-0.10, cknn-0.20},
-      legend pos={south east}
-    ]
-    \addplot [orange, style=solid]
-      table {figures/recover/noise-s_score_cknn-0.00.csv};
-    \addplot [orange, style=dashed]
-      table {figures/recover/noise-s_score_cknn-0.01.csv};
-    \addplot [orange, style=dotted]
-      table {figures/recover/noise-s_score_cknn-0.10.csv};
-    \addplot [orange, style=dashdotted]
-      table {figures/recover/noise-s_score_cknn-0.20.csv};
-  \end{axis}
-  \end{tikzpicture}
+  \input{figures/recover/accuracy_noise.tex}
   \caption{Accuracy with increasing \( s \)}
 \end{figure}
 
@@ -1844,9 +1460,7 @@ and conditioned \( y_j \) is. By definition,
 
 \begin{figure}[h!]
   \centering
-  \begin{tikzpicture}[scale=4]
-    \input{figures/cholesky_factor.tex}
-  \end{tikzpicture}
+  \input{figures/cholesky_factor.tex}
   \caption{Illustration of the Cholesky
     factorization of a partially conditioned matrix.}
 \end{figure}
@@ -2104,6 +1718,39 @@ is better to use the objective \( \frac{\Delta}{n} \) where \( \Delta
 \) is the change in variance after selecting the candidate and \( n \)
 is the number of nonzero entries selecting the candidate adds.
 
+\subsection{Equivalence of Cholesky and QR factorization}
+\label{app:qr}
+
+We show a well-known fact that QR factorization can be viewed
+as the feature-space equivalent of Cholesky factorization,
+which can be viewed as operating in covariance-space.
+\begin{align}
+  \shortintertext{Let \( \Theta \) be a symmetric
+    positive definite matrix such that}
+  \Theta &= F^{\top} F
+  \shortintertext{for some matrix \( F \) whose
+    columns can be viewed as vectors in feature space:}
+  \Theta_{ij} &= \langle F_i, F_j \rangle
+  \shortintertext{where \( F_i \) is the \( i \)th column of
+    \( F \). Now suppose \( F \) has the \( QR \) factorization}
+  F &= QR
+  \shortintertext{where \( Q \) is a \( N \times N \) orthonormal
+    matrix and \( R \) is a \( N \times N \) upper triangular matrix.}
+  \Theta &= F^{\top} F = (Q R)^{\top} (Q R) \\
+         &= R^{\top} Q^{\top} Q R \\
+         &= R^{\top} R
+\end{align}
+from the orthogonality of \( Q \). But note that \( R \) is an upper triangular
+matrix, so \( L = R^{\top} \) is an lower triangular matrix. So we have \(
+\Theta = L L^{\top} \) for lower triangular \( L \). By the uniqueness of
+Cholesky factorization, \( R^{\top} \) is precisely the Cholesky factor of \(
+\Theta \). In addition, the columns of \( Q \) are formed from Gram-Schmitt
+orthogonalization on the columns of \( F \) (in feature-space), and \( R \)
+the coefficients resulting from the Gram-Schmitt procedure. From \( R^{\top} =
+\chol(\Theta) \) and the statistical interpretation of Cholesky factorization
+\cref{eq:chol}, this iterative orthogonalization in feature-space is equivalent
+to iterative conditioning in covariance.
+
 \subsection{Equivalence of selection and orthogonal matching pursuit}
 \label{app:omp}
 
@@ -2117,7 +1764,7 @@ that Cholesky factorization is Gram-Schmitt in feature space.
   \shortintertext{Let \( \Theta \) be a symmetric
     positive definite matrix such that}
   \Theta &= F^{\top} F
-  \shortintertext{For some matrix \( F \)
+  \shortintertext{for some matrix \( F \)
     whose columns are vectors in feature space,}
   F &=
   \begin{pmatrix}
@@ -2155,15 +1802,14 @@ that Cholesky factorization is Gram-Schmitt in feature space.
   \rVert &= \langle \vec{x}_\text{Pr}, \vec{x}_\text{Pr} \rangle -
     \frac{\langle \vec{x}_\text{Pr}, \vec{x}_k \rangle^2}
         {\langle \vec{x}_k, \vec{x}_k \rangle}
-  \shortintertext{Which is precisely the squared
-    covariance of the candidate with the prediction over
-    the variance of the candidate, as in \cref{eq:obj_gp}.}
   % \shortintertext{By induction, one can show}
   % F_2' = F_2 - P_1 F_2
   % \shortintertext{where \( F_2 \) is a set of feature
   %   vectors being conditioned and \( P_1 \) is the projection
   %   matrix onto the subspace spanned by \( F_1 \).}
 \end{align}
+which is precisely the squared covariance of the candidate with the
+prediction over the variance of the candidate, as in \cref{eq:obj_gp}.
 This shows the equivalence as the objective is the same.
 
 \subsection{Checking submodularity}
@@ -2408,17 +2054,24 @@ and expanding the log determinant by the chain rule \cref{eq:det_chain}.
     \right ]
 \end{align}
 We can view this sum as the accumulated \emph{difference} in prediction
-error for a series of prediction problems, where each prediction problem
-is to predict the value of the \( i \)th variable given variables \( i +
-1, i + 2, \dotsc, N \). The left term \( \log \left ( \Theta_{ii \mid s_i
-- \{ i \}} \right ) \) is restricted to only using those variables in the
-sparsity pattern \( s_i \), while the right term \( \log \left ( \Theta_{ii
-\mid i + 1:} \right ) \) is able to use every variable after \( i \). The
-left term will necessarily have greater variance than the right, and the
-goal is to minimize the accumulated deviation. Thus, the KL divergence
-gives a natural way to measure the quality of a sparsity pattern as a good
-sparsity pattern should maintain predictive accuracy while subject to the
-constraint that some variables have no interaction with others.
+error for a series of prediction problems, where each prediction problem is
+to predict the value of the \( i \)th variable given variables \( i + 1, i
++ 2, \dotsc, N \). The left term \( \log \left ( \Theta_{ii \mid s_i - \{ i
+\}} \right ) \) is restricted to only using those variables in the sparsity
+pattern \( s_i \), while the right term \( \log \left ( \Theta_{ii \mid i +
+1:} \right ) \) is able to use every variable after \( i \). The left term
+will necessarily have greater variance than the right, and the goal is to
+minimize the accumulated deviation. Thus, the KL divergence gives a natural
+way to measure the quality of a sparsity pattern as a good sparsity pattern
+should maintain predictive accuracy while subject to the constraint that
+some variables have no interaction with others. This interpretation is also
+given in \cite{katzfuss2022scalable}.
+
+Another interpretation is from \cite{bartels2022adaptive}, where they view
+the full prediction problems as the log likelihood of the variables. Under
+this interpretation, conditional independence (through the screening effect)
+corresponds to a near-constant value of \( \log(\Theta_{ii \mid i + 1:}) \),
+which results in a linear plot of log-likelihood with increasing \( N \).
 
 Because the KL divergence is not symmetric, it matters which way the
 KL divergence is taken as well as whether both matrices have been

@@ -1,0 +1,44 @@
+\begin{algorithmic}[1]
+  \REQUIRE \( \vec{x}_\text{Tr}, \vec{x}_\text{Pr}, K(\cdot, \cdot), s \)
+  \ENSURE \( I \)
+
+  \STATE \( n \gets \lvert \vec{x}_\text{Tr} \rvert \)
+  \STATE \( m \gets \lvert \vec{x}_\text{Pr} \rvert \)
+  \STATE \(
+    \vec{x} \gets
+    \begin{pmatrix}
+      \vec{x}_\text{Tr} \\
+      \vec{x}_\text{Pr}
+    \end{pmatrix}
+  \)
+  \STATE \( I \gets \emptyset \)
+  \STATE \( -I \gets \{ 1, 2, \dotsc, n \} \)
+  \STATE \( L \gets \vec{0}^{(n + m) \times s} \)
+  \STATE \( L_\text{Pr} \gets \vec{0}^{(n + m) \times (s + m)} \)
+  \STATE \(
+    \diag(\Theta_{\text{Tr}, \text{Tr} \mid I}) \gets
+    \diag(K(\vec{x}_\text{Tr}, \vec{x}_\text{Tr}))
+  \)
+  \STATE \(
+    \diag(\Theta_{\text{Tr}, \text{Tr} \mid I, \text{Pr}}) \gets
+    \diag(\Theta_{\text{Tr}, \text{Tr} \mid I})
+  \)
+  \FOR{\( i \in \{ 1, 2, \dotsc, m \} \)}
+    \STATE Update \( L_\text{Pr} \) and \( \diag(\Theta_{\text{Tr}, \text{Tr}
+      \mid I, \text{Pr}}) \) with \( k = n + i \) by \cref{alg:chol_update}.
+  \ENDFOR
+  \WHILE{\( \lvert -I \rvert > 0 \) and \( \lvert I \rvert <s \)}
+    \STATE \(
+      k \gets \max_{j \in -I}
+      \frac{\Theta_{j, \text{Pr} \mid I}}{\Theta_{jj \mid I}}
+    \)
+    \STATE \( I \gets I \cup \{ k \} \)
+    \STATE \( -I \gets -I - \{ k \} \)
+    \STATE \( i \gets \lvert I \rvert \)
+    \STATE Update \( L \) and \( \diag(\Theta_{\text{Tr}, \text{Tr}
+      \mid I}) \) by \\ \cref{alg:chol_update}.
+    \STATE Update \( L_\text{Pr} \) and \( \diag(\Theta_{\text{Tr}, \text{Tr}
+      \mid I, \text{Pr}}) \) with \( i = i + m \) by \cref{alg:chol_update}.
+  \ENDWHILE
+  \RETURN \( I \)
+\end{algorithmic}

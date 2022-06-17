@@ -1,0 +1,109 @@
+\begin{algorithmic}[1]
+  \REQUIRE \( \vec{x}_\text{Tr}, \vec{x}_\text{Pr}, K(\cdot, \cdot), s \)
+  \ENSURE \( I \)
+
+  \STATE \( n \gets \lvert \vec{x}_\text{Tr} \rvert \)
+  \STATE \( m \gets \lvert \vec{x}_\text{Pr} \rvert \)
+  \STATE \(
+    \vec{x} \gets
+    \begin{pmatrix}
+      \vec{x}_\text{Tr} \\
+      \vec{x}_\text{Pr}
+    \end{pmatrix}
+  \)
+  \STATE \( I \gets \emptyset \)
+  \STATE \( -I \gets \{ 1, 2, \dotsc, n \} \)
+  \STATE \( \Theta_{I, I}^{-1} \gets \mathbb{R}^{0 \times 0} \)
+  \STATE \(
+    \Theta_{\text{Pr}, \text{Pr} \mid I}^{-1} \gets
+    K(\vec{x}_\text{Pr}, \vec{x}_\text{Pr})
+  \)
+  \STATE \(
+    \Theta_{\text{Tr}, \text{Pr} \mid I} \gets
+    K(\vec{x}_\text{Tr}, \vec{x}_\text{Pr})
+  \)
+  \STATE \(
+    \diag(\Theta_{\text{Tr}, \text{Tr} \mid I}) \gets
+    \diag(K(\vec{x}_\text{Tr}, \vec{x}_\text{Tr}))
+  \)
+  \STATE \(
+    \diag(\Theta_{\text{Tr}, \text{Tr} \mid I, \text{Pr}}) \gets
+    \diag(\Theta_{\text{Tr}, \text{Tr} \mid I})
+  \) \\  \(
+    - \diag(
+      \Theta_{\text{Tr}, \text{Pr} \mid I}
+      \Theta_{\text{Pr}, \text{Pr} \mid I}^{-1}
+      \Theta_{\text{Pr}, \text{Tr} \mid I}
+    )
+  \)
+  \WHILE{\( \lvert -I \rvert > 0 \) and \( \lvert I \rvert <s \)}
+    \STATE \(
+      k \gets \min_{j \in -I}
+      \frac{\Theta_{jj \mid I, \text{Pr}}}{\Theta_{jj \mid I}}
+    \)
+    \STATE \( I \gets I \cup \{ k \} \)
+    \STATE \( -I \gets -I - \{ k \} \)
+    \STATE \(
+      \vec{v} \gets \Theta_{I, I}^{-1}
+      K(\vec{x}_\text{Tr}[I - \{ k \}], \vec{x}_\text{Tr}[k])
+    \)
+    \STATE \(
+      \Theta_{I, I}^{-1} \gets
+      \begin{pmatrix}
+        \Theta_{I, I}^{-1} +
+        \frac{\vec{v} \vec{v}^{\top}}{\Theta_{kk \mid I}} &
+        \frac{-\vec{v}}{\Theta_{kk \mid I}} \\
+        \frac{-\vec{v}^{\top}}{\Theta_{kk \mid I}} &
+        \frac{1}{\Theta_{kk \mid I}}
+      \end{pmatrix}
+    \)
+    \STATE \(
+      \vec{w} \gets \Theta_{\text{Pr}, \text{Pr} \mid I}^{-1}
+      \Theta_{k, \text{Pr} \mid I}^{\top}
+    \)
+    \STATE \(
+      \Theta_{\text{Pr}, \text{Pr} \mid I}^{-1} \gets
+      \Theta_{\text{Pr}, \text{Pr} \mid I}^{-1} +
+      \frac{\vec{w} \vec{w}^{\top}}{\Theta_{kk \mid I, \text{Pr}}}
+    \)
+    \STATE \(
+      \Theta_{:, k \mid I} \gets
+        K(\vec{x}, \vec{x}_k) -
+        K(\vec{x}, \vec{x}_{I - \{ k \}}) \vec{v}
+    \)
+    \STATE \(
+        \Theta_{:, k \mid I, \text{Pr}} \gets
+        \Theta_{:, k \mid I} -
+        \Theta_{:, \text{Pr} \mid I} \vec{w}
+    \)
+    \STATE \(
+      \vec{u} \gets
+      \frac{\Theta_{:, k \mid I}}{\sqrt{\Theta_{kk \mid I}}}
+    \)
+    \STATE \(
+      \vec{u}_\text{Pr} \gets
+      \frac{\Theta_{:, k \mid I, \text{Pr}}}
+            {\sqrt{\Theta_{kk \mid I, \text{Pr}}}}
+    \)
+    \FOR{\( j \in -I \)}
+      \STATE \(
+        \Theta_{jj \mid I} \gets
+        \Theta_{jj \mid I} -
+        \vec{u}_j^2
+      \)
+      \STATE \(
+        \Theta_{jj \mid I, \text{Pr}} \gets
+        \Theta_{jj \mid I, \text{Pr}} -
+        (\vec{u}_\text{Pr})_j^2
+      \)
+      \FOR{\( c \in \{ 1, 2, \dotsc, m \} \)}
+        \STATE \(
+          \Theta_{j, \text{Pr}[c] \mid I} \gets
+          \Theta_{j, \text{Pr}[c] \mid I} -
+          \vec{u}_j \vec{u}_{n + c}
+        \)
+      \ENDFOR
+    \ENDFOR
+  \ENDWHILE
+  \RETURN \( I \)
+\end{algorithmic}

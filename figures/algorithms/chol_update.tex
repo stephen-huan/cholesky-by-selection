@@ -1,0 +1,14 @@
+\begin{algorithmic}[1]
+  \REQUIRE \( \vec{x}, K(\cdot, \cdot), i, k, L, \diag(\Theta) \)
+  \ENSURE \( L_{:, i}, \diag(\Theta_{\mid k}) \)
+
+  \STATE \( n \gets \lvert \diag(\Theta) \rvert \)
+  \STATE \(
+    L_{:, i} \gets
+    K(\vec{x}, \vec{x}_k) - L_{:, :i - 1} L_{k, :i - 1}^{\top}
+  \)
+  \STATE \( L_{:, i} \gets \frac{L{:, i}}{\sqrt{L_{k, i}}} \)
+  \FOR{\( j \in \{ 1, 2, \dotsc, n \} \)}
+    \STATE \( \Theta_{jj} \gets \Theta_{jj} - L_{j, i}^2 \)
+  \ENDFOR
+\end{algorithmic}
