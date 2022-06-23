@@ -424,8 +424,8 @@ such a distribution over an uncountable number of points consistently, a
 Gaussian process is specified by a \emph{mean function} \( \mu(\vec{x}) \) and
 \emph{covariance function} or \emph{kernel function} \( K(\vec{x}, \vec{y})
 \). For any finite set of points \( X = \{ \vec{x}_1, \dotsc, \vec{x}_n \}
-\) ,\( f(X) \sim \mathcal{N}(\vec{\mu}, \Theta) \), where \( \vec{\mu}_i =
-\mu(\vec{x}_i) \) and \( \Theta_{ij} = K(\vec{x}_i, \vec{x}_j) \).
+\) ,\( f(X) \sim \mathcal{N}(\vec{\mu}, \CM) \), where \( \vec{\mu}_i =
+\mu(\vec{x}_i) \) and \( \CM_{ij} = K(\vec{x}_i, \vec{x}_j) \).
 
 In order to compute a prediction at \( \vec{x}_\text{Pr} \), we can
 simply condition the desired prediction \( \vec{y}_\text{Pr} \) on the
@@ -433,64 +433,64 @@ observed outputs and compute the conditional expectation. We can also
 find the conditional variance, which will quantify the uncertainty of
 our prediction. If we block our covariance matrix
 \(
-  \Theta =
+  \CM =
   \begin{pmatrix}
-    \Theta_{\text{Tr}, \text{Tr}} & \Theta_{\text{Tr}, \text{Pr}} \\
-    \Theta_{\text{Pr}, \text{Tr}} & \Theta_{\text{Pr}, \text{Pr}}
+    \CM_{\text{Tr}, \text{Tr}} & \CM_{\text{Tr}, \text{Pr}} \\
+    \CM_{\text{Pr}, \text{Tr}} & \CM_{\text{Pr}, \text{Pr}}
   \end{pmatrix}
 \)
-where \( \Theta_{\text{Tr}, \text{Tr}}, \Theta_{\text{Pr}, \text{Pr}},
-\Theta_{\text{Tr}, \text{Pr}}, \Theta_{\text{Pr}, \text{Tr}} \) are the
+where \( \CM_{\text{Tr}, \text{Tr}}, \CM_{\text{Pr}, \text{Pr}},
+\CM_{\text{Tr}, \text{Pr}}, \CM_{\text{Pr}, \text{Tr}} \) are the
 covariance matrices of the training data, testing data, and training and test
 data respectively, then the conditional expectation and covariance are:
 \begin{align}
   \label{eq:cond_mean}
   \E[\vec{y}_\text{Pr} \mid \vec{y}_\text{Tr}] &=
     \vec{\mu}_\text{Pr} +
-    \Theta_{\text{Pr}, \text{Tr}} \Theta_{\text{Tr}, \text{Tr}}^{-1}
+    \CM_{\text{Pr}, \text{Tr}} \CM_{\text{Tr}, \text{Tr}}^{-1}
     (\vec{y}_\text{Tr} - \vec{\mu}_\text{Tr}) \\
   \label{eq:cond_cov}
   \Cov[\vec{y}_\text{Pr} \mid \vec{y}_\text{Tr}] &=
-    \Theta_{\text{Pr}, \text{Pr}} -
-    \Theta_{\text{Pr}, \text{Tr}} \Theta_{\text{Tr}, \text{Tr}}^{-1}
-    \Theta_{\text{Tr}, \text{Pr}}
+    \CM_{\text{Pr}, \text{Pr}} -
+    \CM_{\text{Pr}, \text{Tr}} \CM_{\text{Tr}, \text{Tr}}^{-1}
+    \CM_{\text{Tr}, \text{Pr}}
   \shortintertext{For brevity of notation, we will
     often denote the conditional covariance matrix as}
   \label{eq:cond_cov_notation}
-  \Theta_{\text{Pr}, \text{Pr} \mid \text{Tr}} &:=
-    \Theta_{\text{Pr}, \text{Pr}} -
-    \Theta_{\text{Pr}, \text{Tr}} \Theta_{\text{Tr}, \text{Tr}}^{-1}
-    \Theta_{\text{Tr}, \text{Pr}}
+  \CM_{\text{Pr}, \text{Pr} \mid \text{Tr}} &:=
+    \CM_{\text{Pr}, \text{Pr}} -
+    \CM_{\text{Pr}, \text{Tr}} \CM_{\text{Tr}, \text{Tr}}^{-1}
+    \CM_{\text{Tr}, \text{Pr}}
   \shortintertext{When conditioning on multiple sets, the sets are given in
     order of computation. Although the resulting covariance matrix is the same,
     a different order of conditioning means different intermediate results in
     repeated application of \cref{eq:cond_cov}. In general,}
-  \Theta_{I, J \mid K_1, K_2, \dotsc, K_n} &:=
+  \CM_{I, J \mid K_1, K_2, \dotsc, K_n} &:=
     \Cov[\vec{y}_I, \vec{y}_J \mid
          \vec{y}_{K_1 \cup K_2 \cup \dotsb \cup K_n}]
   \shortintertext{denotes the covariance between the variables in index
     sets \( I \) and \( J \), conditional on the variables in \( K_1, K_2,
     \dots, K_n \). Note that by the quotient rule of Schur complementation:}
   \label{eq:quotient_rule}
-  \Theta_{I, J \mid K_{1 \dots n}} &=
-    \Theta_{I, J \mid K_{1 \dots n - 1}} -
-    \Theta_{I, K_n \mid K_{1 \dots n - 1}}
-    \Theta_{K_n, K_n \mid K_{1 \dots n - 1}}^{-1}
-    \Theta_{K_n, J \mid K_{1 \dots n - 1}}
+  \CM_{I, J \mid K_{1 \dots n}} &=
+    \CM_{I, J \mid K_{1 \dots n - 1}} -
+    \CM_{I, K_n \mid K_{1 \dots n - 1}}
+    \CM_{K_n, K_n \mid K_{1 \dots n - 1}}^{-1}
+    \CM_{K_n, J \mid K_{1 \dots n - 1}}
 \end{align}
 \Stodo{\( I \) is overloaded to be identity, an index set,
 and mutual information/information gain. \( I \) should
 refer to identity and the other two must be disambiguated.}
 
 Note that calculating the posterior mean and variance requires inverting the
-training covariance matrix \( \Theta_{\text{Tr}, \text{Tr}} \), which costs
-\( \mathcal{O}(N^3) \), where \( N \) is the number of training points. This
+training covariance matrix \( \CM_{\text{Tr}, \text{Tr}} \), which costs
+\( \BigO(N^3) \), where \( N \) is the number of training points. This
 scaling is prohibitive for large datasets, so many \emph{sparse} Gaussian
 process regression techniques have been proposed. These methods often focus
 on selecting a subset of the training data that is most informative about the
 prediction points, which naturally aligns with our \( k \)-NN perspective.
 If \( s \) points are selected out of the \( N \), then the inversion will
-cost \( \mathcal{O}(s^3) \), which could be substantially cheaper if \( s \)
+cost \( \BigO(s^3) \), which could be substantially cheaper if \( s \)
 is significantly smaller than \( N \). The question is then how to select as
 few points as possible while maintaining predictive accuracy.
 
@@ -507,7 +507,7 @@ regression context. The mutual information, or \emph{information gain} is
 defined as
 \begin{align}
   \label{eq:info}
-  \I[\vec{y}_\text{Pr};\vec{y}_\text{Tr}] &= \entropy[\vec{y}_\text{Pr}] -
+  \MI[\vec{y}_\text{Pr};\vec{y}_\text{Tr}] &= \entropy[\vec{y}_\text{Pr}] -
     \entropy[\vec{y}_\text{Pr} \mid \vec{y}_\text{Tr}]
 \end{align}
 We can use the fact that the entropy of a multivariate Gaussian is
@@ -534,7 +534,7 @@ from comparing the mutual information to the EV-VE identity, which states
 \begin{align}
   \textcolor{orange}{\entropy[\vec{y}_\text{Pr}]} &=
     \textcolor{lightblue}{\entropy[\vec{y}_\text{Pr} \mid \vec{y}_\text{Tr}]} +
-    \textcolor{rust}{\I[\vec{y}_\text{Pr};\vec{y}_\text{Tr}]} \\
+    \textcolor{rust}{\MI[\vec{y}_\text{Pr};\vec{y}_\text{Tr}]} \\
   \textcolor{orange}{\Var[\vec{y}_\text{Pr}]} &=
     \textcolor{lightblue}{\E[\Var[\vec{y}_\text{Pr} \mid \vec{y}_\text{Tr}]]} +
     \textcolor{rust}{     \Var[\E[\vec{y}_\text{Pr} \mid \vec{y}_\text{Tr}]]}
@@ -567,23 +567,23 @@ matrix after conditioning on \( y_k \), in addition to the indices already
 selected according to \cref{eq:cond_cov}:
 \begin{align}
   \nonumber
-  \Theta_{:, : \mid I, k} &= \Theta_{:, : \mid I} -
-    \Theta_{:, k \mid I} \Theta_{k, k \mid I}^{-1} \Theta_{k, : \mid I} \\
+  \CM_{:, : \mid I, k} &= \CM_{:, : \mid I} -
+    \CM_{:, k \mid I} \CM_{k, k \mid I}^{-1} \CM_{k, : \mid I} \\
   \label{eq:cond_select}
-                          &= \Theta_{:, : \mid I} -
-    \frac{\Theta_{:, k \mid I} \Theta_{:, k \mid I}^{\top}}{\Theta_{kk \mid I}}
+                          &= \CM_{:, : \mid I} -
+    \frac{\CM_{:, k \mid I} \CM_{:, k \mid I}^{\top}}{\CM_{kk \mid I}}
 \end{align}
 
 We see that conditioning on a new entry is a rank-one update on the current
-covariance matrix \( \Theta_{\mid I} \), given by the vector \( \vec{u} =
-\frac{\Theta_{:, k \mid I}}{\sqrt{\Theta_{kk \mid I}}} \). Thus, the amount
+covariance matrix \( \CM_{\mid I} \), given by the vector \( \vec{u} =
+\frac{\CM_{:, k \mid I}}{\sqrt{\CM_{kk \mid I}}} \). Thus, the amount
 that the variance of \( \vec{y}_\text{Pr} \) will decrease after selecting
 \( k \) is given by \( u_{n + 1}^2 \), or
 \begin{align}
   \label{eq:obj_gp}
   \frac{\Cov[\vec{y}_{\text{Tr}}[k], \vec{y}_\text{Pr} \mid I]^2}
        {\Var[\vec{y}_{\text{Tr}}[k] \mid I]} &=
-  \frac{\Theta_{k, n + 1 \mid I}^2}{\Theta_{kk \mid I}}
+  \frac{\CM_{k, n + 1 \mid I}^2}{\CM_{kk \mid I}}
   = \Var[\vec{y}_\text{Pr} \mid I]
     \Corr[\vec{y}_\text{Tr}[k], \vec{y}_\text{Pr} \mid I]^2
 \end{align}
@@ -592,21 +592,21 @@ and conditional covariance with the prediction point after conditioning on
 the points already selected to compute \cref{eq:obj_gp}. We then simply
 choose the candidate with the largest decrease in predictive variance. To
 keep track of the conditional variance and covariance, we can simply start
-with the initial values given by \( \Theta_{kk} \) and \( \Theta_{nk} \) and
+with the initial values given by \( \CM_{kk} \) and \( \CM_{nk} \) and
 update after selecting an index \( j \). We compute \( \vec{u} \) for \( j
 \) directly according to \cref{eq:cond_cov} and update \( k \)'s conditional
 variance by subtracting \( u_k^2 \) and update its conditional covariance
 by subtracting \( u_k u_{n + 1} \).
 
 In order to efficiently compute \( \vec{u} \), we rely on two main
-strategies. The direct method is to keep track of \( \Theta_{I, I}^{-1} \),
+strategies. The direct method is to keep track of \( \CM_{I, I}^{-1} \),
 or the precision of the selected entries, and update the precision every
 time a new index is added to \( I \). This can be done efficiently in \(
-\mathcal{O}(s^2) \), see \cref{app:prec_insert}. Once \( \Theta_{I, I}^{-1}
+\BigO(s^2) \), see \cref{app:prec_insert}. Once \( \CM_{I, I}^{-1}
 \) has been computed, \( \vec{u} \) is computed trivially according to
 \cref{eq:cond_cov}. For each of the \( s \) rounds of selection, it takes
 \( s^2 \) to update the precision, and costs \( Ns \) to compute \( \vec{u}
-\), costing \( \mathcal{O}(N s^2 + s^3) = \mathcal{O}(N s^2) \) overall.
+\), costing \( \BigO(N s^2 + s^3) = \BigO(N s^2) \) overall.
 
 The second approach is to take advantage of the quotient rule of Schur
 complementation. Stated statistically, the quotient rule states that
@@ -617,50 +617,50 @@ factorization can be viewed as iterative conditioning:
   \shortintertext{Re-writing the joint covariance matrix,}
   \label{eq:chol_schur}
   \begin{pmatrix}
-    \Theta_{1, 1} & \Theta_{1, 2} \\
-    \Theta_{2, 1} & \Theta_{2, 2}
+    \CM_{1, 1} & \CM_{1, 2} \\
+    \CM_{2, 1} & \CM_{2, 2}
   \end{pmatrix} &=
   \begin{pmatrix}
-    I & 0 \\
-    \textcolor{darkorange}{\Theta_{2, 1} \Theta_{1, 1}^{-1}} & I
+    \Id & 0 \\
+    \textcolor{darkorange}{\CM_{2, 1} \CM_{1, 1}^{-1}} & \Id
   \end{pmatrix}
   \begin{pmatrix}
-    \Theta_{1, 1} & 0 \\
+    \CM_{1, 1} & 0 \\
     0 & \textcolor{lightblue}{
-      \Theta_{2, 2} - \Theta_{2, 1} \Theta_{1, 1}^{-1} \Theta_{1, 2}
+      \CM_{2, 2} - \CM_{2, 1} \CM_{1, 1}^{-1} \CM_{1, 2}
     }
   \end{pmatrix}
   \begin{pmatrix}
-    I & \textcolor{darkorange}{\Theta_{1, 1}^{-1} \Theta_{1, 2}} \\
-    0 & I
+    \Id & \textcolor{darkorange}{\CM_{1, 1}^{-1} \CM_{1, 2}} \\
+    0 & \Id
   \end{pmatrix}
   \shortintertext{so we see that the Cholesky factorization of the joint
-    covariance \( \Theta \) is}
+    covariance \( \CM \) is}
   \label{eq:chol}
-  \chol(\Theta) &=
+  \chol(\CM) &=
   \begin{pmatrix}
-    I & 0 \\
-    \textcolor{darkorange}{\Theta_{2, 1} \Theta_{1, 1}^{-1}} & I
+    \Id & 0 \\
+    \textcolor{darkorange}{\CM_{2, 1} \CM_{1, 1}^{-1}} & \Id
   \end{pmatrix}
   \begin{pmatrix}
-    \chol(\Theta_{1, 1}) & 0 \\
+    \chol(\CM_{1, 1}) & 0 \\
     0 & \chol(\textcolor{lightblue}{
-      \Theta_{2, 2} - \Theta_{2, 1} \Theta_{1, 1}^{-1} \Theta_{1, 2}
+      \CM_{2, 2} - \CM_{2, 1} \CM_{1, 1}^{-1} \CM_{1, 2}
     })
   \end{pmatrix} \\
   \nonumber
   &=
   \begin{pmatrix}
-    \chol(\Theta_{1, 1}) & 0 \\
-    \Theta_{2, 1} \chol(\Theta_{1, 1})^{-\top} & \chol(
-      \Theta_{2, 2} - \Theta_{2, 1} \Theta_{1, 1}^{-1} \Theta_{1, 2}
+    \chol(\CM_{1, 1}) & 0 \\
+    \CM_{2, 1} \chol(\CM_{1, 1})^{-\top} & \chol(
+      \CM_{2, 2} - \CM_{2, 1} \CM_{1, 1}^{-1} \CM_{1, 2}
     )
   \end{pmatrix}
 \end{align}
-Here \( \textcolor{darkorange}{\Theta_{2, 1} \Theta_{1, 1}^{-1}} \)
+Here \( \textcolor{darkorange}{\CM_{2, 1} \CM_{1, 1}^{-1}} \)
 corresponds to the conditional expectation in \cref{eq:cond_mean} and \\ \(
 \textcolor{lightblue}{
-  \Theta_{2, 2} - \Theta_{2, 1} \Theta_{1, 1}^{-1} \Theta_{1, 2}
+  \CM_{2, 2} - \CM_{2, 1} \CM_{1, 1}^{-1} \CM_{1, 2}
 } \)
 corresponds to the conditional covariance in \cref{eq:cond_cov}. Thus, we
 see that Cholesky factorization is iteratively conditioning the Gaussian
@@ -672,8 +672,8 @@ of the Cholesky factor corresponds precisely to the corresponding \( \vec{u}
 The Cholesky factorization can be efficiently computed without excess
 dependence on \( N \) with left-looking, so the conditioning only
 happens when we need it. For each of the \( s \) rounds of selection,
-it costs \( \mathcal{O}(Ns) \) to compute the next column of the
-Cholesky factorization, for a total cost of \( \mathcal{O}(Ns^2) \),
+it costs \( \BigO(Ns) \) to compute the next column of the
+Cholesky factorization, for a total cost of \( \BigO(Ns^2) \),
 matching the time complexity of the explicit precision approach.
 
 \noindent
@@ -694,11 +694,11 @@ matching the time complexity of the explicit precision approach.
 \end{minipage}
 
 While both approaches have the same time complexity, the explicit precision
-algorithm uses \( \mathcal{O}(s^2) \) space to store the precision while the
-Cholesky factorization uses \( \mathcal{O}(N s) \) to store the first \( s \)
-columns of the Cholesky factorization of \( \Theta \), which is always more
+algorithm uses \( \BigO(s^2) \) space to store the precision while the
+Cholesky factorization uses \( \BigO(N s) \) to store the first \( s \)
+columns of the Cholesky factorization of \( \CM \), which is always more
 memory than the precision (\( N > s \)). Both algorithms use an additional \(
-\mathcal{O}(N) \) space to store the conditional variances and covariances.
+\BigO(N) \) space to store the conditional variances and covariances.
 Although the precision algorithm uses asymptotically less memory than the
 Cholesky algorithm, the Cholesky algorithm is preferred for better constant
 factor speed and ease of implementation.
@@ -707,7 +707,7 @@ factor speed and ease of implementation.
 Once the indices have been computed according to \cref{alg:gp_select}
 or \cref{alg:select_chol}, inferring the conditional mean and
 covariance of the unknown data can be done directly according to
-\cref{eq:cond_mean} and \cref{eq:cond_cov} in time \( \mathcal{O}(s^3)
+\cref{eq:cond_mean} and \cref{eq:cond_cov} in time \( \BigO(s^3)
 \) using \cref{alg:infer_select}.
 
 This algorithm is in fact the covariance equivalent of the
@@ -727,7 +727,7 @@ first question is how to generalize the previous objective for a single point
 \cref{eq:obj_gp} to multiple points. Following the same mutual information
 justification as before, a natural criterion is to minimize the log determinant
 of the prediction points' covariance matrix after conditioning on the
-selected points, or \( \logdet(\Theta_{\text{Pr}, \text{Pr} \mid I}) \). This
+selected points, or \( \logdet(\CM_{\text{Pr}, \text{Pr} \mid I}) \). This
 objective, known as D-optimal \cite{krause2008nearoptimal}, has many intuitive
 interpretations --- for example, as the volume of the region of uncertainty
 or as the scaling factor in the density function for the Gaussian process.
@@ -741,42 +741,42 @@ Using the matrix determinant lemma,
   \label{eq:obj_gp_mult}
   \logdet
   \left (
-    \Theta_{\text{Pr}, \text{Pr} \mid I \cup \{ k \}}
+    \CM_{\text{Pr}, \text{Pr} \mid I \cup \{ k \}}
   \right ) &= \logdet
     \left (
-      \Theta_{\text{Pr}, \text{Pr} \mid I} -
-      \frac{\Theta_{\text{Pr}, k \mid I}
-            \Theta_{\text{Pr}, k \mid I}^{\top}
-           }{\Theta_{kk \mid I}}
+      \CM_{\text{Pr}, \text{Pr} \mid I} -
+      \frac{\CM_{\text{Pr}, k \mid I}
+            \CM_{\text{Pr}, k \mid I}^{\top}
+           }{\CM_{kk \mid I}}
     \right ) \\
   \nonumber
-           &= \logdet \left ( \Theta_{\text{Pr}, \text{Pr} \mid I} \right ) +
+           &= \logdet \left ( \CM_{\text{Pr}, \text{Pr} \mid I} \right ) +
     \log
     \left (
       1 -
-      \frac{\Theta_{\text{Pr}, k \mid I}^{\top}
-            \Theta_{\text{Pr}, \text{Pr} \mid I}^{-1}
-            \Theta_{\text{Pr}, k \mid I}
-           }{\Theta_{kk \mid I}}
+      \frac{\CM_{\text{Pr}, k \mid I}^{\top}
+            \CM_{\text{Pr}, \text{Pr} \mid I}^{-1}
+            \CM_{\text{Pr}, k \mid I}
+           }{\CM_{kk \mid I}}
     \right )
   \shortintertext{Focusing on the second term, we can turn
     the quadratic form into conditioning:}
   \nonumber
-           &= \logdet \left ( \Theta_{\text{Pr}, \text{Pr} \mid I} \right ) +
+           &= \logdet \left ( \CM_{\text{Pr}, \text{Pr} \mid I} \right ) +
     \log
     \left (
-      \frac{\Theta_{kk \mid I} -
-            \Theta_{k, \text{Pr} \mid I}
-            \Theta_{\text{Pr}, \text{Pr} \mid I}^{-1}
-            \Theta_{\text{Pr}, k \mid I}
-           }{\Theta_{kk \mid I}}
+      \frac{\CM_{kk \mid I} -
+            \CM_{k, \text{Pr} \mid I}
+            \CM_{\text{Pr}, \text{Pr} \mid I}^{-1}
+            \CM_{\text{Pr}, k \mid I}
+           }{\CM_{kk \mid I}}
     \right )
   \label{eq:greedy_mult}
   \shortintertext{By the quotient rule, we combine the conditioning:}
-           &= \logdet \left ( \Theta_{\text{Pr}, \text{Pr} \mid I} \right ) +
+           &= \logdet \left ( \CM_{\text{Pr}, \text{Pr} \mid I} \right ) +
     \log
     \left (
-      \frac{\Theta_{kk \mid I, \text{Pr}}}{\Theta_{kk \mid I}}
+      \frac{\CM_{kk \mid I, \text{Pr}}}{\CM_{kk \mid I}}
     \right )
 \end{align}
 \Stodo{this maybe should be changed to information gain by flipping the sign}
@@ -806,25 +806,25 @@ We again have two strategies, one which explicitly maintains precisions and
 the other which relies on Cholesky factorization.
 
 For the precision algorithm, using \cref{eq:cond_cov} directly, for \(
-m \) prediction points it costs \( \mathcal{O}(m^3) \) to compute \(
-\Theta_{\text{Pr}, \text{Pr}}^{-1} \) and then \( \mathcal{O}(N m^2) \)
-to compute \( \Theta_{kk \mid \text{Pr}} \) for the \( N \) candidates \(
+m \) prediction points it costs \( \BigO(m^3) \) to compute \(
+\CM_{\text{Pr}, \text{Pr}}^{-1} \) and then \( \BigO(N m^2) \)
+to compute \( \CM_{kk \mid \text{Pr}} \) for the \( N \) candidates \(
 k \). For each of the \( s \) rounds of selecting candidates, it costs
-\( s^2 \) and \( m^2 \) to update the precisions \( \Theta_{I, I}^{-1}
-\) and \( \Theta_{\text{Pr}, \text{Pr}}^{-1} \) respectively, where the
-details of efficiently updating \( \Theta_{\text{Pr}, \text{Pr}}^{-1}
+\( s^2 \) and \( m^2 \) to update the precisions \( \CM_{I, I}^{-1}
+\) and \( \CM_{\text{Pr}, \text{Pr}}^{-1} \) respectively, where the
+details of efficiently updating \( \CM_{\text{Pr}, \text{Pr}}^{-1}
 \) after the rank-one update in \cref{eq:obj_gp_mult} are given in
-\cref{app:prec_cond}. Given the precisions, \( \vec{u} = \frac{\Theta_{:,
-k \mid I}}{\sqrt{\Theta_{kk \mid I}}} \) and \( \vec{u}_\text{Pr} =
-\frac{\Theta_{:, k \mid I, \text{Pr}}}{\sqrt{\Theta_{kk \mid I, \text{Pr}}}}
+\cref{app:prec_cond}. Given the precisions, \( \vec{u} = \frac{\CM_{:,
+k \mid I}}{\sqrt{\CM_{kk \mid I}}} \) and \( \vec{u}_\text{Pr} =
+\frac{\CM_{:, k \mid I, \text{Pr}}}{\sqrt{\CM_{kk \mid I, \text{Pr}}}}
 \) are computed as usual according to \cref{eq:cond_cov} in time \( Ns
 \) and \( Nm \). Finally, for each candidate \( j \), the conditional
-variance \( \Theta_{jj \mid I} \) is updated by subtracting \( u_j^2 \),
-the conditional covariance \( \Theta_{\text{Pr}, k \mid I} \) is updated
+variance \( \CM_{jj \mid I} \) is updated by subtracting \( u_j^2 \),
+the conditional covariance \( \CM_{\text{Pr}, k \mid I} \) is updated
 for each prediction point index \( c \) each by subtracting \( u_j u_c
-\), and the conditional variance \( \Theta_{jj \mid I, \text{Pr}} \) is
+\), and the conditional variance \( \CM_{jj \mid I, \text{Pr}} \) is
 updated by subtracting \( {u_\text{Pr}}_j^2 \). The total time complexity
-after simplification is \( \mathcal{O}(N s^2 + N m^2 + m^3) \).
+after simplification is \( \BigO(N s^2 + N m^2 + m^3) \).
 
 For the Cholesky algorithm, two Cholesky factorizations are stored. We first
 compute the Cholesky factorization after selecting each prediction point,
@@ -832,20 +832,20 @@ for a cost of \( (N + m) m \) for each of the \( m \) columns. We then begin
 selecting candidates, which requires updating both Cholesky factors in time \(
 (N + m)(m + s) \) which is dominated by updating the preconditioned Cholesky
 factor. The columns of the Cholesky factors correspond precisely to \( \vec{u}
-\) and \( \vec{u}_\text{Pr} \) and both conditional variances \( \Theta_{jj
-\mid I} \) and \( \Theta_{jj \mid I, \text{Pr}} \) can be computed as above.
+\) and \( \vec{u}_\text{Pr} \) and both conditional variances \( \CM_{jj
+\mid I} \) and \( \CM_{jj \mid I, \text{Pr}} \) can be computed as above.
 The conditional covariances do not need to be computed. Over \( s \) rounds
-the total time complexity is \( \mathcal{O}((N + m) m^2 + s(N + m)(m + s)) \)
-which simplifies to \( \mathcal{O}(N s^2 + N m^2 + m^3) \).
+the total time complexity is \( \BigO((N + m) m^2 + s(N + m)(m + s)) \)
+which simplifies to \( \BigO(N s^2 + N m^2 + m^3) \).
 
 Although both approaches have the same time complexity, like the single
 point case they differ in memory usage. The explicit precision requires \(
-\mathcal{O}(s^2 + m^2) \) memory to store both precisions, as well as \(
-\mathcal{O}(N m) \) memory to store the conditional covariances. The Cholesky
-algorithm, on the othe rhand, requires \( \mathcal{O}((n + m)(m + s)) \) to
+\BigO(s^2 + m^2) \) memory to store both precisions, as well as \(
+\BigO(N m) \) memory to store the conditional covariances. The Cholesky
+algorithm, on the othe rhand, requires \( \BigO((n + m)(m + s)) \) to
 store the first \( m + s \) columns of the Cholesky factorization of the joint
 covariance matrix between training and prediction points, which simplifies
-to \( \mathcal{O}(N s + N m + m^2) \). Comparing the memory usage, they are
+to \( \BigO(N s + N m + m^2) \). Comparing the memory usage, they are
 the same except for \( s^2 \) versus \( N s \), so the Cholesky algorithm
 again uses more memory than the explicit precision algorithm.
 
@@ -882,31 +882,36 @@ to empirically observe for a particular point set and choice of kernel function
 whether it is submodular. We note that one-dimensional points with a Mat{\'e}rn
 kernel function seems to be submodular, but not for any higher dimension.
 
+\cite{das2011submodular, jagalur-mohan2021batch}
+
 \section{Greedy selection for \emph{global} approximation by KL-minimization}
 
-We have a covariance matrix \( \Theta \) and wish to compute the Cholesky
-factorization of \( \Theta \) into a lower triangular factor \( L \) such that
-\( \Theta = L L^{\top} \). \Stodo{justify importance/downstream applications
-of Cholesky factorization}. This can be done in \( \mathcal{O}(N^3) \) with
+reverse maximin ordering
+\cite{guinness2018permutation, schafer2021sparse, schafer2020compression}
+
+We have a covariance matrix \( \CM \) and wish to compute the Cholesky
+factorization of \( \CM \) into a lower triangular factor \( L \) such that
+\( \CM = L L^{\top} \). \Stodo{justify importance/downstream applications
+of Cholesky factorization}. This can be done in \( \BigO(N^3) \) with
 standard algorithms, which is often prohibitive. Recall the problem of
 inference in Gaussian process regression as described in \cref{subsec:gp_reg}
-also took \( \mathcal{O}(N^3) \) to invert the covariance matrix \( \Theta
+also took \( \BigO(N^3) \) to invert the covariance matrix \( \CM
 \). Thus, similar to Guassian process regression, we will use \emph{sparsity}
 to mitigate the computational cost. In fact, we will be able to re-use our
 previous algorithms \cref{alg:gp_select,alg:gp_select_mult} on each column
 of the Cholesky factorization.
 
-We will first compute the Cholesky factorization of \( \Theta^{-1} \),
+We will first compute the Cholesky factorization of \( \CM^{-1} \),
 also known as the \emph{precision matrix}, and use the resulting sparse
-factorization to efficiently compute an approximation for \( \Theta
+factorization to efficiently compute an approximation for \( \CM
 \). Because the precision matrix encodes the distribution of the full
 conditionals, the \( (i, j) \)th entry of the precision matrix is 0 if and
 only if the variables \( x_i \) and \( x_j \) are conditionally independent,
 conditional on the rest of the variables. Thus, the precision matrix \(
-\Theta^{-1} \) can be sparse as a result of conditional independence even
-if the original covariance matrix \( \Theta \) is dense. It therefore
-makes sense to attempt to approximately ``sparsify'' \( \Theta^{-1} \)
-instead of \( \Theta \) with iterated conditioning.
+\CM^{-1} \) can be sparse as a result of conditional independence even
+if the original covariance matrix \( \CM \) is dense. It therefore
+makes sense to attempt to approximately ``sparsify'' \( \CM^{-1} \)
+instead of \( \CM \) with iterated conditioning.
 
 Because of sparsity, we can only get an approximate Cholesky factor \( L \),
 \( \hat{L} \) belonging to a pre-specified sparsity pattern \( S \) --- a set
@@ -917,26 +922,24 @@ resulting distributions, we use the \emph{KL divergence} according to
 \cite{schafer2021sparse}, or the expected difference in log-densities:
 \begin{align}
   \label{eq:L_obj}
-  L \coloneqq \argmin_{\hat{L} \in S} \, \mathbb{D}_{\text{KL}}
-  \left (
-    \mathcal{N}(\vec{0}, \Theta) \, \Big \| \,
-    \mathcal{N}(\vec{0}, (\hat{L} \hat{L}^{\top})^{-1})
-  \right )
+  L \defeq \argmin_{\hat{L} \in S} \,
+    \KL*{\N(\vec{0}, \CM)}
+        {\N(\vec{0}, (\hat{L} \hat{L}^{\top})^{-1})}
 \end{align}
 
 Note that here we are computing the Cholesky factorization
-of \( \Theta^{-1} \). Surprisingly enough, it is possible to
+of \( \CM^{-1} \). Surprisingly enough, it is possible to
 exactly compute \( L \). First, we re-write the KL-divergence:
 \begin{align}
   \label{eq:kl}
   2 \mathbb{D}_{\text{KL}}
   \left (
-    \mathcal{N}(\vec{0}, \Theta_1) \, \Big \| \,
-    \mathcal{N}(\vec{0}, \Theta_2)
+    \mathcal{N}(\vec{0}, \CM_1) \, \Big \| \,
+    \mathcal{N}(\vec{0}, \CM_2)
   \right )
-  = \trace(\Theta_2^{-1} \Theta_1) + \logdet(\Theta_2) - \logdet(\Theta_1) - N
+  = \trace(\CM_2^{-1} \CM_1) + \logdet(\CM_2) - \logdet(\CM_1) - N
 \end{align}
-where \( \Theta_1 \) and \( \Theta_2 \) are both of size
+where \( \CM_1 \) and \( \CM_2 \) are both of size
 \( N \times N \). See \cref{app:kl_obj} for details.
 
 \begin{theorem}
@@ -946,8 +949,8 @@ where \( \Theta_1 \) and \( \Theta_2 \) are both of size
   column of \( L \) in \cref{eq:L_obj} are:
   \begin{align}
     \label{eq:L_col}
-    L_{s_i, i} = \frac{\Theta_{s_i, s_i}^{-1} \vec{e}_1}
-    {\sqrt{\vec{e}_1^{\top} \Theta_{s_i, s_i}^{-1} \vec{e}_1}}
+    L_{s_i, i} = \frac{\CM_{s_i, s_i}^{-1} \vec{e}_1}
+    {\sqrt{\vec{e}_1^{\top} \CM_{s_i, s_i}^{-1} \vec{e}_1}}
   \end{align}
 \end{theorem}
 
@@ -957,47 +960,47 @@ into the KL divergence \cref{eq:kl}, we obtain:
   \label{eq:obj_chol}
   2 \mathbb{D}_{\text{KL}}
   \left (
-    \mathcal{N}(\vec{0}, \Theta) \, \Big \| \,
+    \mathcal{N}(\vec{0}, \CM) \, \Big \| \,
     \mathcal{N}(\vec{0}, (L L^{\top})^{-1})
   \right )
   &= \sum_{i = 1}^N
     \left [
       \log \left (
-        (\vec{e}_1^{\top} \Theta_{s_i, s_i}^{-1} \vec{e}_1)^{-1}
+        (\vec{e}_1^{\top} \CM_{s_i, s_i}^{-1} \vec{e}_1)^{-1}
       \right )
     \right ]
-    - \logdet(\Theta)
+    - \logdet(\CM)
 \end{align}
 
 See \cref{app:kl_L} for details. In particular, it is important
 which direction the KL divergence is or else cancellation of
-the \( \trace(\Theta_2^{-1} \Theta_1) \) term may not occur.
+the \( \trace(\CM_2^{-1} \CM_1) \) term may not occur.
 
-In order to maximize \cref{eq:obj_chol}, we can ignore \( \logdet(\Theta)
+In order to maximize \cref{eq:obj_chol}, we can ignore \( \logdet(\CM)
 \) since it does not depend on \( L \) and maximize over each column
 independently, since each term in the sum only depends on a single
-column. We want to minimize \( (\vec{e}_1^{\top} \Theta_{s_i, s_i}^{-1}
+column. We want to minimize \( (\vec{e}_1^{\top} \CM_{s_i, s_i}^{-1}
 \vec{e}_1)^{-1} \), the term corresponding to the diagonal entry in the
-inverse of the submatrix of \( \Theta \) corresponding to the entries we've
+inverse of the submatrix of \( \CM \) corresponding to the entries we've
 taken. We can give this value statistical interpretation by using the
 fact that marginalization in covariance is conditioning in precision.
 \begin{align}
   \label{eq:inverse_cond}
-  \Theta_{1, 1 \mid 2} &=
-    ((\Theta^{-1})_{1, 1})^{-1}
-  \shortintertext{where \( \Theta \) is blocked according to}
+  \CM_{1, 1 \mid 2} &=
+    ((\CM^{-1})_{1, 1})^{-1}
+  \shortintertext{where \( \CM \) is blocked according to}
   \label{eq:blocking}
-  \Theta &=
+  \CM &=
   \begin{pmatrix}
-    \Theta_{1, 1} & \Theta_{1, 2} \\
-    \Theta_{2, 1} & \Theta_{2, 2}
+    \CM_{1, 1} & \CM_{1, 2} \\
+    \CM_{2, 1} & \CM_{2, 2}
   \end{pmatrix}
   \shortintertext{Thus, we see that}
   \nonumber
-  (\vec{e}_1^{\top} \Theta_{s_i, s_i}^{-1} \vec{e}_1)^{-1}
-         &= ((\Theta_{s_i, s_i}^{-1})_{11})^{-1} \\
+  (\vec{e}_1^{\top} \CM_{s_i, s_i}^{-1} \vec{e}_1)^{-1}
+         &= ((\CM_{s_i, s_i}^{-1})_{11})^{-1} \\
   \label{eq:L_cond_var}
-         &= \Theta_{ii \mid s_i - \{ i \}}
+         &= \CM_{ii \mid s_i - \{ i \}}
 \end{align}
 
 So our objective on each column is to minimize the conditional variance of
@@ -1010,8 +1013,8 @@ difference is that the candidates is limited to indices lower than \( i \),
 that is, candidate indices \( k \) such that \( k > i \) to maintain the
 lower triangularity of \( L \). Once \( s_i \) has been computed for each \(
 i \), \( L \) can be constructed according to \cref{thm:L}. Each column costs
-\( \mathcal{O}(s^3) \) to compute \( \Theta_{s_i, s_i}^{-1} \) for a total
-cost of \( \mathcal{O}(N s^3) \) for the \( N \) columns of \( L \).
+\( \BigO(s^3) \) to compute \( \CM_{s_i, s_i}^{-1} \) for a total
+cost of \( \BigO(N s^3) \) for the \( N \) columns of \( L \).
 
 \subsection{Aggregated sparsity pattern}
 
@@ -1041,21 +1044,21 @@ point Gaussian regression with the chain rule of log determinant through
 conditioning.
 \begin{align}
   \label{eq:det_chain}
-  \logdet(\Theta) &= \logdet(\Theta_{1, 1 \mid 2}) + \logdet(\Theta_{2, 2})
-  \shortintertext{where \( \Theta \) is blocked according to
+  \logdet(\CM) &= \logdet(\CM_{1, 1 \mid 2}) + \logdet(\CM_{2, 2})
+  \shortintertext{where \( \CM \) is blocked according to
     \cref{eq:blocking}. The KL divergence objective for \( \tilde{i} \) is:}
   \nonumber
-  \sum_{i \in \tilde{i}} \log(\Theta_{ii \mid s_i - \{ i \} })
-  &= \log(\Theta_{i_m i_m \mid \tilde{s}}) +
-     \log(\Theta_{i_{m - 1} i_{m - 1} \mid \tilde{s} \cup \{ i_m \}})
+  \sum_{i \in \tilde{i}} \log(\CM_{ii \mid s_i - \{ i \} })
+  &= \log(\CM_{i_m i_m \mid \tilde{s}}) +
+     \log(\CM_{i_{m - 1} i_{m - 1} \mid \tilde{s} \cup \{ i_m \}})
      + \dotsb \\
   \nonumber
-  &= \logdet(\Theta_{\{ i_m, i_{m - 1} \}, \{ i_m, i_{m - 1} \}
+  &= \logdet(\CM_{\{ i_m, i_{m - 1} \}, \{ i_m, i_{m - 1} \}
              \mid \tilde{s}}) +
-    \log(\Theta_{i_{m - 2} i_{m - 2} \mid \tilde{s} \cup \{ i_m, i_{m - 1} \}})
+    \log(\CM_{i_{m - 2} i_{m - 2} \mid \tilde{s} \cup \{ i_m, i_{m - 1} \}})
     + \dotsb \\
   \label{eq:obj_mult}
-  &= \logdet(\Theta_{\tilde{i}, \tilde{i} \mid \tilde{s}})
+  &= \logdet(\CM_{\tilde{i}, \tilde{i} \mid \tilde{s}})
 \end{align}
 
 We see that the objective \cref{eq:obj_mult} is equivalent to the
@@ -1114,11 +1117,11 @@ entry in the aggregation. This viewpoint leads directly to \cref{alg:chol}.
     \REQUIRE \( \vec{x}, K(\cdot, \cdot), s_i \)
     \ENSURE \( L_{s_i, i} \)
 
-    \STATE \( \Theta_{s_i, s_i}^{-1} \gets
+    \STATE \( \CM_{s_i, s_i}^{-1} \gets
       K(\vec{x}[s_i], \vec{x}[s_i])^{-1}
     \)
-    \STATE \( L_{s_i, i} \gets \frac{\Theta_{s_i, s_i}^{-1} \vec{e}_1}
-      {\sqrt{\vec{e}_1^{\top} \Theta_{s_i, s_i}^{-1} \vec{e}_1}}
+    \STATE \( L_{s_i, i} \gets \frac{\CM_{s_i, s_i}^{-1} \vec{e}_1}
+      {\sqrt{\vec{e}_1^{\top} \CM_{s_i, s_i}^{-1} \vec{e}_1}}
     \)
     \RETURN \( L_{s_i, i} \)
   \end{algorithmic}
@@ -1135,7 +1138,7 @@ entry in the aggregation. This viewpoint leads directly to \cref{alg:chol}.
 
     \STATE \( s \gets \tilde{i} \cup \tilde{s} \)
     \STATE \( U \gets P^{\updownarrow}
-      \chol(P^{\updownarrow} \Theta_{s, s} P^{\updownarrow}) P^{\updownarrow}
+      \chol(P^{\updownarrow} \CM_{s, s} P^{\updownarrow}) P^{\updownarrow}
     \)
     \FOR{\( i \in \tilde{i} \)}
       \STATE \( k \gets \) index of \( i \) in \( \tilde{i} \)
@@ -1153,17 +1156,17 @@ all their columns at once. The observation is that the smallest index in the
 group (corresponding to the entry highest in the matrix) will have the largest
 sparsity pattern, the next index will have one less entry (lacking the entry
 above it, which would violate lower triangularity), and so on. We need to
-compute \( \Theta_{s_i, s_i}^{-1} \vec{e}_1 \) for each \( i \in \tilde{i} \),
+compute \( \CM_{s_i, s_i}^{-1} \vec{e}_1 \) for each \( i \in \tilde{i} \),
 or the precision of the marginalized covariance corresponding to the selected
 entries. By \cref{eq:inverse_cond}, we can turn marginalization in covariance
 into conditioning in precision:
 \begin{align}
   \nonumber
   \label{eq:L_precision}
-  L_{s_i, i} &= \frac{\Theta_{s_i, s_i}^{-1} \vec{e}_1}
-    {\sqrt{\vec{e}_1^{\top} \Theta_{s_i, s_i}^{-1} \vec{e}_1}} \\
-             &= \frac{(\Theta_{s, s})^{-1}_{k:, k: \mid :k - 1} \vec{e}_1}
-             {\sqrt{\vec{e}_1^{\top} (\Theta_{s, s})^{-1}_{k:, k: \mid :k - 1}
+  L_{s_i, i} &= \frac{\CM_{s_i, s_i}^{-1} \vec{e}_1}
+    {\sqrt{\vec{e}_1^{\top} \CM_{s_i, s_i}^{-1} \vec{e}_1}} \\
+             &= \frac{(\CM_{s, s})^{-1}_{k:, k: \mid :k - 1} \vec{e}_1}
+             {\sqrt{\vec{e}_1^{\top} (\CM_{s, s})^{-1}_{k:, k: \mid :k - 1}
                     \vec{e}_1}}
 \end{align}
 where \( s = \tilde{i} \cup \tilde{s} \) and \( k \) is \( i \)'s
@@ -1173,7 +1176,7 @@ entries before it. From \cref{eq:chol}, this can be directly read
 off the Cholesky factorization. Thus, we can simply compute:
 \begin{align}
   \label{eq:L_chol}
-  L &= \chol \left ( \Theta_{s, s}^{-1} \right )
+  L &= \chol \left ( \CM_{s, s}^{-1} \right )
 \end{align}
 and read off the \( k \)th column to compute \cref{eq:L_precision} for each
 \( i \in \tilde{i} \). However, instead of computing a lower triangular
@@ -1182,36 +1185,36 @@ the covariance whose inverse transpose will be a \emph{lower} triangular
 factor for the original matrix. In particular, we see that
 \begin{align}
   \label{eq:U_chol}
-  U &= P^{\updownarrow} \chol(P^{\updownarrow} \Theta_{s, s} P^{\updownarrow})
+  U &= P^{\updownarrow} \chol(P^{\updownarrow} \CM_{s, s} P^{\updownarrow})
        P^{\updownarrow}
-  \shortintertext{satisfies \( U U^{\top} = \Theta_{s, s} \) where
+  \shortintertext{satisfies \( U U^{\top} = \CM_{s, s} \) where
   \( P^{\updownarrow} \) is the order-reversing permutation. Thus,}
   \nonumber
-  \Theta_{s, s}^{-1} &= U^{-\top} U^{-1}
+  \CM_{s, s}^{-1} &= U^{-\top} U^{-1}
 \end{align}
-where \( U^{-\top} \) is an \emph{lower} triangular factor for \( \Theta_{s,
+where \( U^{-\top} \) is an \emph{lower} triangular factor for \( \CM_{s,
 s}^{-1} \) equal to \cref{eq:L_col} because the Cholesky factorization is
 unique. Computing \( U^{-\top} \) leads directly to \cref{alg:L_mult}.
 
 Recall that the complexity of selecting \( s \) out of \( N \) total training
 points for \( m \) prediction points using \cref{alg:gp_select_mult} or
-\cref{alg:select_mult_chol} was \( \mathcal{O}(N s^2 + N m^2 + m^3) \). In the
+\cref{alg:select_mult_chol} was \( \BigO(N s^2 + N m^2 + m^3) \). In the
 context of Cholesky factorization, \( N \) is the size of the matrix, \( m \)
 is the number of columns to aggregate, and \( s \) is the number of nonzero
 entries in each column of \( L \). We therefore need to do \( \frac{N}{m} \)
 selections, one for each aggregated group, where we only need to select \( s
 - m \) entries (since the \( m \) prediction points are automatically added).
 We then need to actually construct each column of \( L \) after determining
-the sparsity pattern, with \cref{alg:L_mult}. This costs \( \mathcal{O}(s^3)
+the sparsity pattern, with \cref{alg:L_mult}. This costs \( \BigO(s^3)
 \) for each aggregated group to compute the Cholesky factor of the submatrix,
 which dominates the time to compute each column of \( L \) for the \( m \)
-columns in the group, \( \mathcal{O}(m s^2) \) (\( N > s > m \)). Thus, the
-overall complexity is \( \mathcal{O}(\frac{N}{m} (N (s - m)^2 + N m^2 + m^3 +
-s^3)) \), which simplifies to \( \mathcal{O}(\frac{N^2 s^2}{m}) \) by making
-use of the bound that \( (s - m)^2 = \mathcal{O}(s^2 + m^2) \).
+columns in the group, \( \BigO(m s^2) \) (\( N > s > m \)). Thus, the
+overall complexity is \( \BigO(\frac{N}{m} (N (s - m)^2 + N m^2 + m^3 +
+s^3)) \), which simplifies to \( \BigO(\frac{N^2 s^2}{m}) \) by making
+use of the bound that \( (s - m)^2 = \BigO(s^2 + m^2) \).
 
 Note that the non-aggregated factorization is equivalent to \( m = 1 \),
-which yields \( \mathcal{O}(N^2 s^2) \) (using the non-aggregated algorithms
+which yields \( \BigO(N^2 s^2) \) (using the non-aggregated algorithms
 \cref{alg:gp_select,alg:L}, but one can also use the aggregated versions
 \cref{alg:gp_select_mult,alg:L_mult} with \( m = 1 \) and achieve equivalent
 complexity). Thus, we see that the aggregated version is \( m \) times faster
@@ -1223,7 +1226,7 @@ Unlike the geometric algorithms of \cite{schafer2021sparse,
 schafer2020compression} which rely on the pairwise distance between points,
 and whose covariance matrix is implicitly determined by a list of points and
 kernel function, this algorithm relies only on the entries of the covariance
-matrix \( \Theta \). Thus, it can factor arbitrary symmetric positive definite
+matrix \( \CM \). Thus, it can factor arbitrary symmetric positive-definite
 matrices without access to points or an explicit kernel function.
 
 \section{Numerical experiments}
@@ -1231,7 +1234,7 @@ matrices without access to points or an explicit kernel function.
 All experiments were run on the Partnership for an Advanced Computing
 Environment (PACE) Phoenix cluster at the Georgia Institute of
 Technology, with 8 cores of a Intel(R) Xeon(R) Gold 6226 CPU @ 2.70GHz
-and 6 GB of RAM per core. Python code for all numerical experiments
+and 22 GB of RAM per core. Python code for all numerical experiments
 can be found at \href{https://github.com/stephen-huan/conditional-knn}
 {https://github.com/stephen-huan/conditional-knn}.
 
@@ -1283,16 +1286,16 @@ of nonzeros per column \( s \) over \( N \) columns. For each column, we
 uniformly randomly pick \( s \) entry that satisfies lower triangularity to
 make nonzero. We randomly generate values according to i.i.d. standard normal
 \( \mathcal{N}(0, 1) \). Finally, we fill the diagonal with a ``large``
-positive value (10) to almost guarantee that the resulting matrix \( \Theta =
-L L^{\top} \) is positive definite. The selection algorithms are then given
-\( \Theta \) and \( s \) and are asked to reconstruct \( L \). The strategies
+positive value (10) to almost guarantee that the resulting matrix \( \CM =
+L L^{\top} \) is positive-definite. The selection algorithms are then given
+\( \CM \) and \( s \) and are asked to reconstruct \( L \). The strategies
 are as follows: ``cknn'' uses conditional selection on each column to minimize
 the conditional variance of the diagonal entry, ``knn'' selects entries with
 the largest covariance with the diagonal entry, ``corr'' selects entries with
 the highest correlation objective \cref{eq:obj_gp} without accounting for
 conditioning, and ``random'' simply randomly samples entries uniformly. The
-strategies are given either the covariance \( \Theta \) or the precision \(
-\Theta^{-1} \) depending on which results in higher accuracy, in particular,
+strategies are given either the covariance \( \CM \) or the precision \(
+\CM^{-1} \) depending on which results in higher accuracy, in particular,
 the ``cknn'' strategy is given the precision while the rest of the methods
 are given the covariance. Accuracy is measured by taking the cardinality of
 the intersection of the recovered sparsity set with the ground truth sparsity
@@ -1329,18 +1332,38 @@ maintains much higher accuracy than the rest of the strategies.
 \end{figure}
 
 Finally, we experiment with the addition of noise. Noise sampled i.i.d
-from \( \mathcal{N}(0, \sigma^2) \) is added to each entry of \( \Theta
-\) symmetrically (i.e. \( \Theta_{ij} \) receives the same noise as \(
-\Theta_{ji} \)) to preserve the symmetry of \( \Theta \). As expected,
+from \( \mathcal{N}(0, \sigma^2) \) is added to each entry of \( \CM
+\) symmetrically (i.e. \( \CM_{ij} \) receives the same noise as \(
+\CM_{ji} \)) to preserve the symmetry of \( \CM \). As expected,
 accuracy degrades with increasing noise, but the algorithm is fairly robust
-to low levels of noise. At higher levels of noise, \( \Theta \) can lose
-positive definiteness, which causes the algorithm to break down.
+to low levels of noise. At higher levels of noise, \( \CM \) can lose
+positive-definiteness, which causes the algorithm to break down.
+
+\Stodo{laplacians, problems with
+positive-definiteness and dense cholesky factors}
+
+\cite{kyng2016approximate}
 
 \subsection{Cholesky factorization}
 
 \subsection{Gaussian process regression}
 
 \subsection{Preconditioning for conjugate gradient}
+
+\subsection{Comparison to other methods}
+
+against greedy gp information theoretic: most are trying to
+get some approximation for the entire process, \emph{directed}
+greedy selection (towards a single point or group of points)
+(never mind, smola \cite{smola2000sparse} is directed)
+
+engineering for multiple points / nonadjacent case (conditioning structure)
+
+omp: feature space versus covariance
+
+previous Cholesky papers: conditional selection versus geometry
+
+\section{Conclusions}
 
 \section*{Acknowledgments}
 \todo{add more funding information}
@@ -1363,109 +1386,109 @@ USA.
 \subsection{Updating precision after insertion}
 \label{app:prec_insert}
 
-We have the matrix \( \Theta_{I, I}^{-1} \) corresponding to the precision of
+We have the matrix \( \CM_{I, I}^{-1} \) corresponding to the precision of
 the selected entries, and wish to take into account the addition of a new entry
-\( k \) into \( I \). That is, we wish to compute \( \Theta_{I', I'}^{-1} \)
+\( k \) into \( I \). That is, we wish to compute \( \CM_{I', I'}^{-1} \)
 for \( I' = I \cup \{ k \} \), which in effect adds a new row and column to \(
-\Theta_{I, I}^{-1} \). In order to invert the new matrix efficiently, we can
+\CM_{I, I}^{-1} \). In order to invert the new matrix efficiently, we can
 block the matrix to separate the new and old information.
 \begin{align}
   \begin{pmatrix}
-    \Theta_{1, 1} & \Theta_{1, 2} \\
-    \Theta_{2, 1} & \Theta_{2, 2}
+    \CM_{1, 1} & \CM_{1, 2} \\
+    \CM_{2, 1} & \CM_{2, 2}
   \end{pmatrix} &=
   \begin{pmatrix}
     I & 0 \\
-    \textcolor{darkorange}{\Theta_{2, 1} \Theta_{1, 1}^{-1}} & I
+    \textcolor{darkorange}{\CM_{2, 1} \CM_{1, 1}^{-1}} & I
   \end{pmatrix}
   \begin{pmatrix}
-    \Theta_{1, 1} & 0 \\
+    \CM_{1, 1} & 0 \\
     0 & \textcolor{lightblue}{
-      \Theta_{2, 2} - \Theta_{2, 1} \Theta_{1, 1}^{-1} \Theta_{1, 2}
+      \CM_{2, 2} - \CM_{2, 1} \CM_{1, 1}^{-1} \CM_{1, 2}
     }
   \end{pmatrix}
   \begin{pmatrix}
-    I & \textcolor{darkorange}{\Theta_{1, 1}^{-1} \Theta_{1, 2}} \\
+    I & \textcolor{darkorange}{\CM_{1, 1}^{-1} \CM_{1, 2}} \\
     0 & I
   \end{pmatrix}
   \shortintertext{For notational convenience, we denote the Schur
-    complement \textcolor{lightblue}{\( \Theta_{2, 2} - \Theta_{2, 1}
-    \Theta_{1, 1}^{-1} \Theta_{1, 2} \)} as \textcolor{lightblue}{\(
-    \Theta_{2, 2 \mid 1} \)}. Inverting both sides of the equation,}
-  \Theta^{-1} &=
+    complement \textcolor{lightblue}{\( \CM_{2, 2} - \CM_{2, 1}
+    \CM_{1, 1}^{-1} \CM_{1, 2} \)} as \textcolor{lightblue}{\(
+    \CM_{2, 2 \mid 1} \)}. Inverting both sides of the equation,}
+  \CM^{-1} &=
   \begin{pmatrix}
-    I & -\textcolor{darkorange}{\Theta_{1, 1}^{-1} \Theta_{1, 2}} \\
+    I & -\textcolor{darkorange}{\CM_{1, 1}^{-1} \CM_{1, 2}} \\
     0 & I
   \end{pmatrix}
   \begin{pmatrix}
-    \Theta_{1, 1}^{-1} & 0 \\
-    0 & \textcolor{lightblue}{\Theta_{2, 2 \mid 1}^{-1}}
+    \CM_{1, 1}^{-1} & 0 \\
+    0 & \textcolor{lightblue}{\CM_{2, 2 \mid 1}^{-1}}
   \end{pmatrix}
   \begin{pmatrix}
     I & 0 \\
-    -\textcolor{darkorange}{\Theta_{2, 1} \Theta_{1, 1}^{-1}} & I
+    -\textcolor{darkorange}{\CM_{2, 1} \CM_{1, 1}^{-1}} & I
   \end{pmatrix} \\
   &=
   \begin{pmatrix}
-    \Theta_{1, 1}^{-1} +
+    \CM_{1, 1}^{-1} +
     \textcolor{darkorange}{
-      \left (\Theta_{1, 1}^{-1} \Theta_{1, 2} \right )
-    } \textcolor{lightblue}{\Theta_{2, 2 \mid 1}^{-1}}
+      \left (\CM_{1, 1}^{-1} \CM_{1, 2} \right )
+    } \textcolor{lightblue}{\CM_{2, 2 \mid 1}^{-1}}
     \textcolor{darkorange}{
-      \left (\Theta_{2, 1} \Theta_{1, 1}^{-1} \right )
+      \left (\CM_{2, 1} \CM_{1, 1}^{-1} \right )
     } &
     - \textcolor{darkorange}{
-      \left (\Theta_{1, 1}^{-1} \Theta_{1, 2} \right )
-    } \textcolor{lightblue}{\Theta_{2, 2 \mid 1}^{-1}} \\
-    - \textcolor{lightblue}{\Theta_{2, 2 \mid 1}^{-1}} \textcolor{darkorange} {
-      \left (\Theta_{2, 1} \Theta_{1, 1}^{-1} \right )
-    } & \textcolor{lightblue}{\Theta_{2, 2 \mid 1}^{-1}}
+      \left (\CM_{1, 1}^{-1} \CM_{1, 2} \right )
+    } \textcolor{lightblue}{\CM_{2, 2 \mid 1}^{-1}} \\
+    - \textcolor{lightblue}{\CM_{2, 2 \mid 1}^{-1}} \textcolor{darkorange} {
+      \left (\CM_{2, 1} \CM_{1, 1}^{-1} \right )
+    } & \textcolor{lightblue}{\CM_{2, 2 \mid 1}^{-1}}
   \end{pmatrix}
   \shortintertext{In the context of adding a new entry to the matrix,
-    \( \Theta_{1, 1} = \Theta_{I, I} \), \( \Theta_{1, 2} = \Theta_{I,
-    k} \), and \( \Theta_{2, 2} = \Theta_{kk} \). Also note that \(
-    \textcolor{lightblue}{\Theta_{kk \mid I}^{-1}} \) is the inverse
+    \( \CM_{1, 1} = \CM_{I, I} \), \( \CM_{1, 2} = \CM_{I,
+    k} \), and \( \CM_{2, 2} = \CM_{kk} \). Also note that \(
+    \textcolor{lightblue}{\CM_{kk \mid I}^{-1}} \) is the inverse
     of the variance of \( k \) conditional on the entries in \( I \),
     which has already been computed in \cref{alg:gp_select}. If we let
-    \( \vec{v} = \textcolor{darkorange}{\Theta_{I, I}^{-1} \Theta_{I,
+    \( \vec{v} = \textcolor{darkorange}{\CM_{I, I}^{-1} \CM_{I,
     k}} \), then we can write the update as:}
   &=
   \begin{pmatrix}
-    \Theta_{I, I}^{-1} + \Theta_{kk \mid I}^{-1} \vec{v} \vec{v}^T &
-    -\Theta_{kk \mid I}^{-1} \vec{v} \\
-    -\Theta_{kk \mid I}^{-1} \vec{v}^{\top} & \Theta_{kk \mid I}^{-1} \\
+    \CM_{I, I}^{-1} + \CM_{kk \mid I}^{-1} \vec{v} \vec{v}^T &
+    -\CM_{kk \mid I}^{-1} \vec{v} \\
+    -\CM_{kk \mid I}^{-1} \vec{v}^{\top} & \CM_{kk \mid I}^{-1} \\
   \end{pmatrix}
 \end{align}
 which is precisely the update in line 13 of \cref{alg:gp_select}. Note that
-the update is a rank-one update to \( \Theta_{1, 1}^{-1} \), which can
-be computed in \( \mathcal{O}(\lvert I \rvert^2) = \mathcal{O}(s^2) \).
+the update is a rank-one update to \( \CM_{1, 1}^{-1} \), which can
+be computed in \( \BigO(\lvert I \rvert^2) = \BigO(s^2) \).
 
 \subsection{Updating precision after marginalization}
 \label{app:prec_delete}
 
-Suppose we have the precision \( \Theta^{-1} \) and wish to compute the
+Suppose we have the precision \( \CM^{-1} \) and wish to compute the
 precision of the marginalized covariance after ignoring an index \( k \).
 That is, we wish to compute the inverse of a matrix after deleting a row and
 column, given the inverse of the original matrix. We could use the result
 in \cref{app:prec_insert} by ``reading'' the update backwards. That is, we
-could identify \( \Theta_{2, 2 \mid 1}^{-1} \) from \( (\Theta^{-1})_{kk}
-\) and \( \vec{v} = \Theta_{1, 1}^{-1} \Theta_{1, 2} \) from \( -
-\frac{(\Theta^{-1})_{-k, k}}{\Theta_{2, 2 \mid 1}^{-1}} \) where \( -k \)
+could identify \( \CM_{2, 2 \mid 1}^{-1} \) from \( (\CM^{-1})_{kk}
+\) and \( \vec{v} = \CM_{1, 1}^{-1} \CM_{1, 2} \) from \( -
+\frac{(\CM^{-1})_{-k, k}}{\CM_{2, 2 \mid 1}^{-1}} \) where \( -k \)
 denotes all rows excluding the \( k \)th row. We can then revert the rank-one
-update by subtracting out the update, computing \( \Theta_{-k, -k}^{-1} =
-(\Theta^{-1})_{-k, -k} - \Theta_{kk \mid I}^{-1} \vec{v} \vec{v}^{\top} \).
+update by subtracting out the update, computing \( \CM_{-k, -k}^{-1} =
+(\CM^{-1})_{-k, -k} - \CM_{kk \mid I}^{-1} \vec{v} \vec{v}^{\top} \).
 However, a more intuitive derivation relies on the fact that marginalization
 in covariance is conditioning in precision. Using \cref{eq:inverse_cond},
-we see that \( \Theta_{-k, -k}^{-1} = (\Theta^{-1})_{-k, -k \mid k} \), or
+we see that \( \CM_{-k, -k}^{-1} = (\CM^{-1})_{-k, -k \mid k} \), or
 the precision conditional on the deleted entry. By \cref{eq:cond_cov}, we
 immediately obtain the equivalent update
 \begin{align}
-  (\Theta^{-1})_{-k, -k \mid k} &= \Theta^{-1}_{-k, -k} -
-    \frac{(\Theta^{-1})_{-k, k}
-          (\Theta^{-1})_{-k, k}^{\top}}{(\Theta^{-1})_{kk}}
+  (\CM^{-1})_{-k, -k \mid k} &= \CM^{-1}_{-k, -k} -
+    \frac{(\CM^{-1})_{-k, k}
+          (\CM^{-1})_{-k, k}^{\top}}{(\CM^{-1})_{kk}}
 \end{align}
-Since this is a rank-one update to the precision \( \Theta^{-1} \), this
-can be computed in \\ \( \mathcal{O}(\text{\# rows}(\Theta^{-1}))^2 \).
+Since this is a rank-one update to the precision \( \CM^{-1} \), this
+can be computed in \\ \( \BigO(\text{\# rows}(\CM^{-1}))^2 \).
 
 \Stodo{this is not used in the paper but is nice to know +
 used in the sensor placement}
@@ -1473,49 +1496,49 @@ used in the sensor placement}
 \subsection{Updating precision after conditioning}
 \label{app:prec_cond}
 
-We have the matrix \( \Theta_{\text{Pr}, \text{Pr} \mid I}^{-1} \), or
+We have the matrix \( \CM_{\text{Pr}, \text{Pr} \mid I}^{-1} \), or
 the precision of the prediction points, conditional on the selected
 entries. We want to take into account selecting an entry \( k \), or to compute
-\( \Theta_{\text{Pr}, \text{Pr} \mid I \cup \{ k \}}^{-1} \) which is a rank-one
+\( \CM_{\text{Pr}, \text{Pr} \mid I \cup \{ k \}}^{-1} \) which is a rank-one
 update to the original matrix from \cref{eq:obj_gp_mult}.
 We can directly apply
 the Sherman–Morrison–Woodbury formula which states that:
 \begin{align}
-  \Theta_{1, 1 \mid 2}^{-1} &= \Theta_{1, 1}^{-1} +
-    \left (\Theta_{1, 1}^{-1} \Theta_{1, 2} \right )
-    \Theta_{2, 2 \mid 1}^{-1}
-    \left (\Theta_{2, 1} \Theta_{1, 1}^{-1} \right )
+  \CM_{1, 1 \mid 2}^{-1} &= \CM_{1, 1}^{-1} +
+    \left (\CM_{1, 1}^{-1} \CM_{1, 2} \right )
+    \CM_{2, 2 \mid 1}^{-1}
+    \left (\CM_{2, 1} \CM_{1, 1}^{-1} \right )
   \shortintertext{Expanding the conditioning by definition,}
   \left (
-    \Theta_{1, 1} - \Theta_{1, 2} \Theta_{2, 2}^{-1} \Theta_{2, 1}
+    \CM_{1, 1} - \CM_{1, 2} \CM_{2, 2}^{-1} \CM_{2, 1}
   \right )^{-1} &=
-    \Theta_{1, 1}^{-1} +
-    \left (\Theta_{1, 1}^{-1} \Theta_{1, 2} \right )
-    \Theta_{2, 2 \mid 1}^{-1}
-    \left (\Theta_{2, 1} \Theta_{1, 1}^{-1} \right )
-  \shortintertext{Letting \( \vec{u} = \Theta_{1, 2} \) and \( \vec{v}
-    = \Theta_{1, 1}^{-1} \Theta_{1, 2} = \Theta_{1, 1}^{-1} \vec{u} \),}
-  (\Theta_{1, 1} - \Theta_{2, 2}^{-1} \vec{u} \vec{u}^{\top})^{-1} &=
-    \Theta_{1, 1}^{-1} + \Theta_{2, 2 \mid 1}^{-1} \vec{v} \vec{v}^{\top}
-  \shortintertext{So we see that a rank-one update to \( \Theta_{1, 1} \)
-    then inverting is a rank-one update to \( \Theta_{1, 1}^{-1} \). In our
-    context, \( \Theta_{1, 1} = \Theta_{\text{Pr}, \text{Pr} \mid I}, \vec{u} =
-    \Theta_{\text{Pr}, k \mid I}, \Theta_{2, 2} = \Theta_{kk \mid I} \) so \(
-    \Theta_{2, 2 \mid 1}^{-1} = \Theta_{kk \mid \text{Pr}, I}^{-1} \) (this can
+    \CM_{1, 1}^{-1} +
+    \left (\CM_{1, 1}^{-1} \CM_{1, 2} \right )
+    \CM_{2, 2 \mid 1}^{-1}
+    \left (\CM_{2, 1} \CM_{1, 1}^{-1} \right )
+  \shortintertext{Letting \( \vec{u} = \CM_{1, 2} \) and \( \vec{v}
+    = \CM_{1, 1}^{-1} \CM_{1, 2} = \CM_{1, 1}^{-1} \vec{u} \),}
+  (\CM_{1, 1} - \CM_{2, 2}^{-1} \vec{u} \vec{u}^{\top})^{-1} &=
+    \CM_{1, 1}^{-1} + \CM_{2, 2 \mid 1}^{-1} \vec{v} \vec{v}^{\top}
+  \shortintertext{So we see that a rank-one update to \( \CM_{1, 1} \)
+    then inverting is a rank-one update to \( \CM_{1, 1}^{-1} \). In our
+    context, \( \CM_{1, 1} = \CM_{\text{Pr}, \text{Pr} \mid I}, \vec{u} =
+    \CM_{\text{Pr}, k \mid I}, \CM_{2, 2} = \CM_{kk \mid I} \) so \(
+    \CM_{2, 2 \mid 1}^{-1} = \CM_{kk \mid \text{Pr}, I}^{-1} \) (this can
     be rigorously shown by expanding the Schur complement and taking advantage
     of the quotient rule as in \cref{eq:greedy_mult}). \( \vec{v} \) can be
-    computed according to definition as \( \Theta_{\text{Pr}, \text{Pr} \mid
+    computed according to definition as \( \CM_{\text{Pr}, \text{Pr} \mid
     I}^{-1} \vec{u} \). Thus, we can write the update as}
-  \left ( \Theta_{\text{Pr}, \text{Pr} \mid I} -
-    \frac{\Theta_{\text{Pr}, k \mid I} \Theta_{\text{Pr}, k \mid I}^{\top}}
-    {\Theta_{kk \mid I}}
+  \left ( \CM_{\text{Pr}, \text{Pr} \mid I} -
+    \frac{\CM_{\text{Pr}, k \mid I} \CM_{\text{Pr}, k \mid I}^{\top}}
+    {\CM_{kk \mid I}}
   \right )^{-1} &=
-    \Theta_{1, 1}^{-1} +
-    \Theta_{kk \mid \text{Pr}, I}^{-1} \vec{v} \vec{v}^{\top}
+    \CM_{1, 1}^{-1} +
+    \CM_{kk \mid \text{Pr}, I}^{-1} \vec{v} \vec{v}^{\top}
 \end{align}
 which is the update in line 18 of \cref{alg:gp_select_mult}.
 Since the update is a rank-one update, it can be computed in \(
-\mathcal{O}(\lvert \text{Pr} \rvert^2) = \mathcal{O}(m^2) \).
+\BigO(\lvert \text{Pr} \rvert^2) = \BigO(m^2) \).
 
 \subsection{Updating Cholesky factorization after rank-one downdate}
 \label{app:chol_downdate}
@@ -1525,8 +1548,8 @@ Since the update is a rank-one update, it can be computed in \(
 We use the approach from Lemma 1 of \cite{krause2015more}, slightly adapted
 to use in-place operations and to make no assumption on the particular row
 ordering of the Cholesky factor. Let \( L \) be a Cholesky factorization of \(
-\Theta \), that is, \( L = \chol(\Theta) \). We wish to compute the updated
-Cholesky factor \( L' = \chol(\Theta') \) where \( \Theta' = \Theta - \vec{u}
+\CM \), that is, \( L = \chol(\CM) \). We wish to compute the updated
+Cholesky factor \( L' = \chol(\CM') \) where \( \CM' = \CM - \vec{u}
 \vec{u}^{\top} \). To do so, assume \( L \) and \( L' \) are blocked according
 to the same block structure:
 \begin{align}
@@ -1541,26 +1564,26 @@ to the same block structure:
     \vec{r}_2' & L_2'
   \end{pmatrix}
   \shortintertext{Multiplying, we find}
-  L L^{\top} = \Theta &=
+  L L^{\top} = \CM &=
   \begin{pmatrix}
     r_1^2 & r_1 \vec{r}_2^{\top} \\
     r_1 \vec{r}_2 & L_2 L_2^{\top} + \vec{r}_2 \vec{r}_2^{\top}
   \end{pmatrix}
-  \\ L' L'^{\top} = \Theta' &=
+  \\ L' L'^{\top} = \CM' &=
   \begin{pmatrix}
     r_1'^2 & r_1' \vec{r}_2'^{\top} \\
     r_1' \vec{r}_2' & L_2' L_2'^{\top} + \vec{r}_2' \vec{r}_2'^{\top}
   \end{pmatrix}
   \shortintertext{From here, we solve for
     \( r'_1 \), \( \vec{r}' \), and \( L_2' \)}
-  r_1'^2 &= \Theta'_{11} = \Theta_{11} - u_1^2 \\
+  r_1'^2 &= \CM'_{11} = \CM_{11} - u_1^2 \\
          &= r_1^2 - u_1^2 \\
   r_1' &= \sqrt{r_1^2 - u_1^2} \\
-  r_1' \vec{r}_2' &= \Theta'_{2:, 1} = \Theta_{2:, 1} - u_1 \vec{u}_2 \\
+  r_1' \vec{r}_2' &= \CM'_{2:, 1} = \CM_{2:, 1} - u_1 \vec{u}_2 \\
                   &= r_1 \vec{r}_2 - u_1 \vec{u}_2 \\
   \vec{r}_2' &= \frac{1}{r_1'} (r_1 \vec{r}_2 - u_1 \vec{u}_2) \\
-  % L_2' L_2'^{\top} + \vec{r}_2' \vec{r}_2'^{\top} &= \Theta'_{22}
-  %   = \Theta_{22} - \vec{u}_2 \vec{u}_2^{\top} \\
+  % L_2' L_2'^{\top} + \vec{r}_2' \vec{r}_2'^{\top} &= \CM'_{22}
+  %   = \CM_{22} - \vec{u}_2 \vec{u}_2^{\top} \\
   L_2' L_2'^{\top} &= L_2 L_2^{\top} + \vec{r}_2 \vec{r}_2^{\top}
     - \vec{u}_2 \vec{u}_2^{\top} - \vec{r}_2' \vec{r}_2'^{\top}
   \shortintertext{Plugging in the expresion for \( \vec{r}'_2 \),}
@@ -1586,7 +1609,7 @@ to the same block structure:
     \frac{r_1}{r_1'} \vec{u}_2 - \frac{u_1}{r_1'} \vec{r}_2
   \right )^{\top}
   \shortintertext{which is a rank-one downdate to the subfactor \( L_2 \).
-    Recursively updating \( L_2 \) yields a \( \mathcal{O}(N^2) \) algorithm.
+    Recursively updating \( L_2 \) yields a \( \BigO(N^2) \) algorithm.
     We now re-write the algorithm to be in-place to take advantage of BLAS
     routines. The updates can be summarized as:}
   r_1' &= \sqrt{r_1^2 - u_1^2} \\
@@ -1618,8 +1641,8 @@ BLAS as level-one \texttt{daxpy} operations.
 \subsection{Updating Cholesky factor after insertion}
 \label{app:chol_insert}
 
-Suppose we have a cholesky factor \( L \) of \( \Theta \) and we insert
-a new point into \( \Theta \). We wish to update the Cholesky \( L \) to
+Suppose we have a cholesky factor \( L \) of \( \CM \) and we insert
+a new point into \( \CM \). We wish to update the Cholesky \( L \) to
 account for this insertion. Using the recursive conditioning interpretation
 of Cholesky factorization in \cref{eq:chol}, we see that the columns of \( L
 \) before the insertion will remain unchanged, the column at the insertion
@@ -1633,7 +1656,7 @@ a rank-one update of the covariance, so we can use rank-one downdating from
 \cref{app:chol_downdate} to update \( L \) for the columns after the insertion
 point, where the vector in the rank-one downdate is the newly inserted column.
 This update touches every value in the Cholesky factor exactly once, so its
-complexity is \( \mathcal{O}(N^2) \) as opposed to the \( \mathcal{O}(N^3)
+complexity is \( \BigO(N^2) \) as opposed to the \( \BigO(N^3)
 \) cost of completely regenerating the Cholesky factor from scratch.
 
 \subsection{Partial updates in the selection algorithm}
@@ -1654,16 +1677,16 @@ the first \( j \) variables on the selected index \( k \) would result in
 \( y_1 , y_2, \dotsc, y_{j}, y_{j + 1 \mid k}, \dotsc, y_{M \mid k} \).
 
 The first question is to compute the resulting covariance matrix. We know \(
-\vec{y} \sim \mathcal{N}(\vec{0}, \Theta) \) and \( \vec{y}_{\mid k} \) has
+\vec{y} \sim \mathcal{N}(\vec{0}, \CM) \) and \( \vec{y}_{\mid k} \) has
 conditional distribution according to \cref{eq:cond_cov}, \( \vec{y}_{\mid k}
-\sim \mathcal{N}(\mu, \Theta - \Theta_{:, k} \Theta_{k, k}^{-1} \Theta_{k,
+\sim \mathcal{N}(\mu, \CM - \CM_{:, k} \CM_{k, k}^{-1} \CM_{k,
 :}) \). Taking the Cholesky factorization of both covariance matrices, let \(
-L = \chol(\Theta) \) and \( L_{\mid k} = \chol(\Theta_{\mid k}) \). We can
+L = \chol(\CM) \) and \( L_{\mid k} = \chol(\CM_{\mid k}) \). We can
 then view \( \vec{y} \) as \( L \vec{z} \), where \( \vec{z} \) is distributed
 according to \( \mathcal{N}(\vec{0}, I) \). Similarly, \( \vec{y}_{\mid k} =
 L_{\mid k} \vec{z} + \vec{\mu} \). For unconditioned \( y_i \) and \( y_j \), the
-covariance between them is defined to be \( \Theta_{ij} \). Similarly, for
-conditioned \( y_i \) and \( y_j \), the covariance is \( \Theta_{ij \mid k}
+covariance between them is defined to be \( \CM_{ij} \). Similarly, for
+conditioned \( y_i \) and \( y_j \), the covariance is \( \CM_{ij \mid k}
 \). The only question is what the covariance between unconditioned \( y_i \)
 and conditioned \( y_j \) is. By definition,
 \begin{align}
@@ -1697,12 +1720,12 @@ and conditioned \( y_j \) is. By definition,
     L_{j: \mid k}
   \end{pmatrix}^{\top}
   \shortintertext{We will denote a partially conditioned matrix as}
-  \Theta_{:, :, \shortmid k}
+  \CM_{:, :, \shortmid k}
 \end{align}
 
 \begin{figure}[h!]
   \centering
-  \input{figures/cholesky_factor.tex}
+  \input{figures/partial_factor.tex}
   \caption{Illustration of the Cholesky
     factorization of a partially conditioned matrix.}
 \end{figure}
@@ -1715,7 +1738,7 @@ that the determinant of a  triangular matrix is the product of its
 diagonal entries:
 \begin{align}
   \label{eq:partial_logdet}
-  \frac{1}{2} \logdet(\Theta_{:, : \shortmid k}) &=
+  \frac{1}{2} \logdet(\CM_{:, : \shortmid k}) &=
   \underbrace{\log(L_{11}) + \dotsb + \log(L_{jj})}_{\text{the same}} +
   \underbrace{
     \log(L_{j + 1, j + 1 \mid k}) + \dotsb + \log(L_{M, M \mid k})
@@ -1723,29 +1746,29 @@ diagonal entries:
   \shortintertext{Comparing to the KL divergence \cref{eq:obj_chol},
     \( \mathbb{D}_{\text{KL}}
       \left (
-        \mathcal{N}(\vec{0}, \Theta) \, \Big \| \,
+        \mathcal{N}(\vec{0}, \CM) \, \Big \| \,
         \mathcal{N}(\vec{0}, (L L^{\top})^{-1})
       \right )
     \) which is equivalent to maximizing}
   &= \sum_{i = 1}^M
       \log \left (
-        \Theta_{ii \mid s_i - \{ i \}}
+        \CM_{ii \mid s_i - \{ i \}}
       \right )
   \shortintertext{Recalling that \( k \) is added partially to some \( s_i \),
     only those \( i > j \)}
   &= \underbrace{
-      \log \left ( \Theta_{11 \mid s_1 - \{ 1 \}} \right ) + \dotsb +
-      \log \left ( \Theta_{jj \mid s_j - \{ j \}} \right )
+      \log \left ( \CM_{11 \mid s_1 - \{ 1 \}} \right ) + \dotsb +
+      \log \left ( \CM_{jj \mid s_j - \{ j \}} \right )
      }_\text{the same} + \\
   \nonumber
   &  \underbrace{
-      \log \left ( \Theta_{j + 1, j + 1 \mid s_{j + 1} - \{ j + 1 \}} \right )
-      + \dotsb + \log \left ( \Theta_{MM \mid s_M - \{ M \}} \right )
+      \log \left ( \CM_{j + 1, j + 1 \mid s_{j + 1} - \{ j + 1 \}} \right )
+      + \dotsb + \log \left ( \CM_{MM \mid s_M - \{ M \}} \right )
      }_\text{conditioned}
   \shortintertext{Since \( L_{ii} \) is the square root
     of the variance of the \( i \)th variable conditional
     on each entry before it in the ordering, we have}
-  2 \log(L_{ii}) &= \log(\Theta_{ii \mid s_i - \{ i \}})
+  2 \log(L_{ii}) &= \log(\CM_{ii \mid s_i - \{ i \}})
 \end{align}
 So minimizing the log determinant of the partially
 conditioned covariance matrix \cref{eq:partial_logdet} is
@@ -1762,43 +1785,43 @@ different perspective affects the interpretation of the multiple
 point selection algorithm. In the example, let \( x \) and \( y \)
 be selected points and \( 1 \) and \( 2 \) be prediction points.
 \begin{align}
-  \Theta &=
+  \CM &=
   \begin{pmatrix}
-    \Theta_{xx} & \Theta_{xy} & \Theta_{x1} & \Theta_{x2} \\
-    \Theta_{yx} & \Theta_{yy} & \Theta_{y1} & \Theta_{y2} \\
-    \Theta_{1x} & \Theta_{1y} & \Theta_{11} & \Theta_{12} \\
-    \Theta_{2x} & \Theta_{2y} & \Theta_{21} & \Theta_{22}
+    \CM_{xx} & \CM_{xy} & \CM_{x1} & \CM_{x2} \\
+    \CM_{yx} & \CM_{yy} & \CM_{y1} & \CM_{y2} \\
+    \CM_{1x} & \CM_{1y} & \CM_{11} & \CM_{12} \\
+    \CM_{2x} & \CM_{2y} & \CM_{21} & \CM_{22}
   \end{pmatrix}
   \shortintertext{Computing the log determinant by chain rule,}
-  \logdet(\Theta) &= \log(\Theta_{xx}) + \log(\Theta_{yy \mid x}) +
-    \log(\Theta_{11 \mid x, y}) + \log(\Theta_{22 \mid x, y, 1})
+  \logdet(\CM) &= \log(\CM_{xx}) + \log(\CM_{yy \mid x}) +
+    \log(\CM_{11 \mid x, y}) + \log(\CM_{22 \mid x, y, 1})
   \shortintertext{Isolating the objective --- the variances of the
     prediction points}
-  \log(\Theta_{11 \mid x, y}) + \log(\Theta_{22 \mid x, y, 1}) &=
-    \logdet(\Theta) - \log(\Theta_{xx}) - \log(\Theta_{yy \mid x})
+  \log(\CM_{11 \mid x, y}) + \log(\CM_{22 \mid x, y, 1}) &=
+    \logdet(\CM) - \log(\CM_{xx}) - \log(\CM_{yy \mid x})
   \shortintertext{Now consider how inserting \( y \) changed the objective
     from when it was just \( x \).}
-  \log(\Theta_{11 \mid x}) + \log(\Theta_{22 \mid x, 1}) &=
-    \logdet(\Theta_{-y, -y}) - \log(\Theta_{xx}) \\
+  \log(\CM_{11 \mid x}) + \log(\CM_{22 \mid x, 1}) &=
+    \logdet(\CM_{-y, -y}) - \log(\CM_{xx}) \\
   \Delta &=
-    \logdet(\Theta) - \log(\Theta_{yy \mid x}) - \logdet(\Theta_{-y, -y})
+    \logdet(\CM) - \log(\CM_{yy \mid x}) - \logdet(\CM_{-y, -y})
   \shortintertext{But from \cref{eq:greedy_mult} we know}
   \Delta &= \log \left (
-      \frac{\Theta_{yy \mid x, 1, 2}}{\Theta_{yy \mid x}}
+      \frac{\CM_{yy \mid x, 1, 2}}{\CM_{yy \mid x}}
     \right )
   \shortintertext{Substituting,}
-  \log(\Theta_{yy \mid x, 1, 2}) - \log(\Theta_{yy \mid x}) &=
-    \logdet(\Theta) - \log(\Theta_{yy \mid x}) - \logdet(\Theta_{-y, -y}) \\
-  \log(\Theta_{yy \mid x, 1, 2}) &=
-    \logdet(\Theta) - \logdet(\Theta_{-y, -y})
+  \log(\CM_{yy \mid x, 1, 2}) - \log(\CM_{yy \mid x}) &=
+    \logdet(\CM) - \log(\CM_{yy \mid x}) - \logdet(\CM_{-y, -y}) \\
+  \log(\CM_{yy \mid x, 1, 2}) &=
+    \logdet(\CM) - \logdet(\CM_{-y, -y})
   \shortintertext{In general,}
   \label{eq:logdet_diff}
-  \log(\Theta_{kk \mid I, \text{Pr}}) &=
-    \logdet(\Theta) - \logdet(\Theta_{-k, -k})
+  \log(\CM_{kk \mid I, \text{Pr}}) &=
+    \logdet(\CM) - \logdet(\CM_{-k, -k})
 \end{align}
 Another way to arrive at the same result is to note that if we inserted
-\( y \) at the \emph{end} of \( \Theta_{-y, -y} \), to compute the log
-determinant of the new, bigger matrix \( \Theta \) we would add the
+\( y \) at the \emph{end} of \( \CM_{-y, -y} \), to compute the log
+determinant of the new, bigger matrix \( \CM \) we would add the
 variance of \( y \) conditional on every entry in the matrix to the
 old determinant by chain rule. Since the determinant is invariant to
 symmetric permutation, the matrix inserting \( y \) at the end has the
@@ -1811,9 +1834,9 @@ The multiple prediction point algorithm can therefore be interpreted as
 we insert the candidate \emph{after} all the previously selected points
 (so it is conditional on all the previous points) and \emph{before}
 the prediction points (which conditions all of them). We then compute
-\( \log(\Theta_{kk \mid I, \text{Pr}}) \) for some candidate \( k \)
+\( \log(\CM_{kk \mid I, \text{Pr}}) \) for some candidate \( k \)
 which represents the difference in log determinant and then subtract \(
-\log(\Theta_{kk \mid I}) \) which is the spurious variance introduced by
+\log(\CM_{kk \mid I}) \) which is the spurious variance introduced by
 inserting \( k \) into the matrix. We do not need to subtract the spurious
 variances from the previously selected points because \( k \) does not
 affect them, and we select candidates by \emph{relative} score.
@@ -1823,27 +1846,27 @@ let \( 1 \) and \( 2 \) be prediction points while \( x \) and \(
 y \) are both a selected points below \( 2 \) but above \( 1 \), where
 \( x \) has already been selected and \( y \) is a candidate.
 \begin{align}
-  \Theta &=
+  \CM &=
   \begin{pmatrix}
-    \Theta_{11} & \Theta_{1y} & \Theta_{1x} & \Theta_{12} \\
-    \Theta_{y1} & \Theta_{yy} & \Theta_{yx} & \Theta_{y2} \\
-    \Theta_{x1} & \Theta_{xy} & \Theta_{xx} & \Theta_{x2} \\
-    \Theta_{21} & \Theta_{2y} & \Theta_{2x} & \Theta_{22}
+    \CM_{11} & \CM_{1y} & \CM_{1x} & \CM_{12} \\
+    \CM_{y1} & \CM_{yy} & \CM_{yx} & \CM_{y2} \\
+    \CM_{x1} & \CM_{xy} & \CM_{xx} & \CM_{x2} \\
+    \CM_{21} & \CM_{2y} & \CM_{2x} & \CM_{22}
   \end{pmatrix}
   \shortintertext{Computing the log determinant by chain rule,}
-  \logdet(\Theta) &= \log(\Theta_{11}) + \log(\Theta_{yy  \mid 1}) +
-    \log(\Theta_{xx \mid 1, y}) + \log(\Theta_{22 \mid 1, y, x})
+  \logdet(\CM) &= \log(\CM_{11}) + \log(\CM_{yy  \mid 1}) +
+    \log(\CM_{xx \mid 1, y}) + \log(\CM_{22 \mid 1, y, x})
   \shortintertext{We see that \( y \) conditions \( 2 \) but not \( 1 \),
     precisely what we want to encode. However, we have introduced a spurious
-    term \( \log(\Theta_{yy \mid 1}) \) and changed the variance of \( x \),
+    term \( \log(\CM_{yy \mid 1}) \) and changed the variance of \( x \),
     both of which must be subtracted out.}
-  \log(\Theta_{11}) + \log(\Theta_{22 \mid 1, y, x}) &=
-  \logdet(\Theta) - \log(\Theta_{yy \mid 1}) - \log(\Theta_{xx \mid 1, y})
-  \shortintertext{We can substitute \( \log(\Theta_{yy \mid 1, x, 2}) \)
-    for \( \logdet(\Theta) \) by \cref{eq:logdet_diff}. Athough
+  \log(\CM_{11}) + \log(\CM_{22 \mid 1, y, x}) &=
+  \logdet(\CM) - \log(\CM_{yy \mid 1}) - \log(\CM_{xx \mid 1, y})
+  \shortintertext{We can substitute \( \log(\CM_{yy \mid 1, x, 2}) \)
+    for \( \logdet(\CM) \) by \cref{eq:logdet_diff}. Athough
     it differs by a constant, this does not change the objective.}
-  &= \log(\Theta_{yy \mid 1, x, 2}) -
-    \log(\Theta_{yy \mid 1}) - \log(\Theta_{xx \mid 1, y})
+  &= \log(\CM_{yy \mid 1, x, 2}) -
+    \log(\CM_{yy \mid 1}) - \log(\CM_{xx \mid 1, y})
 \end{align}
 
 As long as we can compute conditional variances of our candidate on each
@@ -1857,8 +1880,8 @@ insert it in its appropriate place in the Cholesky factor. To update the
 Cholesky factor after an insertion efficiently, we left-look to get the
 column of its insertion position, and then update all columns right of the
 column by a rank-one downdate as described in \cref{app:chol_insert} which
-touches every entry in the Cholesky factor, \( \mathcal{O}(N(m + s) \) per
-update for a total cost of \( \mathcal{O}(N(m + s)(s)) \) over \( s \)
+touches every entry in the Cholesky factor, \( \BigO(N(m + s) \) per
+update for a total cost of \( \BigO(N(m + s)(s)) \) over \( s \)
 selections. In addition, the algorithm can be considerably simplified by
 simply adding the conditional variances of the prediction points, instead
 of starting with a proxy for the log determinant of the entire matrix and
@@ -1872,15 +1895,15 @@ the candidate, conditional on all points prior to the selected point. Suppose
 we are at index \( i \) and the candidate is index \( j \), the updates are as
 follows:
 \begin{align}
-  \Theta_{ii \mid :i - 1} &= (L_{ii})^2 \\
-  \Theta_{ij \mid :i - 1} &= L_{ij} \cdot L_{ii} \\
-  \Theta_{ii \mid :i - 1, j} &= \Theta_{ii \mid :i - 1} -
-    \frac{\Theta_{ij \mid :i - 1}^2}{\Theta_{jj \mid :i - 1}} \\
-  \Theta_{jj \mid :i - 1, i} &= \Theta_{jj \mid :i - 1} -
-    \frac{\Theta_{ij \mid :i - 1}^2}{\Theta_{ii \mid :i - 1}} \\
-                             &= \Theta_{jj \mid :i}
+  \CM_{ii \mid :i - 1} &= (L_{ii})^2 \\
+  \CM_{ij \mid :i - 1} &= L_{ij} \cdot L_{ii} \\
+  \CM_{ii \mid :i - 1, j} &= \CM_{ii \mid :i - 1} -
+    \frac{\CM_{ij \mid :i - 1}^2}{\CM_{jj \mid :i - 1}} \\
+  \CM_{jj \mid :i - 1, i} &= \CM_{jj \mid :i - 1} -
+    \frac{\CM_{ij \mid :i - 1}^2}{\CM_{ii \mid :i - 1}} \\
+                             &= \CM_{jj \mid :i}
 \end{align}
-Of course, the base case \( \Theta_{jj} \) is simply \(
+Of course, the base case \( \CM_{jj} \) is simply \(
 K(\vec{x}_j, \vec{x}_j) \), the variance of the \( j \)th point.
 
 For each of the \( N \) candidates, it requires \( m + s \) operations from
@@ -1915,31 +1938,31 @@ must be made to the selection algorithms to support global comparison.
 
 \subsubsection{Single column selection}
 
-For a single prediction point, the objective is \( \frac{\Theta_{k, \text{Pr}
-\mid I}^2}{\Theta_{kk \mid I}} \) \cref{eq:obj_gp} which is exactly the amount
+For a single prediction point, the objective is \( \frac{\CM_{k, \text{Pr}
+\mid I}^2}{\CM_{kk \mid I}} \) \cref{eq:obj_gp} which is exactly the amount
 the variance of the prediction point is decreased if the \( k \)th candidate is
-selected, that is, \( \Theta_{\text{Pr}, \text{Pr} \mid I} - \Theta_{\text{Pr},
-\text{Pr} \mid I, k} = \frac{\Theta_{k, \text{Pr} \mid I}^2}{\Theta_{kk \mid
+selected, that is, \( \CM_{\text{Pr}, \text{Pr} \mid I} - \CM_{\text{Pr},
+\text{Pr} \mid I, k} = \frac{\CM_{k, \text{Pr} \mid I}^2}{\CM_{kk \mid
 I}} \). From the global perspective, all other prediction points are untouched,
 so the amount the sum of the log variances of all the prediction points changes
 is
 \begin{align}
   \min \Delta &= \min \left [
-    \log(\Theta_{\text{Pr}, \text{Pr} \mid I, k}) -
-  \log(\Theta_{\text{Pr}, \text{Pr} \mid I}) \right ] \\
-              &= \min \frac{\Theta_{\text{Pr}, \text{Pr} \mid I, k}}
-                           {\Theta_{\text{Pr}, \text{Pr} \mid I}} \\
-              &= \min \frac{\Theta_{\text{Pr}, \text{Pr} \mid I}
-              - \frac{\Theta_{k, \text{Pr} \mid I}^2}{\Theta_{kk \mid I}}}
-                           {\Theta_{\text{Pr}, \text{Pr} \mid I}} \\
+    \log(\CM_{\text{Pr}, \text{Pr} \mid I, k}) -
+  \log(\CM_{\text{Pr}, \text{Pr} \mid I}) \right ] \\
+              &= \min \frac{\CM_{\text{Pr}, \text{Pr} \mid I, k}}
+                           {\CM_{\text{Pr}, \text{Pr} \mid I}} \\
+              &= \min \frac{\CM_{\text{Pr}, \text{Pr} \mid I}
+              - \frac{\CM_{k, \text{Pr} \mid I}^2}{\CM_{kk \mid I}}}
+                           {\CM_{\text{Pr}, \text{Pr} \mid I}} \\
               &= \min \left [ 1 -
-                \frac{\Theta_{k, \text{Pr} \mid I}^2}
-                     {\Theta_{kk \mid I} \Theta_{\text{Pr}, \text{Pr} \mid I}}
+                \frac{\CM_{k, \text{Pr} \mid I}^2}
+                     {\CM_{kk \mid I} \CM_{\text{Pr}, \text{Pr} \mid I}}
                  \right ] \\
   \label{eq:global_obj}
               &= \max
-                \frac{\Theta_{k, \text{Pr} \mid I}^2}
-                     {\Theta_{kk \mid I} \Theta_{\text{Pr}, \text{Pr} \mid I}}
+                \frac{\CM_{k, \text{Pr} \mid I}^2}
+                     {\CM_{kk \mid I} \CM_{\text{Pr}, \text{Pr} \mid I}}
 \end{align}
 where \cref{eq:global_obj} can be interpreted as the
 \emph{percentage} of the decrease in variance from selecting
@@ -1967,29 +1990,29 @@ We show a well-known fact that QR factorization can be viewed
 as the feature-space equivalent of Cholesky factorization,
 which can be viewed as operating in covariance-space.
 \begin{align}
-  \shortintertext{Let \( \Theta \) be a symmetric
-    positive definite matrix such that}
-  \Theta &= F^{\top} F
+  \shortintertext{Let \( \CM \) be a symmetric
+    positive-definite matrix such that}
+  \CM &= F^{\top} F
   \shortintertext{for some matrix \( F \) whose
     columns can be viewed as vectors in feature space:}
-  \Theta_{ij} &= \langle F_i, F_j \rangle
+  \CM_{ij} &= \langle F_i, F_j \rangle
   \shortintertext{where \( F_i \) is the \( i \)th column of
     \( F \). Now suppose \( F \) has the \( QR \) factorization}
   F &= QR
   \shortintertext{where \( Q \) is a \( N \times N \) orthonormal
     matrix and \( R \) is a \( N \times N \) upper triangular matrix.}
-  \Theta &= F^{\top} F = (Q R)^{\top} (Q R) \\
+  \CM &= F^{\top} F = (Q R)^{\top} (Q R) \\
          &= R^{\top} Q^{\top} Q R \\
          &= R^{\top} R
 \end{align}
 from the orthogonality of \( Q \). But note that \( R \) is an upper triangular
 matrix, so \( L = R^{\top} \) is an lower triangular matrix. So we have \(
-\Theta = L L^{\top} \) for lower triangular \( L \). By the uniqueness of
+\CM = L L^{\top} \) for lower triangular \( L \). By the uniqueness of
 Cholesky factorization, \( R^{\top} \) is precisely the Cholesky factor of \(
-\Theta \). In addition, the columns of \( Q \) are formed from Gram-Schmitt
+\CM \). In addition, the columns of \( Q \) are formed from Gram-Schmitt
 orthogonalization on the columns of \( F \) (in feature-space), and \( R \)
 the coefficients resulting from the Gram-Schmitt procedure. From \( R^{\top} =
-\chol(\Theta) \) and the statistical interpretation of Cholesky factorization
+\chol(\CM) \) and the statistical interpretation of Cholesky factorization
 \cref{eq:chol}, this iterative orthogonalization in feature-space is equivalent
 to iterative conditioning in covariance.
 
@@ -2003,9 +2026,9 @@ in \cite{tropp2007signal}. The equivalence comes from the fact
 that Cholesky factorization is Gram-Schmitt in feature space.
 
 \begin{align}
-  \shortintertext{Let \( \Theta \) be a symmetric
-    positive definite matrix such that}
-  \Theta &= F^{\top} F
+  \shortintertext{Let \( \CM \) be a symmetric
+    positive-definite matrix such that}
+  \CM &= F^{\top} F
   \shortintertext{for some matrix \( F \)
     whose columns are vectors in feature space,}
   F &=
@@ -2013,16 +2036,16 @@ that Cholesky factorization is Gram-Schmitt in feature space.
     \vec{x}_1 & \vec{x}_2 & \hdots & \vec{x}_N
   \end{pmatrix}
   \shortintertext{Immediately we have}
-  \Theta_{ij} &= \langle \vec{x}_i, \vec{x}_j \rangle
+  \CM_{ij} &= \langle \vec{x}_i, \vec{x}_j \rangle
   \shortintertext{where \( \langle \cdot, \cdot \rangle \)
     denotes the ordinary inner product on \( \mathbb{R}^N \).}
   \shortintertext{It suffices to see a single step of Cholesky
     factorization. Selecting \( \vec{x}_1 \),}
-  \Theta' &= \Theta - \frac{\vec{x}_1 \vec{x}_1^{\top}}
-    {\Theta_{11}} \\
+  \CM' &= \CM - \frac{\vec{x}_1 \vec{x}_1^{\top}}
+    {\CM_{11}} \\
   \label{eq:cov_step}
-  \Theta_{ij}' &= \Theta_{ij} -
-    \frac{\Theta_{i1} \Theta_{j1}}{\Theta_{ii}}
+  \CM_{ij}' &= \CM_{ij} -
+    \frac{\CM_{i1} \CM_{j1}}{\CM_{ii}}
   \shortintertext{Switching to the feature space perspective,
     if we select \( \vec{x}_1 \) we force the rest of the
     feature vectors to be orthogonal to \( \vec{x}_1 \),}
@@ -2066,8 +2089,8 @@ and choices of kernel function. If \( \text{Pr} \) is the set of prediction
 points, \( I \) is a set of indexes, and \( x_1, x_2 \) are additional
 indices not in \( I \), then the set function is submodular if and only if
 \begin{align*}
-  \I(\text{Pr}, I \cup \{ x_2 \}) - \I(I) &\overset{?}{\geq}
-    \I(\text{Pr}, I \cup \{ x_1, x_2 \}) - \I(\text{Pr}, I \cup \{ x_1 \})
+  \MI(\text{Pr}, I \cup \{ x_2 \}) - \MI(I) &\overset{?}{\geq}
+    \MI(\text{Pr}, I \cup \{ x_1, x_2 \}) - \MI(\text{Pr}, I \cup \{ x_1 \})
   \shortintertext{Expanding from the definition
     of mutual information \cref{eq:info},}
   \entropy[\text{Pr} \mid I] - \entropy[\text{Pr} \mid I \cup \{ x_2 \}]
@@ -2076,38 +2099,38 @@ indices not in \( I \), then the set function is submodular if and only if
     \entropy[\text{Pr} \mid I \cup \{ x_1, x_2 \}]
   \shortintertext{Since this is the objective \cref{eq:obj_gp_mult}
     (with additional log),}
-  \frac{\Theta_{x_2, x_2 \mid I}}{\Theta_{x_2, x_2 \mid I, \text{Pr}}}
+  \frac{\CM_{x_2, x_2 \mid I}}{\CM_{x_2, x_2 \mid I, \text{Pr}}}
     &\overset{?}{\geq}
-    \frac{\Theta_{x_2, x_2 \mid I} -
-          \frac{\Theta_{x_1, x_2 \mid I}^2}{\Theta_{x_1, x_1 \mid I}}}
-         {\Theta_{x_2, x_2 \mid I, \text{Pr}} -
-         \frac{\Theta_{x_1, x_2 \mid I, \text{Pr}}^2}
-              {\Theta_{x_1, x_1 \mid I, \text{Pr}}}}
+    \frac{\CM_{x_2, x_2 \mid I} -
+          \frac{\CM_{x_1, x_2 \mid I}^2}{\CM_{x_1, x_1 \mid I}}}
+         {\CM_{x_2, x_2 \mid I, \text{Pr}} -
+         \frac{\CM_{x_1, x_2 \mid I, \text{Pr}}^2}
+              {\CM_{x_1, x_1 \mid I, \text{Pr}}}}
     \shortintertext{From the fact that \(
     \frac{a}{b} \geq \frac{a - c}{b - d} \) if and only if
      \( \frac{a}{b} \leq \frac{c}{d} \),}
-  \frac{\Theta_{x_2, x_2 \mid I}}{\Theta_{x_2, x_2 \mid I, \text{Pr}}}
+  \frac{\CM_{x_2, x_2 \mid I}}{\CM_{x_2, x_2 \mid I, \text{Pr}}}
     &\overset{?}{\leq}
-    \frac{\frac{\Theta_{x_1, x_2 \mid I}^2}{\Theta_{x_1, x_1 \mid I}}}
-         {\frac{\Theta_{x_1, x_2 \mid I, \text{Pr}}^2}
-               {\Theta_{x_1, x_1 \mid I, \text{Pr}}}}
-  \shortintertext{Multiplying by \( \frac{\Theta_{x_1, x_1 \mid
-    I}}{\Theta_{x_1, x_1 \mid I, \text{Pr}}} \) on both sides,}
-  \frac{\Theta_{x_1, x_1 \mid I} \Theta_{x_2, x_2 \mid I}}
-       {\Theta_{x_1, x_1 \mid I, \text{Pr}}
-        \Theta_{x_2, x_2 \mid I, \text{Pr}}}
+    \frac{\frac{\CM_{x_1, x_2 \mid I}^2}{\CM_{x_1, x_1 \mid I}}}
+         {\frac{\CM_{x_1, x_2 \mid I, \text{Pr}}^2}
+               {\CM_{x_1, x_1 \mid I, \text{Pr}}}}
+  \shortintertext{Multiplying by \( \frac{\CM_{x_1, x_1 \mid
+    I}}{\CM_{x_1, x_1 \mid I, \text{Pr}}} \) on both sides,}
+  \frac{\CM_{x_1, x_1 \mid I} \CM_{x_2, x_2 \mid I}}
+       {\CM_{x_1, x_1 \mid I, \text{Pr}}
+        \CM_{x_2, x_2 \mid I, \text{Pr}}}
     &\overset{?}{\leq}
-    \frac{\Theta_{x_1, x_2 \mid I}^2}
-         {\Theta_{x_1, x_2 \mid I, \text{Pr}}^2}
-  \shortintertext{Multiplying by \( \frac{\Theta_{x_1,
-    x_2 \mid I, \text{Pr}}^2}{\Theta_{x_1, x_1 \mid
-    I} \Theta_{x_2, x_2 \mid I}} \) on both sides,}
-  \frac{\Theta_{x_1, x_2 \mid I, \text{Pr}}^2}
-       {\Theta_{x_1, x_1 \mid I, \text{Pr}}
-        \Theta_{x_2, x_2 \mid I, \text{Pr}}}
+    \frac{\CM_{x_1, x_2 \mid I}^2}
+         {\CM_{x_1, x_2 \mid I, \text{Pr}}^2}
+  \shortintertext{Multiplying by \( \frac{\CM_{x_1,
+    x_2 \mid I, \text{Pr}}^2}{\CM_{x_1, x_1 \mid
+    I} \CM_{x_2, x_2 \mid I}} \) on both sides,}
+  \frac{\CM_{x_1, x_2 \mid I, \text{Pr}}^2}
+       {\CM_{x_1, x_1 \mid I, \text{Pr}}
+        \CM_{x_2, x_2 \mid I, \text{Pr}}}
     &\overset{?}{\leq}
-    \frac{\Theta_{x_1, x_2 \mid I}^2}
-         {\Theta_{x_1, x_1 \mid I} \Theta_{x_2, x_2 \mid I}}
+    \frac{\CM_{x_1, x_2 \mid I}^2}
+         {\CM_{x_1, x_1 \mid I} \CM_{x_2, x_2 \mid I}}
   \shortintertext{By definition, this is}
   \Corr[x_1, x_2 \mid I, \text{Pr}] &\overset{?}{\leq}
     \Corr[x_1, x_2 \mid I]
@@ -2125,70 +2148,70 @@ a nearby point decreases the correlation for far away points.
 
 We want to show that the KL divergence between two multivariate
 Gaussians centered at \( \vec{0} \) with covariance matrices
-\( \Theta_1 \) and \( \Theta_2 \) can be written as
+\( \CM_1 \) and \( \CM_2 \) can be written as
 \begin{align}
   2 \mathbb{D}_{\text{KL}}
   \left (
-    \mathcal{N}(\vec{0}, \Theta_1) \, \Big \| \,
-    \mathcal{N}(\vec{0}, \Theta_2)
+    \mathcal{N}(\vec{0}, \CM_1) \, \Big \| \,
+    \mathcal{N}(\vec{0}, \CM_2)
   \right )
-  &= \trace(\Theta_2^{-1} \Theta_1) + \logdet(\Theta_2) - \logdet(\Theta_1) - N
-  \shortintertext{where \( \Theta_1 \) and \( \Theta_2 \) are both
+  &= \trace(\CM_2^{-1} \CM_1) + \logdet(\CM_2) - \logdet(\CM_1) - N
+  \shortintertext{where \( \CM_1 \) and \( \CM_2 \) are both
     of size \( N \times N \). Recall that the log density \( \log
-    \pi(\vec{x}) \) for \( \vec{x} \sim \mathcal{N}(\vec{0}, \Theta) \) is}
-  \log \pi(\vec{x}) &= -\frac{1}{2} (N \log(2 \pi) + \logdet(\Theta) +
-    \vec{x}^{\top} \Theta^{-1} \vec{x})
+    \pi(\vec{x}) \) for \( \vec{x} \sim \mathcal{N}(\vec{0}, \CM) \) is}
+  \log \pi(\vec{x}) &= -\frac{1}{2} (N \log(2 \pi) + \logdet(\CM) +
+    \vec{x}^{\top} \CM^{-1} \vec{x})
   \shortintertext{By the definition of KL divergence,}
   2 \mathbb{D}_{\text{KL}}
   \left (
-    \mathcal{N}(\vec{0}, \Theta_1) \, \Big \| \,
-    \mathcal{N}(\vec{0}, \Theta_2)
+    \mathcal{N}(\vec{0}, \CM_1) \, \Big \| \,
+    \mathcal{N}(\vec{0}, \CM_2)
   \right ) &= 2 \E_P[\log P - \log Q]
   \shortintertext{where \( P \) and \( Q \) are the corresponding
-    densities for \( \Theta_1 \) and \( \Theta_2 \) respectively,
+    densities for \( \CM_1 \) and \( \CM_2 \) respectively,
     and \( \E_P \) denotes expectation under \( P \).}
-  &= 2 \E_P[-\frac{1}{2} (N \log(2 \pi) + \logdet(\Theta_1) +
-            \vec{x}^{\top} \Theta_1^{-1} \vec{x}) \\
+  &= 2 \E_P[-\frac{1}{2} (N \log(2 \pi) + \logdet(\CM_1) +
+            \vec{x}^{\top} \CM_1^{-1} \vec{x}) \\
   \nonumber
   & \hphantom{= 2 \E_P[}
-            +\frac{1}{2} (N \log(2 \pi) + \logdet(\Theta_2) +
-            \vec{x}^{\top} \Theta_2^{-1} \vec{x})] \\
+            +\frac{1}{2} (N \log(2 \pi) + \logdet(\CM_2) +
+            \vec{x}^{\top} \CM_2^{-1} \vec{x})] \\
   \label{eq:kl_after_logdet}
-  &= \E_P[\vec{x}^{\top} \Theta_2^{-1} \vec{x} -
-          \vec{x}^{\top} \Theta_1^{-1} \vec{x}]
-          + \logdet(\Theta_2) - \logdet(\Theta_1) \\
-  \E_P[\vec{x}^{\top} \Theta_2^{-1} \vec{x} -
-          \vec{x}^{\top} \Theta_1^{-1} \vec{x}]
+  &= \E_P[\vec{x}^{\top} \CM_2^{-1} \vec{x} -
+          \vec{x}^{\top} \CM_1^{-1} \vec{x}]
+          + \logdet(\CM_2) - \logdet(\CM_1) \\
+  \E_P[\vec{x}^{\top} \CM_2^{-1} \vec{x} -
+          \vec{x}^{\top} \CM_1^{-1} \vec{x}]
   &=
-  \E_P[\trace(\vec{x}^{\top} \Theta_2^{-1} \vec{x}) -
-       \trace(\vec{x}^{\top} \Theta_1^{-1} \vec{x})]
+  \E_P[\trace(\vec{x}^{\top} \CM_2^{-1} \vec{x}) -
+       \trace(\vec{x}^{\top} \CM_1^{-1} \vec{x})]
 \end{align}
 because the trace of a scalar is a scalar, and the linearity of trace.
 \begin{align}
   &=
-  \E_P[\trace(\Theta_2^{-1} \vec{x} \vec{x}^{\top}) -
-       \trace(\Theta_1^{-1} \vec{x} \vec{x}^{\top})]
+  \E_P[\trace(\CM_2^{-1} \vec{x} \vec{x}^{\top}) -
+       \trace(\CM_1^{-1} \vec{x} \vec{x}^{\top})]
   && \text{cyclic property of trace} \\
   &=
-  \E_P[\trace(\Theta_2^{-1} \vec{x} \vec{x}^{\top} -
-              \Theta_1^{-1} \vec{x} \vec{x}^{\top})]
+  \E_P[\trace(\CM_2^{-1} \vec{x} \vec{x}^{\top} -
+              \CM_1^{-1} \vec{x} \vec{x}^{\top})]
   && \text{linearity of trace} \\
   &= \E_P[\trace \left (
-    (\Theta_2^{-1} - \Theta_1^{-1}) \vec{x} \vec{x}^{\top} \right )]
+    (\CM_2^{-1} - \CM_1^{-1}) \vec{x} \vec{x}^{\top} \right )]
   && \text{factoring} \\
   &= \trace(\E_P \left [
-    (\Theta_2^{-1} - \Theta_1^{-1}) \vec{x} \vec{x}^{\top} \right])
+    (\CM_2^{-1} - \CM_1^{-1}) \vec{x} \vec{x}^{\top} \right])
   && \text{swapping trace and expectation} \\
-  &= \trace((\Theta_2^{-1} - \Theta_1^{-1})
+  &= \trace((\CM_2^{-1} - \CM_1^{-1})
     \E_P \left [ \vec{x} \vec{x}^{\top} \right])
   && \text{linearity of expectation} \\
-  &= \trace((\Theta_2^{-1} - \Theta_1^{-1}) \Theta_1)
-  && \text{\( \Theta_1 = \E_P[\vec{x} \vec{x}^{\top} \)]} \\
-  &= \trace(\Theta_2^{-1} \Theta_1 - I)
+  &= \trace((\CM_2^{-1} - \CM_1^{-1}) \CM_1)
+  && \text{\( \CM_1 = \E_P[\vec{x} \vec{x}^{\top} \)]} \\
+  &= \trace(\CM_2^{-1} \CM_1 - I)
   && \text{multiplying} \\
-  &= \trace(\Theta_2^{-1} \Theta_1) - \trace(I)
+  &= \trace(\CM_2^{-1} \CM_1) - \trace(I)
   && \text{linearity of trace} \\
-  &= \trace(\Theta_2^{-1} \Theta_1) - N
+  &= \trace(\CM_2^{-1} \CM_1) - N
   \label{eq:kl_after_trace}
   && \text{trace of \( N \times N \) identity \( N \)}
 \end{align}
@@ -2197,76 +2220,76 @@ Combining \cref{eq:kl_after_trace} with \cref{eq:kl_after_logdet}, we obtain
   \nonumber
   2 \mathbb{D}_{\text{KL}}
   \left (
-    \mathcal{N}(\vec{0}, \Theta_1) \, \Big \| \,
-    \mathcal{N}(\vec{0}, \Theta_2)
+    \mathcal{N}(\vec{0}, \CM_1) \, \Big \| \,
+    \mathcal{N}(\vec{0}, \CM_2)
   \right )
-  &= \trace(\Theta_2^{-1} \Theta_1) + \logdet(\Theta_2) - \logdet(\Theta_1) - N
+  &= \trace(\CM_2^{-1} \CM_1) + \logdet(\CM_2) - \logdet(\CM_1) - N
 \end{align}
 as desired.
 
 \subsection{Reduction for optimal factor}
 \label{app:kl_L}
 
-We wish to compute the KL divergence between \( \Theta \) and the Cholesky
+We wish to compute the KL divergence between \( \CM \) and the Cholesky
 factor \( L \) computed according to \cref{thm:L}. From \cref{eq:kl},
 \begin{align}
   \label{eq:kl_L}
   2 \mathbb{D}_{\text{KL}}
   \left (
-    \mathcal{N}(\vec{0}, \Theta) \, \Big \| \,
+    \mathcal{N}(\vec{0}, \CM) \, \Big \| \,
     \mathcal{N}(\vec{0}, (L L^{\top})^{-1})
   \right )
-  &= \trace(L L^{\top} \Theta) - \logdet(L L^{\top}) - \logdet(\Theta) - N
+  &= \trace(L L^{\top} \CM) - \logdet(L L^{\top}) - \logdet(\CM) - N
   \shortintertext{Ignoring terms not depending on \( L \),}
-  &= \trace(L L^{\top} \Theta) - \logdet(L L^{\top})
+  &= \trace(L L^{\top} \CM) - \logdet(L L^{\top})
   \shortintertext{By the cyclic property of trace,}
-  &= \trace(L \Theta L^{\top}) - \logdet(L L^{\top})
-  \shortintertext{Focusing on \( \trace(L \Theta
+  &= \trace(L \CM L^{\top}) - \logdet(L L^{\top})
+  \shortintertext{Focusing on \( \trace(L \CM
     L^{\top}) \) and expanding on the columns of \( L \),}
-  \trace(L \Theta L^{\top}) &= \sum_{i = 1}^N
-    L_{s_i, i}^{\top} \Theta_{s_i, s_i} L_{s_i, i}
+  \trace(L \CM L^{\top}) &= \sum_{i = 1}^N
+    L_{s_i, i}^{\top} \CM_{s_i, s_i} L_{s_i, i}
   \shortintertext{Plugging in \( L_{s_i, i} \) from \cref{thm:L},}
   &= \sum_{i = 1}^N
     \left (
-      \frac{\left ( \Theta_{s_i, s_i}^{-1} \vec{e}_1 \right )^{\top}}
-        {\sqrt{\vec{e}_1^{\top} \Theta_{s_i, s_i}^{-1} \vec{e}_1}}
+      \frac{\left ( \CM_{s_i, s_i}^{-1} \vec{e}_1 \right )^{\top}}
+        {\sqrt{\vec{e}_1^{\top} \CM_{s_i, s_i}^{-1} \vec{e}_1}}
     \right )
-    \Theta_{s_i, s_i}
+    \CM_{s_i, s_i}
     \left (
-      \frac{\Theta_{s_i, s_i}^{-1} \vec{e}_1}
-        {\sqrt{\vec{e}_1^{\top} \Theta_{s_i, s_i}^{-1} \vec{e}_1}}
+      \frac{\CM_{s_i, s_i}^{-1} \vec{e}_1}
+        {\sqrt{\vec{e}_1^{\top} \CM_{s_i, s_i}^{-1} \vec{e}_1}}
     \right ) \\
   &= \sum_{i = 1}^N
-    \frac{\vec{e}_1^{\top} \Theta_{s_i, s_i}^{-1}
-          \Theta_{s_i, s_i} \Theta_{s_i, s_i}^{-1}
-          \vec{e}_1}{\vec{e}_1^{\top} \Theta_{s_i, s_i}^{-1} \vec{e}_1} \\
+    \frac{\vec{e}_1^{\top} \CM_{s_i, s_i}^{-1}
+          \CM_{s_i, s_i} \CM_{s_i, s_i}^{-1}
+          \vec{e}_1}{\vec{e}_1^{\top} \CM_{s_i, s_i}^{-1} \vec{e}_1} \\
   &= \sum_{i = 1}^N 1 = N
 \end{align}
 \begin{align}
   \shortintertext{Using \( N \) for \( \trace(L
-    L^{\top} \Theta) \) in \cref{eq:kl_L},}
+    L^{\top} \CM) \) in \cref{eq:kl_L},}
   2 \mathbb{D}_{\text{KL}}
   \left (
-    \mathcal{N}(\vec{0}, \Theta) \, \Big \| \,
+    \mathcal{N}(\vec{0}, \CM) \, \Big \| \,
     \mathcal{N}(\vec{0}, (L L^{\top})^{-1})
   \right )
-  &= -\logdet(L L^{\top}) - \logdet(\Theta)
+  &= -\logdet(L L^{\top}) - \logdet(\CM)
   \shortintertext{\( L^{\top} \) has the same log determinant
     as \( L \), and because \( L \) is lower triangular, its
     log determinant is just the sum of its diagonal entries:}
-  &= -2 \sum_{i = 1}^N \left [ \log(L_{ii}) \right ] - \logdet(\Theta)
+  &= -2 \sum_{i = 1}^N \left [ \log(L_{ii}) \right ] - \logdet(\CM)
   \shortintertext{Plugging \cref{eq:L_col} for the diagonal entries,}
   &= -\sum_{i = 1}^N
-    \left [ \log(\vec{e}_1^{\top} \Theta_{s_i, s_i}^{-1} \vec{e}_1) \right ]
-    - \logdet(\Theta)
+    \left [ \log(\vec{e}_1^{\top} \CM_{s_i, s_i}^{-1} \vec{e}_1) \right ]
+    - \logdet(\CM)
   \shortintertext{Bringing the negative inside,}
   &= \sum_{i = 1}^N
     \left [
       \log \left (
-        (\vec{e}_1^{\top} \Theta_{s_i, s_i}^{-1} \vec{e}_1)^{-1}
+        (\vec{e}_1^{\top} \CM_{s_i, s_i}^{-1} \vec{e}_1)^{-1}
       \right )
     \right ]
-    - \logdet(\Theta)
+    - \logdet(\CM)
 \end{align}
 So minimizing the KL divergence (given optimal \( L \)) corresponds to
 minimizing the sum of the inverse of the diagonal entries. We can give
@@ -2276,31 +2299,31 @@ and expanding the log determinant by the chain rule \cref{eq:det_chain}.
   \sum_{i = 1}^N
     \left [
       \log \left (
-        (\vec{e}_1^{\top} \Theta_{s_i, s_i}^{-1} \vec{e}_1)^{-1}
+        (\vec{e}_1^{\top} \CM_{s_i, s_i}^{-1} \vec{e}_1)^{-1}
       \right )
     \right ]
-    - \logdet(\Theta)
+    - \logdet(\CM)
   &= \sum_{i = 1}^N
     \left [
-      \log \left ( \Theta_{ii \mid s_i - \{ i \}} \right )
+      \log \left ( \CM_{ii \mid s_i - \{ i \}} \right )
     \right ]
-    - \logdet(\Theta) \\
+    - \logdet(\CM) \\
   &= \sum_{i = 1}^N
-      \log \left ( \Theta_{ii \mid s_i - \{ i \}} \right ) -
+      \log \left ( \CM_{ii \mid s_i - \{ i \}} \right ) -
     \sum_{i = 1}^N
-      \log \left ( \Theta_{ii \mid i + 1:} \right ) \\
+      \log \left ( \CM_{ii \mid i + 1:} \right ) \\
   &= \sum_{i = 1}^N
     \left [
-      \log \left ( \Theta_{ii \mid s_i - \{ i \}} \right ) -
-      \log \left ( \Theta_{ii \mid i + 1:} \right )
+      \log \left ( \CM_{ii \mid s_i - \{ i \}} \right ) -
+      \log \left ( \CM_{ii \mid i + 1:} \right )
     \right ]
 \end{align}
 We can view this sum as the accumulated \emph{difference} in prediction
 error for a series of prediction problems, where each prediction problem is
 to predict the value of the \( i \)th variable given variables \( i + 1, i
-+ 2, \dotsc, N \). The left term \( \log \left ( \Theta_{ii \mid s_i - \{ i
++ 2, \dotsc, N \). The left term \( \log \left ( \CM_{ii \mid s_i - \{ i
 \}} \right ) \) is restricted to only using those variables in the sparsity
-pattern \( s_i \), while the right term \( \log \left ( \Theta_{ii \mid i +
+pattern \( s_i \), while the right term \( \log \left ( \CM_{ii \mid i +
 1:} \right ) \) is able to use every variable after \( i \). The left term
 will necessarily have greater variance than the right, and the goal is to
 minimize the accumulated deviation. Thus, the KL divergence gives a natural
@@ -2312,7 +2335,7 @@ given in \cite{katzfuss2022scalable}.
 Another interpretation is from \cite{bartels2022adaptive}, where they view
 the full prediction problems as the log likelihood of the variables. Under
 this interpretation, conditional independence (through the screening effect)
-corresponds to a near-constant value of \( \log(\Theta_{ii \mid i + 1:}) \),
+corresponds to a near-constant value of \( \log(\CM_{ii \mid i + 1:}) \),
 which results in a linear plot of log-likelihood with increasing \( N \).
 
 Because the KL divergence is not symmetric, it matters which way the
@@ -2322,13 +2345,13 @@ ways to compare two covariance matrices. However, note that
 \begin{align}
 \mathbb{D}_{\text{KL}}
   \left (
-    \mathcal{N}(\vec{0}, \Theta) \, \Big \| \,
+    \mathcal{N}(\vec{0}, \CM) \, \Big \| \,
     \mathcal{N}(\vec{0}, (L L^{\top})^{-1})
   \right ) &=
 \mathbb{D}_{\text{KL}}
   \left (
     \mathcal{N}(\vec{0}, L L^{\top}) \, \Big \| \,
-    \mathcal{N}(\vec{0}, \Theta^{-1})
+    \mathcal{N}(\vec{0}, \CM^{-1})
   \right )
 \end{align}
 from \cref{eq:kl} and the cyclic property of trace, so inverting both
