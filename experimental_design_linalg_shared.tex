@@ -10,6 +10,8 @@
 \usepackage{lipsum}
 \usepackage{amssymb}
 \usepackage{amsfonts}
+\usepackage{amsopn}
+\usepackage{mathtools}
 \usepackage{graphicx}
 \usepackage{epstopdf}
 \usepackage{algorithmic}
@@ -49,13 +51,12 @@
 \pgfplotsset{compat=newest}
 \usepgfplotslibrary{fillbetween}
 
-% custom commands:
+% Custom commands:
 % \newcommand{\todo}[1]{{\color{red} #1}}
 \newcommand{\Ftodo}[1]{\todo[color=lightblue]{Florian: #1}}
 \newcommand{\Stodo}[1]{\todo[color=seagreen]{Stephen: #1}}
 
-\usepackage{mathtools}
-%Names of standard objects
+% Names of standard objects
 \newcommand*{\Reals}{\mathbb{R}}
 \newcommand*{\Naturals}{\mathbb{N}}
 
@@ -82,43 +83,6 @@
   }%
 }
 \makeatother
-
-%Names of Variables:
-\newcommand*{\stateP}{\mathbf{x}}
-\newcommand*{\stateD}{\hat{\mathbf{x}}}
-
-\newcommand*{\resP}{\mathbf{r}}
-\newcommand*{\resD}{\hat{\mathbf{r}}}
-
-\newcommand*{\resMatP}{\mathbf{R}}
-\newcommand*{\resMatD}{\hat{\mathbf{R}}}
-
-
-\newcommand*{\dirP}{\mathbf{p}}
-\newcommand*{\dirMatP}{\mathbf{P}}
-\newcommand*{\dirD}{\hat{\mathbf{p}}}
-\newcommand*{\dirMatD}{\hat{\mathbf{P}}}
-
-\newcommand*{\rhsP}{\mathbf{b}}
-\newcommand*{\rhsD}{\hat{\mathbf{b}}}
-
-\newcommand*{\mat}{\mathbf{A}}
-\newcommand*{\adj}[1]{#1^{\dagger}}
-\newcommand*{\con}[1]{\bar{#1}}
-
-\newcommand*{\alphaP}{\alpha}
-\newcommand*{\alphaD}{\hat{\alpha}}
-
-\newcommand*{\alphaMatP}{\bm{\alpha}}
-\newcommand*{\alphaMatD}{\hat{\bm{\alpha}}}
-
-\newcommand*{\betaP}{\beta}
-\newcommand*{\betaD}{\hat{\beta}}
-
-\newcommand*{\betaMatP}{\bm{\beta}}
-\newcommand*{\betaMatD}{\hat{\bm{\beta}}}
-
-\renewcommand{\vec}[1]{\bm{#1}}
 
 \renewcommand{\algorithmicrequire}{\textbf{Input:}}
 \renewcommand{\algorithmicensure}{\textbf{Output:}}
@@ -152,21 +116,42 @@ S. Huan, J. Guinness, M. Katzfuss, H. Owhadi, F. Sch{\"a}fer}
   \email{florian.schaefer@cc.gatech.edu},\newline Corresponding Author}
 }
 
+\newcommand*{\defeq}{\coloneqq}
+\newcommand*{\BigO}{\mathcal{O}}
+\newcommand*{\N}{\mathcal{N}}
+\newcommand*{\SpSet}{\mathcal{S}}
+\newcommand*{\I}{I}
 
-\usepackage{amsopn}
+\renewcommand{\vec}[1]{\bm{#1}}
+\newcommand*{\Id}{\text{Id}}
+
+% Names of variables
+% covariance matrix
+\newcommand*{\CM}{\Theta}
+\DeclareMathOperator{\Train}{Tr}
+\DeclareMathOperator{\Pred}{Pr}
+
+% Names of operators
+\DeclarePairedDelimiter{\norm}{\lVert}{\rVert}
 \DeclareMathOperator{\diag}{diag}
 \let\trace\relax
 \DeclareMathOperator{\trace}{trace}
 \DeclareMathOperator{\logdet}{logdet}
 \DeclareMathOperator{\chol}{chol}
+\DeclareMathOperator{\FRO}{FRO}
 
 \DeclareMathOperator*{\argmin}{argmin}
 
+\DeclarePairedDelimiterX{\infdivx}[2]{(}{)}{%
+  #1\;\delimsize\|\;#2%
+}
+\newcommand*{\KL}{\mathbb{D}_{\operatorname{KL}}\infdivx}
+\newcommand*{\p}{\pi}
 \DeclareMathOperator{\E}{E}
 \DeclareMathOperator{\Var}{Var}
 \DeclareMathOperator{\Cov}{Cov}
 \DeclareMathOperator{\Corr}{Corr}
-\DeclareMathOperator{\I}{MI}
+\DeclareMathOperator{\MI}{MI}
 \DeclareMathOperator{\entropy}{H}
 
 %%% Local Variables:

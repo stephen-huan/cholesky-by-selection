@@ -39,24 +39,24 @@
 
 % REQUIRED
 \begin{abstract}
-  Dense kernel matrices resulting from pointwise evaluations of a kernel
-  function arise naturally in machine learning and statistics. Previous
-  work in constructing sparse transport maps or sparse approximate inverse
-  Cholesky factors for such matrices by minimizing Kullback-Leibler divergence
-  recovers the Vecchia approximation for Gaussian processes. However, this
-  method for Cholesky factorization relies only on geometry to construct the
+  Dense kernel matrices resulting from pairwise evaluations of a kernel
+  function arise naturally in machine learning and statistics. Previous work
+  in constructing sparse transport maps or sparse approximate inverse Cholesky
+  factors for such matrices by minimizing Kullback-Leibler divergence recovers
+  the Vecchia approximation for Gaussian processes. However, this method for
+  Cholesky factorization usually relies only on geometry to construct the
   sparsity pattern, ignoring the conditional effect of adding an entry. In this
   work, we construct the sparsity pattern by leveraging a greedy selection
   algorithm which selects points that maximize mutual information with target
-  points, conditional on all points selected previously. For selecting $k$
-  points out of $N$, the naive time complexity is $\mathcal{O}(N k^4)$, but
-  by maintaining a partial Cholesky factor we reduce this to $\mathcal{O}(N
-  k^2)$. Furthermore, for multiple ($m$) targets we achieve a time complexity
-  of $\mathcal{O}(N k^2 + N m^2 + m^3)$ which is maintained in the setting
-  of Cholesky factorization where a selected point need not condition every
+  points, conditional on all points selected previously. For selecting \( k \)
+  points out of \( N \), the naive time complexity is \( \BigO(N k^4) \), but
+  by maintaining a partial Cholesky factor we reduce this to \( \BigO(N k^2)
+  \). Furthermore, for multiple (\( m \)) targets we achieve a time complexity
+  of \( \BigO(N k^2 + N m^2 + m^3) \) which is maintained in the setting of
+  Cholesky factorization where a selected point need not condition every
   target. We directly apply the selection algorithm to image classification
-  and recovery of sparse Cholesky factors, improving upon $k$-th nearest
-  neighbors in every case. Through Kullback-Leibler minimization we apply
+  and recovery of sparse Cholesky factors, improving upon \( k \)-th nearest
+  neighbors in every case. By minimizing Kullback-Leibler divergence, we apply
   the algorithm to Cholesky factorization and Gaussian process regression,
   improving in high dimensional geometries as well as when preconditioning
   with the conjugate gradient.
@@ -74,63 +74,51 @@
 
 \section{Introduction}
 
-\paragraph{The problem and existing work}
+\paragraph{The problem}
 
-This work is concerned with Gaussian process regression in the setting of \(
-N \) points in \( D \) dimension space, whose covariance matrix \( \Theta
-\in \mathbb{R}^{N \times N} \) is induced by a prescribed kernel function.
-Gaussian processes enjoy widespread application in spatial statistics and
-geostatistics \cite{rue2005gaussian}, machine learning through kernel
-machines \cite{rasmussen2006gaussian}, and Bayesian experimental design
-\cite{wu2018exploiting}, e.g. in sensor placement \cite{krause2008nearoptimal}.
-However, statistical inference with Gaussian processes often requires the
-log determinant or inverse of the covariance matrix, at a computational time
-cost of \( \mathcal{O}(N^3) \) and a memory cost of \( \mathcal{O}(N^2) \)
-to store the \emph{dense} \( N \times N \) covariance matrix.
+This work is concerned with Gaussian process regression in the setting
+of \( N \) points in \( D \) dimension space, whose covariance matrix \(
+\CM \in \Reals^{N \times N} \) is induced by pairwise evaluation of a
+prescribed kernel function. Gaussian processes enjoy widespread application
+in spatial statistics and geostatistics \cite{rue2005gaussian}, machine
+learning through kernel machines \cite{rasmussen2006gaussian}, and optimal
+experimental design \cite{mutny2022experimental}, e.g. in sensor placement
+\cite{krause2008nearoptimal}. However, statistical inference with Gaussian
+processes often requires computing quantities such as \( \CM \vec{v} \),
+\( \CM^{-1} \vec{v} \), \( \logdet(\CM) \), at a computational cost of \(
+\BigO(N^2) \) or \( \BigO(N^3) \) and a memory cost of \( \BigO(N^2) \) to
+store the \emph{dense} \( N \times N \) covariance matrix. Overcoming these
+computational challenges for Gaussian process regression naturally generalizes
+to fast algorithms for numerical linear algebra on positive-definite matrices,
+since all positive-definite matrices can be viewed as covariance matrices
+and vice-versa.
 
-Many approaches have been developed to address this computational bottleneck.
-The machine learning community has developed many sparse (in the sense of
-selecting a subset of \( k \) points of out the \( N \) total, \( k \ll N
-\)) algorithms that greedily select the next point to include by maximizing
-a information-theoretic objective \cite{smola2000sparse, herbrich2002fast,
-seeger2003fast}. Similar algorithms have been developed in the context of
-sensor placement \cite{krause2008nearoptimal, clark2018greedy} where it is
-assumed the target phenomena is modeled by a Gaussian process or is otherwise
-linearly dependent on the \( k \) selected measurements. More recent work
-exploits the empirical observation that the marginal log-likelihood is
-approximately linear, giving a principled way to determine the number of
-selected points without viewing the whole dataset \cite{bartels2022adaptive}.
-These greedy methods often leverage linear-algebraic factorization for
-efficient computation, particularly the Cholesky factorization \cite{
-herbrich2002fast, seeger2003fast, bartels2022adaptive} or the closely
-related QR factorization \cite{clark2018greedy}. Since both the covariance
-matrix \( \Theta \) and its precision \( \Theta^{-1} \) are by definition
-positive-definite, a Cholesky factor \( L \) always exists. Another approach is
-to directly leverage the Cholesky factor itself, through incomplete Cholesky
-factorization of the covariance \( \Theta \) \cite{schafer2020compression,
-chenparallel, chow2015finegrained} or a sparse approximate Cholesky
-factorization of the precision \( \Theta^{-1} \) \cite{schafer2021sparse}.
-As noted in \cite{schafer2021sparse}, the Cholesky factor of the precision
-is often much sparser than the factor of the covariance, because the
-precision encodes conditional independence while the covariance encodes
-marginal independence. In the special case of the Mat{\'e}rn kernel function
-with half-integer smoothness, the covariance matrix \( \Theta \) admits
-a sparse, banded factorization, allowing for an exact algorithm linear
-in both time and space with the number of points, and only additionally
-depending on the smoothness parameter \( \nu \) \cite{chen2022kernel}. From
-the perspective of transport maps, the Cholesky factor \( L \) satisfying
-\( \Theta^{-1} = L^{\top} L \) can be viewed as a linear transport map
-mapping an arbitrary multivariate Gaussian distribution \( \vec{x} \sim
-\mathcal{N}(\vec{0}, \Theta) \) to the standard Gaussian \( \vec{z} \sim
-\mathcal{N}(\vec{0}, I_N) \) through \( \vec{z} = L \vec{x} \). Thus, one
-generalization of Cholesky factorization to nonlinear and non-Gaussian
-distributions is the Knothe-Rosenblatt rearrangement, which preserves
-lower triangularity (variables only interact with those before them in
-the ordering), some sense of positive-definiteness (the diagonal of the
-Jacobian is positive), and sparsity, particularly in the inverse mapping
+\paragraph{Existing work}
+
+Computation with positive-definite matrices is often accelerated with sparse
+Cholesky factorization, either through incomplete Cholesky factorization
+of the covariance \( \CM \) \cite{schafer2020compression, chenparallel,
+chow2015finegrained}, sparse approximate Cholesky factorization of the
+precision \( \CM^{-1} \) \cite{schafer2021sparse}, or factorized sparse
+approximate inverse (FSAI) preconditioners \cite{kaporin1990alternative,
+yeremin2000factorized}. From the perspective of transport maps, the Cholesky
+factor \( L \) satisfying \( \CM^{-1} = L^{\top} L \) can be viewed as a linear
+transport map mapping an arbitrary multivariate Gaussian distribution \(
+\vec{x} \sim \mathcal{N}(\vec{0}, \CM) \) to the standard Gaussian \( \vec{z}
+\sim \mathcal{N}(\vec{0}, I_N) \) through \( \vec{z} = L \vec{x} \). Thus,
+one generalization of Cholesky factorization to nonlinear and non-Gaussian
+distributions is the Knothe-Rosenblatt rearrangement, which preserves lower
+triangularity, monotonicity, and sparsity, particularly in the inverse mapping
 \cite{spantini2018inference}. These triangular transport maps have been
 applied to problems in spatial statistics, particularly for simulation and
 sampling problems \cite{marzouk2016introduction, katzfuss2022scalable}.
+
+% not sure this is necessary
+% In the special case of the Mat{\'e}rn kernel function with half-integer
+% smoothness on one-dimensional points, the covariance matrix \( \CM \) admits
+% a sparse, banded factorization, allowing for an exact algorithm linear
+% in both time and space with the number of points, and only additionally
+% depending on the smoothness parameter \( \nu \) \cite{chen2022kernel}.
 
 \paragraph{Vecchia approximation}
 
@@ -140,33 +128,157 @@ approach for fast Gaussian process regression, the Vecchia approximation
 decomposition of the joint likelihood \( \pi \).
 \begin{align}
   \label{eq:joint}
-  \pi(\vec{x}) &= \pi(x_1) \pi(x_2 \mid x_1) \dots
-    \pi(x_N \mid x_1, x_2, \dotsc, x_{N - 1})
+  \p(\vec{x}) &= \p(x_1) \p(x_2 \mid x_1) \dots
+    \p(x_N \mid x_1, x_2, \dotsc, x_{N - 1})
   \shortintertext{Assuming that there are many points, the key assumption
     is that many of the points contribute little additional information,
     conditional on a carefully chosen subset of the points. Letting \(
     s_i \) denote the indices of training points to include for the \(
     i \)th variable, the Vecchia approximation proposes to approximate
     \cref{eq:joint} by the sparse approximation}
-  \pi(\vec{x}) &\approx \pi(x_1) \pi(x_2 \mid x_{s_2}) \dots
-    \pi(x_N \mid x_{s_N})
+  \label{eq:vecchia}
+  \p(\vec{x}) &\approx \p(x_1) \p(x_2 \mid x_{s_2}) \dots
+    \p(x_N \mid x_{s_N})
 \end{align}
-Note that \( s_i \) is often restricted to a subset of the indices
-\( 1, \dotsc, i - 1 \) to maintain lower triangularity. Indices in
-sparsity set \( s_i \) are often chosen to be the closest points to
-\( \vec{x}_i \) by Euclidean distance \cite{vecchia1988estimation,
-schafer2020compression, schafer2021sparse, katzfuss2022scalable}. This
-choice can be justified by noting that popular kernel functions like the
-Mat{\'e}rn family of kernel functions decay exponentially with increasing
-distance. For more general kernel functions, geostatisticians have long
-observed the ``screening effect'', or the observation that conditional
-on points close to the point of interest, far away points are nearly
-conditionally independent \cite{stein2002screening, stein20112010}.
-Possible manifestations of this effect include the observed linearity
-of the marginal log-likelihood \cite{bartels2022adaptive}, approximate
-submodularity of common information-theoretic criteria \cite{das2011submodular,
-jagalur-mohan2021batch}, and exponential decay in error for Cholesky
-factorization \cite{schafer2020compression, schafer2021sparse}.
+From the Vecchia approximation, the joint likelihood can be factored into
+\( N \) independent regression problems, where each regression problem is
+to approximate the conditional distribution of the \( i \)th variable.
+Independence allows for embarrassingly parallel algorithms, which is exploited
+both in Gaussian process regression \cite{katzfuss2021general} and Cholesky
+factorization \cite{schafer2021sparse}. The difference is that while the
+Gaussian process perspective emphasizes local regression problems and sparsity
+in point selection (or variable interaction), Cholesky factorization emphasizes
+minimizing global functionals and sparsity in the resulting matrix factor.
+If an appropriate functional is chosen and a sparsity pattern \( \SpSet \)
+specified, then it is an optimization problem to determine the entries of
+the matrix factor. Multiple functionals in the literature actually converge
+to the same closed-form expression for the entries of the resulting Cholesky
+factor \( L \) subject to the constraint that \( L \in \SpSet \): Minimizers
+of the Kaporin condition number \( (\trace(L \CM L^{\top})/N)^N/\det(L \CM
+L^{\top}) \) \cite{kaporin1990alternative}, minimizes of \( \norm{\Id - L
+\chol(\CM)}_{\FRO} \) additionally subject to the constraint \( \diag(L
+\CM L^{\top}) = 1 \) \cite{yeremin2000factorized}, and minimizers of the
+KL-divergence \( \KL{\N(\vec{0}, \CM)} {\N(\vec{0}, (L L^{\top})^{-1})}
+\) \cite{schafer2021sparse}. This shared closed-form expression for the
+entries of the resulting factor can be shown to be equivalent to the
+formula used to compute the Vecchia approximation for Gaussian processes
+\cite{vecchia1988estimation}. In addition, the KL-divergence is used to
+compute sparse lower-triangular maps in \cite{marzouk2016introduction,
+katzfuss2022scalable}.
+
+The primary difference between the numerical linear algebra viewpoint (Kaporin
+conditional number or Frobenius norm minimization) and the statistical
+viewpoint (KL-minimization) is whether the covariance is factored, \( L
+\approx \chol(\CM)^{-1} \), or the precision, \( L \approx \chol(\CM^{-1}) \).
+As observed in \cite{schafer2021sparse, spantini2018inference}, factors of
+the precision are often much sparser than factors of the covariance, because
+the precision encodes conditional independence while the covariance encodes
+marginal independence. Covariance matrices arising from kernel functions
+are often fully dense, but the approximate factors of their precision can
+be sparse if the ordering and sparsity pattern are chosen carefully.
+
+\paragraph{Sparsity selection by geometry}
+
+Assuming that a suitable elimination ordering is chosen, it remains to
+be decided the sparsity set for each point. Indices are often chosen
+to be the closest points to the current point by Euclidean distance
+\cite{vecchia1988estimation, schafer2020compression, schafer2021sparse,
+katzfuss2022scalable}. This choice can be justified by noting that
+popular kernel functions like the Mat{\'e}rn family of kernel functions
+decay exponentially with increasing distance. For more general kernel
+functions, geostatisticians have long observed the ``screening effect'',
+or the observation that conditional on points close to the point
+of interest, far away points are nearly conditionally independent
+\cite{stein2002screening, stein20112010}.
+
+% not sure this is necessary
+% Possible manifestations of this effect include the observed linearity of the
+% marginal log-likelihood \cite{bartels2022adaptive}, approximate submodularity
+% of common information-theoretic criteria \cite{das2011submodular,
+% jagalur-mohan2021batch}, and exponential decay in error for Cholesky
+% factorization \cite{schafer2020compression, schafer2021sparse}.
+
+However, selecting by distance alone ignores the conditional effect of adding
+new points to the sparsity set. As an illustrative example, imagine the closest
+point to the point of interest has been duplicated multiple times. Once the
+duplicated point has been selected, conditional on the selected point, the
+duplicates provide no additional information. But they are still closest to
+the point of interest, so selecting by distance alone would still add these
+redundant points to the sparsity set. Instead, we propose greedily selecting
+based on conditional mutual information with the point of interest.
+
+\paragraph{Conditional selection}
+
+The machine learning community has long developed algorithms that greedily
+select the next point to include by maximizing an information-theoretic
+objective \cite{smola2000sparse, herbrich2002fast, seeger2003fast}.
+Similar algorithms have been developed in the context of sensor placement
+\cite{krause2008nearoptimal, clark2018greedy} and experimental design
+\cite{mutny2022experimental} where it is assumed the target phenomena
+is modeled by a Gaussian process or is otherwise linearly dependent
+on the selected measurements. More recent work exploits the empirical
+observation that the marginal log-likelihood is approximately linear,
+giving a principled way to determine the number of selected points
+without viewing the whole dataset \cite{bartels2022adaptive}.
+
+Our proposed selection method can be viewed as the covariance equivalent of
+a popular algorithm in signal processing and compressive sensing, orthogonal
+matching pursuit (OMP) \cite{tropp2007signal, tropp2006algorithms}, which
+seeks to approximate a target vector as the sparse linear combination from a
+given collection of vectors. OMP is a workhorse algorithm used in as diverse
+contexts as signal recovery \cite{tropp2007signal, tropp2006algorithms},
+polynomial chaos expansion \cite{baptista2019greedy}, and the use of neural
+networks to solve partial differential equations \cite{hao2021efficient,
+siegel2022optimal}.
+
+Nearly all of these selection methods leverage numerical linear algebra
+for efficient computation, particularly the Cholesky factorization
+\cite{herbrich2002fast, seeger2003fast, bartels2022adaptive} or the
+closely related QR factorization \cite{clark2018greedy, tropp2007signal,
+baptista2019greedy}. We wish to emphasize that algorithms for Cholesky
+factorization translate naturally to Gaussian processes regression and
+vice-versa.
+
+\paragraph{Main results}
+
+For a single point of interest, a direct computation of the conditional
+mutual information criterion would have a computational time complexity of \(
+\BigO(N k^4) \) to greedily select \( k \) points out of \( N \) total, but by
+maintaining a partial Cholesky factor, we are able to reduce this complexity
+to \( \BigO(N k^2) \). We extend this basic selection algorithm to maximize
+mutual information with \emph{multiple} points of interest, to naturally take
+advantage of the ``two birds with one stone'' effect. For \( m \) target points
+we achieve a time complexity of \( \BigO(N k^2 + N m^2 + m^3) \), which for
+\( m \approx k \) is essentially \( m \) times faster than the single-point
+algorithm. In the setting of aggregated (or supernodal) Cholesky factorization
+where the sparsity pattern for multiple columns is determined at once, a
+candidate entry may be between two columns --- above one, but below another.
+Adding this entry only conditions a \emph{partial} subset of the target points.
+By carefully applying rank-one downdating of Cholesky factors, we are able to
+capture this structure at the same time complexity for multiple points.
+
+Greedy selection \emph{locally} infers the posterior distribution for
+distinguished point(s) of interest. In order to get a \emph{global}
+approximation for the entire Gaussian process, we compute a sparse approximate
+Cholesky factor of the precision by minimizing the KL-divergence between the
+centered multivariate normal distributions with covariance matrices \( \CM \)
+and \( (L L^{\top})^{-1} \) subject to the constraint \( L \in \SpSet \) as
+in \cite{schafer2021sparse}. We show that the resulting optimization problem
+reduces to independent regression problems for each column. In applying our
+greedy selection method, we are able to get more accurate Cholesky factors
+for the same number of nonzeros compared to if the sparsity was selected with
+geometry. Finally, we show how to adaptively determine the number of nonzeros
+per column in order to reduce the global KL-divergence by maintaining a global
+priority queue shared between each local greedy selection algorithm.
+
+\paragraph{Outline}
+
+\Stodo{todo once more of the paper is solidified}
+The remainder of the paper is organized as follows.
+
+\section{Greedy selection for directed inference}
+
+\subsection{Conditional \textit{k}-th nearest neighbors}
 
 \begin{figure}[h!]
   \centering
@@ -179,29 +291,6 @@ factorization \cite{schafer2020compression, schafer2021sparse}.
     conditioning on the four points in orange.}
   \label{fig:screen}
 \end{figure}
-
-From the Vecchia approximation, the joint likelihood can be factored into
-\( N \) independent regression problems, where each regression problem is
-to approximate the conditional distribution of the \( i \)th variable.
-Independence allows for embarrassingly parallel algorithms, which is
-exploited in both Gaussian process regression \cite{katzfuss2021general}
-and Cholesky factorization \cite{schafer2021sparse}. The difference is
-that while the Gaussian process perspective emphasizes local regression
-problems and sparsity in point selection (or variable interaction),
-Cholesky factorization emphasizes minimizing the global Kullback-Leibler
-(KL) divergence and sparsity in the resulting matrix factor.
-
-\paragraph{Sparsity selection by geometry}
-
-In the original Vecchia paper, the sparsity
-sets are determined by Euclidean distance.
-
-screening and conditional independence.
-
-\paragraph{conditional selection / experimental design / omp}
-
-omp: \cite{tropp2007signal, tropp2006algorithms,
-hao2021efficient, siegel2022optimal, baptista2019greedy}
 
 \begin{figure}[h]
   \centering
@@ -219,15 +308,18 @@ hao2021efficient, siegel2022optimal, baptista2019greedy}
   \label{fig:select}
 \end{figure}
 
-\paragraph{Main results}
-
-\paragraph{Outline}
-
-The remainder of the paper is organized as follows.
-
-\section{Greedy selection for directed inference}
-
-\subsection{Conditional \textit{k}-th nearest neighbors}
+\begin{figure}[h]
+  \centering
+  \input{figures/cholesky_factor.tex}%
+  % TODO: matching GP image with 13 candidates, 3 selected, 1 training point
+  \input{figures/selection/cknn.tex}
+  \caption{For a column in isolation, the \textcolor{orange}{unknown} point
+    is the diagonal entry, below it are \textcolor{lightblue}{candidates},
+    and the \textcolor{seagreen}{selected} entries are added to the sparsity
+    pattern \( s_i \). Thus, sparsity selection in Cholesky factorization
+    is analogous to point selection in Gaussian processes.}
+  \label{fig:select_chol}
+\end{figure}
 
 Consider the simple regression algorithm \( k \)th-nearest neighbors (\( k
 \)-NN). Given a training set \( X_\text{Tr} = \{ \vec{x}_1, \dotsc, \vec{x}_n
