@@ -76,22 +76,17 @@
 
 \paragraph{The problem}
 
-This work is concerned with Gaussian process regression in the setting
-of \( N \) points in \( D \) dimension space, whose covariance matrix \(
-\CM \in \Reals^{N \times N} \) is induced by pairwise evaluation of a
-prescribed kernel function. Gaussian processes enjoy widespread application
+Gaussian processes find application 
 in spatial statistics and geostatistics \cite{rue2005gaussian}, machine
 learning through kernel machines \cite{rasmussen2006gaussian}, and optimal
 experimental design \cite{mutny2022experimental}, e.g. in sensor placement
-\cite{krause2008nearoptimal}. However, statistical inference with Gaussian
-processes often requires computing quantities such as \( \CM \vec{v} \),
-\( \CM^{-1} \vec{v} \), \( \logdet(\CM) \), at a computational cost of \(
-\BigO(N^2) \) or \( \BigO(N^3) \) and a memory cost of \( \BigO(N^2) \) to
-store the \emph{dense} \( N \times N \) covariance matrix. Overcoming these
-computational challenges for Gaussian process regression naturally generalizes
-to fast algorithms for numerical linear algebra on positive-definite matrices,
-since all positive-definite matrices can be viewed as covariance matrices
-and vice-versa.
+\cite{krause2008nearoptimal}. 
+However, Gaussian process statistics from $N$ datapoints with requires computing with the 
+covariance matrix $\CM \in \Reals^{N \times N}$ 
+to obtain quantities such as \( \CM \vec{v} \),
+\( \CM^{-1} \vec{v} \), \( \logdet(\CM) \). 
+For dense $\CM$, directly computing these quantities has a computational cost of \( \BigO(N^3) \) and a memory cost of \( \BigO(N^2) \), which is prohibitively expensive for $N \gtrapprox 10^5$.  
+Beyond Gaussian processes, computations with large positive-definite matrices are required accross computational mathematics, motivating the search for faster, approximate algorithms.
 
 \paragraph{Existing work}
 
