@@ -1,0 +1,109 @@
+\begin{algorithmic}[1]
+  \REQUIRE \( \vec{x}_\Train, \vec{x}_\Pred, \K(\cdot, \cdot), s \)
+  \ENSURE \( \I \)
+
+  \STATE \( N \gets \card{\vec{x}_\Train} \)
+  \STATE \( m \gets \card{\vec{x}_\Pred} \)
+  \STATE \(
+    \vec{x} \gets
+    \begin{pmatrix}
+      \vec{x}_\Train \\
+      \vec{x}_\Pred
+    \end{pmatrix}
+  \)
+  \STATE \( \I \gets \emptyset \)
+  \STATE \( -\I \gets \{ 1, \dotsc, N \} \)
+  \STATE \( \CM_{\I, \I}^{-1} \gets \Reals^{0 \times 0} \)
+  \STATE \(
+    \CM_{\Pred, \Pred \mid \I}^{-1} \gets
+    \K(\vec{x}_\Pred, \vec{x}_\Pred)
+  \)
+  \STATE \(
+    \CM_{\Train, \Pred \mid \I} \gets
+    \K(\vec{x}_\Train, \vec{x}_\Pred)
+  \)
+  \STATE \(
+    \diag(\CM_{\Train, \Train \mid \I}) \gets
+    \diag(\K(\vec{x}_\Train, \vec{x}_\Train))
+  \)
+  \STATE \(
+    \diag(\CM_{\Train, \Train \mid \I, \Pred}) \gets
+    \diag(\CM_{\Train, \Train \mid \I})
+  \) \\  \(
+    - \diag(
+      \CM_{\Train, \Pred \mid \I}
+      \CM_{\Pred, \Pred \mid \I}^{-1}
+      \CM_{\Pred, \Train \mid \I}
+    )
+  \)
+  \WHILE{\( \card{-\I} > 0 \) and \( \card{\I} < s \)}
+    \STATE \(
+      k \gets \min_{j \in -\I}
+      \frac{\CM_{j, j \mid \I, \Pred}}{\CM_{j, j \mid \I}}
+    \)
+    \STATE \( \I \gets \I \cup \{ k \} \)
+    \STATE \( -\I \gets -\I - \{ k \} \)
+    \STATE \(
+      \vec{v} \gets \CM_{\I, \I}^{-1}
+      \K(\vec{x}_\Train[\I - \{ k \}], \vec{x}_\Train[k])
+    \)
+    \STATE \(
+      \CM_{\I, \I}^{-1} \gets
+      \begin{pmatrix}
+        \CM_{\I, \I}^{-1} +
+        \frac{\vec{v} \vec{v}^{\top}}{\CM_{k, k \mid \I}} &
+        \frac{-\vec{v}}{\CM_{k, k \mid \I}} \\
+        \frac{-\vec{v}^{\top}}{\CM_{k, k \mid \I}} &
+        \frac{1}{\CM_{k, k \mid \I}}
+      \end{pmatrix}
+    \)
+    \STATE \(
+      \vec{w} \gets \CM_{\Pred, \Pred \mid \I}^{-1}
+      \CM_{k, \Pred \mid \I}^{\top}
+    \)
+    \STATE \(
+      \CM_{\Pred, \Pred \mid \I}^{-1} \gets
+      \CM_{\Pred, \Pred \mid \I}^{-1} +
+      \frac{\vec{w} \vec{w}^{\top}}{\CM_{k, k \mid \I, \Pred}}
+    \)
+    \STATE \(
+      \CM_{:, k \mid \I} \gets
+        \K(\vec{x}, \vec{x}_k) -
+        \K(\vec{x}, \vec{x}_{\I - \{ k \}}) \vec{v}
+    \)
+    \STATE \(
+        \CM_{:, k \mid \I, \Pred} \gets
+        \CM_{:, k \mid \I} -
+        \CM_{:, \Pred \mid \I} \vec{w}
+    \)
+    \STATE \(
+      \vec{u} \gets
+      \frac{\CM_{:, k \mid \I}}{\sqrt{\CM_{k, k \mid \I}}}
+    \)
+    \STATE \(
+      \vec{u}_\Pred \gets
+      \frac{\CM_{:, k \mid \I, \Pred}}
+            {\sqrt{\CM_{k, k \mid \I, \Pred}}}
+    \)
+    \FOR{\( j \in -\I \)}
+      \STATE \(
+        \CM_{j, j \mid \I} \gets
+        \CM_{j, j \mid \I} -
+        \vec{u}_j^2
+      \)
+      \STATE \(
+        \CM_{j, j \mid \I, \Pred} \gets
+        \CM_{j, j \mid \I, \Pred} -
+        (\vec{u}_\Pred)_j^2
+      \)
+      \FOR{\( c \in \{ 1, \dotsc, m \} \)}
+        \STATE \(
+          \CM_{j, \Pred[c] \mid \I} \gets
+          \CM_{j, \Pred[c] \mid \I} -
+          \vec{u}_j \vec{u}_{N + c}
+        \)
+      \ENDFOR
+    \ENDFOR
+  \ENDWHILE
+  \RETURN \( \I \)
+\end{algorithmic}

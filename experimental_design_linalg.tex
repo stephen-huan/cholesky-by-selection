@@ -274,13 +274,12 @@ priority queue shared between each local greedy selection algorithm.
 \paragraph{Outline}
 
 \Stodo{todo once more of the paper is solidified}
+
 The remainder of the paper is organized as follows.
 
-\section{Greedy selection for directed inference}
+\Stodo{put images in the introduction?}
 
-\subsection{Conditional \textit{k}-th nearest neighbors}
-
-\begin{figure}[h!]
+\begin{figure}[h]
   \centering
   \input{figures/screening/uncond.tex}%
   \input{figures/screening/cond.tex}
@@ -321,300 +320,209 @@ The remainder of the paper is organized as follows.
   \label{fig:select_chol}
 \end{figure}
 
-Consider the simple regression algorithm \( k \)th-nearest neighbors (\( k
-\)-NN). Given a training set \( X_\text{Tr} = \{ \vec{x}_1, \dotsc, \vec{x}_n
-\} \) and corresponding labels \( \vec{y}_\text{Tr} = \{ y_1, \dotsc, y_n \}
-\), the goal is to estimate the unknown label \( y_\text{Pr} \) of some unseen
-prediction point \( \vec{x}_\text{Pr} \) Stated informally, the \( k \)-NN
-approach is to select the \( k \) points in \( X_\text{Tr} \) \emph{most
-informative} about \( \vec{x}_\text{Pr} \) and combine their results.
-
-\begin{algorithm}
-  \caption{Idealized \( k \)-NN regression}
-  Given \( (X_\text{Tr}, \vec{y}_\text{Tr}) =
-        \{ (\vec{x}_1, y_1), \dotsc, (\vec{x}_n, y_n) \} \)
-  and \( \vec{x}_\text{Pr} \)
-  \begin{enumerate}
-    \item Select the \( k \) points in \( X_\text{Tr} \)
-      most informative about \( \vec{x}_\text{Pr} \)
-    \item Combine the labels of the selected points to generate a prediction
-  \end{enumerate}
-\end{algorithm}
-
-One \Ftodo{"specific" and "intuitively" are fluff, meaning that they
+\Ftodo{"specific" and "intuitively" are fluff, meaning that they
 don't really add information. In order to achieve crisp, high-quality
 academic writing, it is important to try to those fluff words as much as
 possible. It's normal to add them out of reflex initially, so it requires
-active postprocessing.} specific approach is intuitively, points close
-to \( \vec{x}_\text{Pr} \) should be similar to it. So we select the \(
-k \) closest points in \( X_\text{Tr} \) to \( \vec{x}_\text{Pr} \) and
-pool their labels (e.g., by averaging).
+active postprocessing.}
 
-\begin{algorithm}
-  \caption{\( k \)-NN regression}
-  \begin{enumerate}
-    \item Select the \( k \) points \( \{ \vec{x}_{i_1}, \dotsc, \vec{x}_{i_k}
-      \} \subseteq X_\text{Tr} \) closest to \( \vec{x}_\text{Pr} \)
-    \item Compute \( \vec{y}_\text{Pr} \) by
-      \( \frac{1}{k} \sum_{j = 1}^k y_{i_j} \)
-  \end{enumerate}
-\end{algorithm}
+\section{Greedy selection for directed inference}
+\label{sec:select}
 
-However, we can generalize the notion of ``closest'' with the \emph{kernel
-trick}, by using an arbitrary kernel function to measure similarity. For
-example, commonly used kernels like the Gaussian kernel and Mat{\'e}rn family
-of covariance functions are \emph{isotropic}; they depend only on the distance
-between the two vectors. If such isotropic kernels monotonically decrease with
-distance, then selecting points based on the largest kernel similarity recovers
-\( k \)-NN. However, kernels need not be isotropic in general --- they just
-need to capture some sense of ``similarity'', motivating kernel \( k \)-NN.
+We motivate the greedy selection algorithm in the concrete setting of Gaussian
+process regression. We say the function \( f(\vec{x}) \) is distributed
+according to a Gaussian process prior with mean function \( \mu(\vec{x}) \)
+and covariance function or kernel function \( \K(\vec{x}, \vec{x}') \), if for
+any finite set of points \( X = \{ \vec{x}_i \}^N_{i = 1} \), \( f(X) \sim
+\N(\vec{\mu}, \CM) \), where \( \mu_i = \mu(\vec{x}_i) \) and \( \CM_{ij} =
+K(\vec{x}_i, \vec{x}_j) \), symbolized as \( f(\vec{x}) \sim \GP(\mu(\vec{x}),
+\K(\vec{x}, \vec{x}')) \). By definition, the kernel function \( K \) yields
+positive-definite covariance matrices \( \CM \) for any set of points.
 
-\Stodo{not sure whether ``stationary'' or
-``isotropic'' are the right word(s) to use here}
+Given the training dataset \( \mathcal{D} = \{ (\vec{x}_i, y_i) \}^N_{i =
+1} \) where the inputs \( \vec{x}_i \in \Reals^D \) are collected in the
+matrix \( X_\Train = [\vec{x}_1, \dotsc, \vec{x}_N]^{\top} \in \Reals^{N
+\times D} \) and the measurements at those points are collected in the vector
+\( \vec{y}_\Train = [y_1, \dotsc, y_N]^{\top} \in \Reals^N \), we wish to
+predict the values at \( M \) new points \( X_\Pred \in \Reals^{M \times D} \)
+for which \( \vec{y}_\Pred \in \Reals^M \) is unknown. We assume that there
+is a deterministic function \( f(\vec{x}) \) that maps the input points to
+observed output measurements and that this function is distributed according
+to a Gaussian process, \( f \sim \GP(\mu(\vec{x}), \K(\vec{x}, \vec{x}')) \)
+where we assume a zero mean function \( \mu(\vec{x}) = \vec{0} \).
 
-\begin{algorithm}
-  \caption{Kernel \( k \)-NN regression}
-  Given kernel function \( K(\vec{x}, \vec{y}) \)
-  \begin{enumerate}
-    \item Select the \( k \) points \( \{ \vec{x}_{i_1}, \dotsc, \vec{x}_{i_k}
-      \} \subseteq X_\text{Tr} \) most similar to \( \vec{x}_\text{Pr} \)
-    \item Compute \( \vec{y}_\text{Pr} \) by an average weighted by similarity
-  \end{enumerate}
-\end{algorithm}
-
-Although the kernel \( k \)-NN approach is more general than its normed
-counterpart, it still suffers from a fundamental issue. Suppose the closest
-point to \( \vec{x}_\text{Pr} \) has many duplicates in the training set. Then
-the algorithm will select the same point multiple times, even though in some
-sense the duplicate point has stopped giving additional information about the
-prediction point. In order to fix this issue, we should be selecting new points
-\emph{conditional} on the points we've already selected. This preserves the
-idealized algorithm of selecting points based on the information they tell us
-about the prediction point --- once we've selected a point, conditioning on
-it reduces the information similar points tells us, encouraging diverse point
-selection.
-
-\begin{algorithm}
-  \caption{\textcolor{lightblue}{Conditional} kernel \( k \)-NN regression}
-  \begin{enumerate}
-    \item Select the \( k \) points \( \{ \vec{x}_{i_1}, \dotsc, \vec{x}_{i_k}
-      \}  \subseteq X_\text{Tr} \) most \textcolor{lightblue}{informative} to
-      \( \vec{x}_\text{Pr} \) \\ \textcolor{lightblue}{after conditioning on
-      all points selected beforehand}
-    \item Compute \( \vec{y}_\text{Pr} \) by an average weighted by
-      \textcolor{lightblue}{information}
-  \end{enumerate}
-\end{algorithm}
-
-In order to make the notions of conditioning and information precise, we need a
-specific framework. Kernel methods lead naturally to Gaussian processes, whose
-covariance matrices naturally result from kernel functions and allows us to use
-the rigorous statistical and information-theoretic notions of conditioning and
-information.
-
-\Stodo{mention sensor placement/spatial statistics perspective/literature}
-
-\subsection{Sparse Gaussian process regression}
-\label{subsec:gp_reg}
-
-A \emph{Gaussian process} is a prior distribution over functions, such that
-for any finite set of points, the corresponding function over the points
-is distributed according to a multivariate Gaussian. In order to generate
-such a distribution over an uncountable number of points consistently, a
-Gaussian process is specified by a \emph{mean function} \( \mu(\vec{x}) \) and
-\emph{covariance function} or \emph{kernel function} \( K(\vec{x}, \vec{y})
-\). For any finite set of points \( X = \{ \vec{x}_1, \dotsc, \vec{x}_n \}
-\) ,\( f(X) \sim \mathcal{N}(\vec{\mu}, \CM) \), where \( \vec{\mu}_i =
-\mu(\vec{x}_i) \) and \( \CM_{ij} = K(\vec{x}_i, \vec{x}_j) \).
-
-In order to compute a prediction at \( \vec{x}_\text{Pr} \), we can
-simply condition the desired prediction \( \vec{y}_\text{Pr} \) on the
-observed outputs and compute the conditional expectation. We can also
-find the conditional variance, which will quantify the uncertainty of
-our prediction. If we block our covariance matrix
+From the distribution on \( f(\vec{x}) \), the joint distribution
+of training and testing data \( \vec{y} \) has covariance
 \(
   \CM =
   \begin{pmatrix}
-    \CM_{\text{Tr}, \text{Tr}} & \CM_{\text{Tr}, \text{Pr}} \\
-    \CM_{\text{Pr}, \text{Tr}} & \CM_{\text{Pr}, \text{Pr}}
+    \CM_{\Train, \Train} & \CM_{\Train, \Pred} \\
+    \CM_{\Pred, \Train} & \CM_{\Pred, \Pred}
   \end{pmatrix}
 \)
-where \( \CM_{\text{Tr}, \text{Tr}}, \CM_{\text{Pr}, \text{Pr}},
-\CM_{\text{Tr}, \text{Pr}}, \CM_{\text{Pr}, \text{Tr}} \) are the
-covariance matrices of the training data, testing data, and training and test
-data respectively, then the conditional expectation and covariance are:
+where \( \CM_{\I, \J} \) denotes \( \K(X_\I, X_\J) \) for index sets
+\( \I, \J \). In order to make predictions at the unknown points \(
+X_\Pred \), we condition the desired prediction \( \vec{y}_\Pred
+\) on the observed measurements \( \vec{y}_\Train \). For Gaussian
+processes, the posterior distribution is of closed form given by
 \begin{align}
   \label{eq:cond_mean}
-  \E[\vec{y}_\text{Pr} \mid \vec{y}_\text{Tr}] &=
-    \vec{\mu}_\text{Pr} +
-    \CM_{\text{Pr}, \text{Tr}} \CM_{\text{Tr}, \text{Tr}}^{-1}
-    (\vec{y}_\text{Tr} - \vec{\mu}_\text{Tr}) \\
+  \E[\vec{y}_\Pred \mid \vec{y}_\Train] &=
+    \vec{\mu}_\Pred +
+    \CM_{\Pred, \Train} \CM_{\Train, \Train}^{-1}
+    (\vec{y}_\Train - \vec{\mu}_\Train) \\
   \label{eq:cond_cov}
-  \Cov[\vec{y}_\text{Pr} \mid \vec{y}_\text{Tr}] &=
-    \CM_{\text{Pr}, \text{Pr}} -
-    \CM_{\text{Pr}, \text{Tr}} \CM_{\text{Tr}, \text{Tr}}^{-1}
-    \CM_{\text{Tr}, \text{Pr}}
-  \shortintertext{For brevity of notation, we will
-    often denote the conditional covariance matrix as}
+  \Cov[\vec{y}_\Pred \mid \vec{y}_\Train] &=
+    \CM_{\Pred, \Pred} -
+    \CM_{\Pred, \Train} \CM_{\Train, \Train}^{-1}
+    \CM_{\Train, \Pred}
+  \shortintertext{For brevity of notation, we
+    denote the conditional covariance matrix as}
   \label{eq:cond_cov_notation}
-  \CM_{\text{Pr}, \text{Pr} \mid \text{Tr}} &:=
-    \CM_{\text{Pr}, \text{Pr}} -
-    \CM_{\text{Pr}, \text{Tr}} \CM_{\text{Tr}, \text{Tr}}^{-1}
-    \CM_{\text{Tr}, \text{Pr}}
+  \CM_{\I, \J \mid \V} &\defeq
+    \CM_{\I, \J} - \CM_{\I, \V} \CM_{\V, \V}^{-1} \CM_{\V, \J}
   \shortintertext{When conditioning on multiple sets, the sets are given in
     order of computation. Although the resulting covariance matrix is the same,
     a different order of conditioning means different intermediate results in
     repeated application of \cref{eq:cond_cov}. In general,}
-  \CM_{I, J \mid K_1, K_2, \dotsc, K_n} &:=
-    \Cov[\vec{y}_I, \vec{y}_J \mid
-         \vec{y}_{K_1 \cup K_2 \cup \dotsb \cup K_n}]
-  \shortintertext{denotes the covariance between the variables in index
-    sets \( I \) and \( J \), conditional on the variables in \( K_1, K_2,
-    \dots, K_n \). Note that by the quotient rule of Schur complementation:}
+  \CM_{I, J \mid \V_1, \V_2, \dotsc, \V_n} &\defeq
+    \Cov[\vec{y}_\I, \vec{y}_\J \mid
+         \vec{y}_{\V_1 \cup \V_2 \cup \dotsb \cup \V_n}]
+  \shortintertext{denotes the covariance between the variables in index sets
+    \( \I \) and \( \J \), conditional on the variables in \( \V_1, \V_2,
+    \dots, \V_n \). Note that by the quotient rule of Schur complementation:}
   \label{eq:quotient_rule}
-  \CM_{I, J \mid K_{1 \dots n}} &=
-    \CM_{I, J \mid K_{1 \dots n - 1}} -
-    \CM_{I, K_n \mid K_{1 \dots n - 1}}
-    \CM_{K_n, K_n \mid K_{1 \dots n - 1}}^{-1}
-    \CM_{K_n, J \mid K_{1 \dots n - 1}}
+  \CM_{\I,   \J   \mid \V_{1 \dots n}} &=
+  \CM_{\I,   \J   \mid \V_{1 \dots n - 1}} -
+  \CM_{\I,   \V_n \mid \V_{1 \dots n - 1}}
+  \CM_{\V_n, \V_n \mid \V_{1 \dots n - 1}}^{-1}
+  \CM_{\V_n, \J   \mid \V_{1 \dots n - 1}}
 \end{align}
-\Stodo{\( I \) is overloaded to be identity, an index set,
-and mutual information/information gain. \( I \) should
-refer to identity and the other two must be disambiguated.}
-
-Note that calculating the posterior mean and variance requires inverting the
-training covariance matrix \( \CM_{\text{Tr}, \text{Tr}} \), which costs
-\( \BigO(N^3) \), where \( N \) is the number of training points. This
-scaling is prohibitive for large datasets, so many \emph{sparse} Gaussian
-process regression techniques have been proposed. These methods often focus
-on selecting a subset of the training data that is most informative about the
-prediction points, which naturally aligns with our \( k \)-NN perspective.
-If \( s \) points are selected out of the \( N \), then the inversion will
-cost \( \BigO(s^3) \), which could be substantially cheaper if \( s \)
-is significantly smaller than \( N \). The question is then how to select as
-few points as possible while maintaining predictive accuracy.
-
-\Stodo{cite sparse Gaussian regression papers}
+Calculating the posterior mean and variance requires inverting the training
+covariance matrix \( \CM_{\Train, \Train} \), which has a computational time
+complexity of \( \BigO(N^3) \) for \( N \) training points. This scaling
+is prohibitive for large datasets, so one natural approach is to carefully
+select a subset of \( s \) points out of the \( N \), \( s \ll N \), and pay
+a much smaller \( \mathcal{O}(s^3) \) cost. Of course, throwing away \( N -
+s \) points will necessarily lead to worse predictive accuracy. To maintain
+reasonable accuracy at a severely reduced computational cost requires a
+criterion to choose the most effective points.
 
 \subsection{Problem: optimal selection}
+\label{subsec:select_obj}
 
-The natural criterion justified from the \( k \)-NN perspective is to maximize
-the \emph{mutual information} between the selected points and the target point
-for prediction. Such information-theoretic objectives have seen success in
-the spatial statistics community \cite{krause2008nearoptimal}, who use such
-criteria to determine the best locations to place sensors in a Gaussian process
-regression context. The mutual information, or \emph{information gain} is
-defined as
+\Stodo{elaborate more on mutual
+information information-theoretic criteria in the literature}
+
+One natural criterion is to maximize the \emph{mutual information} between the
+selected points and the target point for prediction. The mutual information has
+been used by \cite{krause2008nearoptimal} to determine the best locations to
+place sensors. The mutual information, or \emph{information gain} is defined as
 \begin{align}
   \label{eq:info}
-  \MI[\vec{y}_\text{Pr};\vec{y}_\text{Tr}] &= \entropy[\vec{y}_\text{Pr}] -
-    \entropy[\vec{y}_\text{Pr} \mid \vec{y}_\text{Tr}]
+  \MI[\vec{y}_\Pred;\vec{y}_\Train] &= \entropy[\vec{y}_\Pred] -
+    \entropy[\vec{y}_\Pred \mid \vec{y}_\Train]
 \end{align}
-We can use the fact that the entropy of a multivariate Gaussian is
-monotonically increasing with the log determinant of its covariance matrix to
-efficiently compute these entropies. Because the entropy of \( \vec{y}_\text{Pr}
-\) is constant, maximizing the mutual information is equivalent to minimizing
-the conditional entropy. From \cref{eq:cond_cov} we see that minimizing the
-conditional entropy is equivalent to minimizing the log determinant of the
-posterior covariance matrix. Note that for a single predictive point, this
-is monotonic with its variance. So another justification is that we are
-reducing the \emph{conditional variance} of the desired point as much as
-possible. In particular, because our estimator is the conditional expectation
-\cref{eq:cond_mean}, it is unbiased because \( \E[\E[\vec{y}_\text{Pr} \mid
-\vec{y}_\text{Tr}]] = \E[\vec{y}_\text{Pr}] \). Because it is unbiased, its
-expected mean squared error is simply the conditional variance since \(
-\E[(\vec{y}_\text{Pr} - \E[\vec{y}_\text{Pr} \mid \vec{y}_\text{Tr}])^2 \mid
-\vec{y}_\text{Tr}] = \Var[\vec{y}_\text{Pr} \mid \vec{y}_\text{Tr}] \) where
-the expectation is taken under conditioning because of the assumption that
-\( \vec{y}_\text{Pr} \) is distributed according to the Gaussian process. So
-maximizing the mutual information is equivalent to minimizing the conditional
-variance which is in turn equivalent to minimizing the expected mean squared
-error of the prediction. Another perspective on the objective can be derived
-from comparing the mutual information to the EV-VE identity, which states
+Maximizing the mutual information is equivalent to minimizing the conditional
+entropy since the entropy of \( \vec{y}_\Pred \) is constant. Because the
+differential entropy of a multivariate Gaussian is monotonically increasing
+with the log determinant of its covariance matrix, minimizing the conditional
+entropy is equivalent to minimizing the log determinant of the posterior
+covariance matrix. For a single predictive point, the log determinant
+reduces to its variance. Thus, maximizing mutual information minimizes the
+\emph{conditional variance} of the target point. In particular, because our
+estimator is the conditional expectation \cref{eq:cond_mean}, it is unbiased
+because \( \E[\E[\vec{y}_\Pred \mid \vec{y}_\Train]] = \E[\vec{y}_\Pred]
+\). Because it is unbiased, its expected mean squared error is simply
+the conditional variance since \( \E[(\vec{y}_\Pred - \E[\vec{y}_\Pred
+\mid \vec{y}_\Train])^2 \mid \vec{y}_\Train] = \Var[\vec{y}_\Pred \mid
+\vec{y}_\Train] \) where the outer expectation is taken under conditioning
+because of the assumption that \( \vec{y}_\Pred \) is distributed according
+to the Gaussian process. So maximizing the mutual information is equivalent
+to minimizing the conditional variance which is in turn equivalent to
+minimizing the expected mean squared error of the prediction.
+
+Another perspective on the mutual information results from comparing the
+definition of mutual information \cref{eq:info} to the EV-VE identity,
 \begin{align}
-  \textcolor{orange}{\entropy[\vec{y}_\text{Pr}]} &=
-    \textcolor{lightblue}{\entropy[\vec{y}_\text{Pr} \mid \vec{y}_\text{Tr}]} +
-    \textcolor{rust}{\MI[\vec{y}_\text{Pr};\vec{y}_\text{Tr}]} \\
-  \textcolor{orange}{\Var[\vec{y}_\text{Pr}]} &=
-    \textcolor{lightblue}{\E[\Var[\vec{y}_\text{Pr} \mid \vec{y}_\text{Tr}]]} +
-    \textcolor{rust}{     \Var[\E[\vec{y}_\text{Pr} \mid \vec{y}_\text{Tr}]]}
+  \textcolor{orange}{\entropy[\vec{y}_\Pred]} &=
+    \textcolor{lightblue}{\entropy[\vec{y}_\Pred \mid \vec{y}_\Train]} +
+    \textcolor{rust}{\MI[\vec{y}_\Pred;\vec{y}_\Train]} \\
+  \textcolor{orange}{\Var[\vec{y}_\Pred]} &=
+    \textcolor{lightblue}{\E[\Var[\vec{y}_\Pred \mid \vec{y}_\Train]]} +
+    \textcolor{rust}{     \Var[\E[\vec{y}_\Pred \mid \vec{y}_\Train]]}
 \end{align}
 On the left hand side, entropy is monotone with variance. On the right hand
-side, the expectation of the conditional variance can be interpreted to be
-the fluctuation of the prediction point after conditioning, and is monotone
-with the conditional entropy. Because the expectation of conditional variance
-and variance of conditional expectation add to a constant, minimizing the
-expectation of the conditional variance is equivalent to maximizing the
-variance of conditional expectation, which we see corresponds to the mutual
-information term. Supposing \( \vec{y}_\text{Pr} \) was independent of \(
-\vec{y}_\text{Tr} \), then the conditional expectation becomes simply the
-expectation, whose variance is 0. Thus, the variance of the conditional
-expectation can be interpreted to be the ``information'' shared between \(
-\vec{y}_\text{Pr} \) and \( \vec{y}_\text{Tr} \), as the larger it is, the
-more the prediction for \( \vec{y}_\text{Pr} \) (the conditional expectation)
-depends on the observed results of \( \vec{y}_\text{Tr} \).
+side, the expectation of the conditional variance is monotone with conditional
+entropy and can be interpreted to be the fluctuation of the prediction point
+after conditioning. Because the sum of the expectation of conditional variance
+and variance of conditional expectation is constant, minimizing the expectation
+of the conditional variance is equivalent to maximizing the variance of
+conditional expectation, which corresponds to the mutual information.
+Supposing \( \vec{y}_\Pred \) was independent of \( \vec{y}_\Train \), then
+the conditional expectation becomes simply the expectation, whose variance is
+0. Thus, the variance of the conditional expectation is the information shared
+between \( \vec{y}_\Pred \) and \( \vec{y}_\Train \), as the larger it is,
+the more the prediction for \( \vec{y}_\Pred \) (the conditional expectation)
+depends on the observed results of \( \vec{y}_\Train \).
 
 \subsection{A greedy approach}
-\label{subsec:greedy}
+\label{subsec:greedy_select}
 
-We now consider how to efficiently minimize the conditional variance
-objective using a greedy approach. At each iteration, we pick the training
-point which most reduces the conditional variance of the prediction point.
-Let \( I = \{ i_1, i_2, \dotsc, i_j \} \) be the set of indexes of training
-points selected already. Let the prediction point have index \( n + 1 \),
-the last index. For a candidate index \( k \), we update the covariance
-matrix after conditioning on \( y_k \), in addition to the indices already
-selected according to \cref{eq:cond_cov}:
+In order to maximize conditional mutual information we greedily select the
+candidate with highest information, or the point which most reduces the
+conditional variance of the prediction point. Let \( \I = \{ i_j \}^s_{j =
+1} \subseteq \Train \) be the set of indices of selected training points.
+For a candidate index \( k \), we condition the current covariance matrix
+on \( y_k \) according to \cref{eq:cond_cov}:
 \begin{align}
-  \nonumber
-  \CM_{:, : \mid I, k} &= \CM_{:, : \mid I} -
-    \CM_{:, k \mid I} \CM_{k, k \mid I}^{-1} \CM_{k, : \mid I} \\
+  \CM_{:, : \mid \I, k} &= \CM_{:, : \mid \I} -
+    \CM_{:, k \mid \I} \CM_{k, k \mid \I}^{-1} \CM_{k, : \mid \I} \\
+  %                    &= \CM_{:, : \mid \I} -
+  % \frac{\CM_{:, k \mid \I} \CM_{:, k \mid \I}^{\top}}{\CM_{k, k \mid \I}} \\
   \label{eq:cond_select}
-                          &= \CM_{:, : \mid I} -
-    \frac{\CM_{:, k \mid I} \CM_{:, k \mid I}^{\top}}{\CM_{kk \mid I}}
+                       &= \CM_{:, : \mid \I} - \vec{u} \vec{u}^{\top} \\
+  \label{eq:cond_cov_vec}
+  \vec{u} &= \frac{\CM_{:, k \mid \I}}{\sqrt{\CM_{k, k \mid \I}}}
 \end{align}
-
-We see that conditioning on a new entry is a rank-one update on the current
-covariance matrix \( \CM_{\mid I} \), given by the vector \( \vec{u} =
-\frac{\CM_{:, k \mid I}}{\sqrt{\CM_{kk \mid I}}} \). Thus, the amount
-that the variance of \( \vec{y}_\text{Pr} \) will decrease after selecting
-\( k \) is given by \( u_{n + 1}^2 \), or
+From \cref{eq:cond_select}, conditioning on a new point is a
+rank-one downdate on the current covariance matrix. Thus, the
+amount that the variance of \( y_\Pred \) will decrease after
+selecting \( k \) is given by \( u_\Pred^2 \), or
 \begin{align}
   \label{eq:obj_gp}
-  \frac{\Cov[\vec{y}_{\text{Tr}}[k], \vec{y}_\text{Pr} \mid I]^2}
-       {\Var[\vec{y}_{\text{Tr}}[k] \mid I]} &=
-  \frac{\CM_{k, n + 1 \mid I}^2}{\CM_{kk \mid I}}
-  = \Var[\vec{y}_\text{Pr} \mid I]
-    \Corr[\vec{y}_\text{Tr}[k], \vec{y}_\text{Pr} \mid I]^2
+  u_\Pred^2 = \frac{\CM_{\Pred, k \mid \I}^2}{\CM_{k, k \mid \I}}
+  = \frac{\Cov[y_\Pred, \vec{y}_{\Train}[k] \mid \I]^2}
+         {\Var[\vec{y}_{\Train}[k] \mid \I]}
+  = \Var[y_\Pred \mid \I]
+    \Corr[y_\Pred, \vec{y}_\Train[k] \mid \I]^2
 \end{align}
-For each candidate \( k \), we need to keep track of its conditional variance
-and conditional covariance with the prediction point after conditioning on
-the points already selected to compute \cref{eq:obj_gp}. We then simply
-choose the candidate with the largest decrease in predictive variance. To
-keep track of the conditional variance and covariance, we can simply start
-with the initial values given by \( \CM_{kk} \) and \( \CM_{nk} \) and
-update after selecting an index \( j \). We compute \( \vec{u} \) for \( j
-\) directly according to \cref{eq:cond_cov} and update \( k \)'s conditional
-variance by subtracting \( u_k^2 \) and update its conditional covariance
-by subtracting \( u_k u_{n + 1} \).
+We need to keep track of each candidate's variance and covariance with the
+prediction point after conditioning on the points already selected to compute
+\cref{eq:obj_gp}. We start with the unconditional values given by \( \CM_{k,
+k} \) and \( \CM_{\Pred, k} \) and update after selecting an index \( j \). We
+compute \( \vec{u} \) for \( j \) directly according to \cref{eq:cond_cov} and
+update \( k \)'s conditional variance by subtracting \( u_k^2 \) and update
+its conditional covariance by subtracting \( u_k u_\Pred \).
 
-In order to efficiently compute \( \vec{u} \), we rely on two main
-strategies. The direct method is to keep track of \( \CM_{I, I}^{-1} \),
-or the precision of the selected entries, and update the precision every
-time a new index is added to \( I \). This can be done efficiently in \(
-\BigO(s^2) \), see \cref{app:prec_insert}. Once \( \CM_{I, I}^{-1}
-\) has been computed, \( \vec{u} \) is computed trivially according to
-\cref{eq:cond_cov}. For each of the \( s \) rounds of selection, it takes
-\( s^2 \) to update the precision, and costs \( Ns \) to compute \( \vec{u}
-\), costing \( \BigO(N s^2 + s^3) = \BigO(N s^2) \) overall.
+We have two strategies to efficiently compute \( \vec{u} \). The direct method
+is to keep track of \( \CM_{\I, \I}^{-1} \), or the precision of the selected
+entries, and update the precision every time a new index is added to \( \I \).
+This can be done efficiently in computational time complexity \( \BigO(s^2) \),
+see \cref{app:prec_insert}. Once \( \CM_{\I, \I}^{-1} \) has been computed, \(
+\vec{u} \) is computed directly according to \cref{eq:cond_cov}. For each of
+the \( s \) rounds of selection, it takes \( s^2 \) to update the precision,
+and costs \( Ns \) to compute \( \vec{u} \), costing \( \BigO(N s^2 + s^3) =
+\BigO(N s^2) \) overall.
 
-The second approach is to take advantage of the quotient rule of Schur
-complementation. Stated statistically, the quotient rule states that
-conditioning on \( I \) and then conditioning on \( J \) is the same as
-conditioning on \( I \cup J \). We then remind ourselves that Cholesky
-factorization can be viewed as iterative conditioning:
+The second strategy is to take advantage of the quotient rule of Schur
+complementation. From a statistical perspective, the quotient rule states
+that conditioning on \( \I \) and then conditioning on \( \J \) is the
+same as conditioning on \( \I \cup \J \). We then remind ourselves that
+Cholesky factorization can be viewed as iterative conditioning.
 \begin{align}
-  \shortintertext{Re-writing the joint covariance matrix,}
+  \shortintertext{Re-writing the joint covariance
+    matrix by two steps of block Gaussisan elimination,}
   \label{eq:chol_schur}
   \begin{pmatrix}
     \CM_{1, 1} & \CM_{1, 2} \\
@@ -651,226 +559,200 @@ factorization can be viewed as iterative conditioning:
   \nonumber
   &=
   \begin{pmatrix}
-    \chol(\CM_{1, 1}) & 0 \\
-    \CM_{2, 1} \chol(\CM_{1, 1})^{-\top} & \chol(
+    \textcolor{darkorange}{\chol(\CM_{1, 1})} & 0 \\
+    \textcolor{darkorange}{\CM_{2, 1} \chol(\CM_{1, 1})^{-\top}} &
+    \chol(\textcolor{lightblue}{
       \CM_{2, 2} - \CM_{2, 1} \CM_{1, 1}^{-1} \CM_{1, 2}
-    )
+    })
   \end{pmatrix}
 \end{align}
-Here \( \textcolor{darkorange}{\CM_{2, 1} \CM_{1, 1}^{-1}} \)
-corresponds to the conditional expectation in \cref{eq:cond_mean} and \\ \(
+Here the conditional expectation in \cref{eq:cond_mean} corresponds to
+\( \textcolor{darkorange}{\CM_{2, 1} \CM_{1, 1}^{-1}} \)
+and the conditional covariance in \cref{eq:cond_cov} corresponds to
+\(
 \textcolor{lightblue}{
-  \CM_{2, 2} - \CM_{2, 1} \CM_{1, 1}^{-1} \CM_{1, 2}
-} \)
-corresponds to the conditional covariance in \cref{eq:cond_cov}. Thus, we
-see that Cholesky factorization is iteratively conditioning the Gaussian
-process. From the iterative conditioning perspective, the \( i \)th column
-of the Cholesky factor corresponds precisely to the corresponding \( \vec{u}
-\) for \( i \) since a iterative sequence of conditioning on \( i_1, i_2
-\dotsc \) is equivalent to conditioning on \( I \) by the quotient rule.
+  \CM_{2, 2 \mid 1} = \CM_{2, 2} - \CM_{2, 1} \CM_{1, 1}^{-1} \CM_{1, 2}
+} \).
+Thus, we see that Cholesky factorization is iteratively conditioning
+the Gaussian process. From the iterative conditioning perspective, the
+\( k \)th column of the Cholesky factor corresponds precisely to the
+corresponding \( \vec{u} \) for \( k \) in \cref{eq:cond_cov_vec} since
+a iterative sequence of conditioning on \( i_1, i_2 \dotsc, i_{k - 1}
+\) is equivalent to conditioning on \( \I \) by the quotient rule.
 
-The Cholesky factorization can be efficiently computed without excess
-dependence on \( N \) with left-looking, so the conditioning only
-happens when we need it. For each of the \( s \) rounds of selection,
-it costs \( \BigO(Ns) \) to compute the next column of the
-Cholesky factorization, for a total cost of \( \BigO(Ns^2) \),
+Adding a column to the current Cholesky factor can be efficiently
+computed without excess dependence on \( N \) with left-looking
+(see \cref{alg:chol_update}), so the conditioning only happens
+when we need it. For each of the \( s \) rounds of selection, it
+costs \( \BigO(N s) \) to compute the next column of the Cholesky
+factorization, for a total time complexity of \( \BigO(N s^2) \),
 matching the time complexity of the explicit precision approach.
 
-\noindent
-\begin{minipage}[t]{0.49\textwidth}
-\begin{algorithm}[H]
-  \caption{Point selection by \\ explicit precision}
-  \label{alg:gp_select}
-  \input{figures/algorithms/gp_select.tex}
-\end{algorithm}
-\end{minipage}
-\hfill
-\begin{minipage}[t]{0.49\textwidth}
-\begin{algorithm}[H]
-  \caption{Point selection by \\ Cholesky factorization}
-  \label{alg:select_chol}
-  \input{figures/algorithms/select_chol.tex}
-\end{algorithm}
-\end{minipage}
+\Stodo{should the algorithms be moved to the appendix?}
 
-While both approaches have the same time complexity, the explicit precision
-algorithm uses \( \BigO(s^2) \) space to store the precision while the
-Cholesky factorization uses \( \BigO(N s) \) to store the first \( s \)
-columns of the Cholesky factorization of \( \CM \), which is always more
-memory than the precision (\( N > s \)). Both algorithms use an additional \(
-\BigO(N) \) space to store the conditional variances and covariances.
-Although the precision algorithm uses asymptotically less memory than the
-Cholesky algorithm, the Cholesky algorithm is preferred for better constant
-factor speed and ease of implementation.
-\Stodo{what is a good way to say non-asymptotically faster?}
+\begin{figure}
+  \centering
+  \begin{minipage}[t]{0.49\textwidth}
+  \begin{algorithm}[H]
+    \caption{Point selection by \\ explicit precision}
+    \label{alg:select_prec}
+    \input{figures/algorithms/select_prec.tex}
+  \end{algorithm}
+  \end{minipage}
+  \hfill
+  \begin{minipage}[t]{0.49\textwidth}
+  \begin{algorithm}[H]
+    \caption{Point selection by \\ Cholesky factorization}
+    \label{alg:select_chol}
+    \input{figures/algorithms/select_chol.tex}
+  \end{algorithm}
+  \end{minipage}
+  \caption{Algorithms for single-point selection.}
+  \label{fig:alg_select}
+\end{figure}
 
-Once the indices have been computed according to \cref{alg:gp_select}
-or \cref{alg:select_chol}, inferring the conditional mean and
-covariance of the unknown data can be done directly according to
-\cref{eq:cond_mean} and \cref{eq:cond_cov} in time \( \BigO(s^3)
-\) using \cref{alg:infer_select}.
+While both approaches have the same time complexity, the precision algorithm
+uses \( \BigO(s^2) \) space to store the precision \( \Theta_{\I, \I}^{-1}
+\) while the Cholesky algorithm uses \( \BigO(N s) \) space to store the
+first \( s \) columns of the Cholesky factorization of \( \CM \), which
+is always more memory than the precision (\( N > s \)). Both algorithms
+use an additional \( \BigO(N) \) space to store the conditional variances
+and covariances. Although the precision algorithm uses less memory than
+the Cholesky algorithm, the Cholesky algorithm is preferred for better
+performance and ease of implementation.
+
+Once the indices have been computed according to \cref{alg:select_prec}
+or \cref{alg:select_chol}, inferring the conditional mean and covariance
+of the unknown data can be done directly according to \cref{eq:cond_mean}
+and \cref{eq:cond_cov} in time \( \BigO(s^3) \) using \cref{alg:infer_select}.
+
+\Stodo{elaborate more on OMP in the literature}
 
 This algorithm is in fact the covariance equivalent of the
 signal recovery algorithm orthogonal matching pursuit (OMP)
 \cite{tropp2007signal}, a connection elaborated in \cref{app:omp}.
 
-\begin{algorithm}
-  \caption{Gaussian process inference by selection}
-  \label{alg:infer_select}
-  \input{figures/algorithms/infer_select.tex}
-\end{algorithm}
-
 \subsection{Supernodes and blocked selection}
+\label{subsec:mult_select}
 
-We now consider how to efficiently deal with multiple prediction points. The
-first question is how to generalize the previous objective for a single point
+We now consider efficiently dealing with multiple prediction points. The
+first question is how to generalize the objective for a single point
 \cref{eq:obj_gp} to multiple points. Following the same mutual information
-justification as before, a natural criterion is to minimize the log determinant
-of the prediction points' covariance matrix after conditioning on the
-selected points, or \( \logdet(\CM_{\text{Pr}, \text{Pr} \mid I}) \). This
-objective, known as D-optimal \cite{krause2008nearoptimal}, has many intuitive
-interpretations --- for example, as the volume of the region of uncertainty
-or as the scaling factor in the density function for the Gaussian process.
+justification in \cref{subsec:select_obj}, a natural criterion is to
+minimize the log determinant of the prediction points' covariance matrix
+after conditioning on the selected points, or \( \logdet(\CM_{\Pred, \Pred
+\mid I}) \). This objective, known as D-optimal design in the literature
+\cite{krause2008nearoptimal}, has many intuitive interpretations: for
+example, as the volume of the region of uncertainty or as the scaling
+factor in the probability density function for multivariate Gaussians.
 
-We now need to be able to efficiently compute the effect of selecting an
-index \( k \) on the log determinant. From \cref{eq:cond_select}, we know
-that selecting an index is a rank-one update on the prediction covariance.
-Using the matrix determinant lemma,
-\Stodo{move to appendix}
+We need to efficiently compute the effect of selecting an index \( k \)
+on the log determinant. From \cref{eq:cond_select}, selecting an index
+is a rank-one update on the covariance matrix of the prediction points.
 \begin{align}
   \label{eq:obj_gp_mult}
-  \logdet
-  \left (
-    \CM_{\text{Pr}, \text{Pr} \mid I \cup \{ k \}}
-  \right ) &= \logdet
-    \left (
-      \CM_{\text{Pr}, \text{Pr} \mid I} -
-      \frac{\CM_{\text{Pr}, k \mid I}
-            \CM_{\text{Pr}, k \mid I}^{\top}
-           }{\CM_{kk \mid I}}
-    \right ) \\
-  \nonumber
-           &= \logdet \left ( \CM_{\text{Pr}, \text{Pr} \mid I} \right ) +
-    \log
-    \left (
-      1 -
-      \frac{\CM_{\text{Pr}, k \mid I}^{\top}
-            \CM_{\text{Pr}, \text{Pr} \mid I}^{-1}
-            \CM_{\text{Pr}, k \mid I}
-           }{\CM_{kk \mid I}}
-    \right )
-  \shortintertext{Focusing on the second term, we can turn
-    the quadratic form into conditioning:}
-  \nonumber
-           &= \logdet \left ( \CM_{\text{Pr}, \text{Pr} \mid I} \right ) +
-    \log
-    \left (
-      \frac{\CM_{kk \mid I} -
-            \CM_{k, \text{Pr} \mid I}
-            \CM_{\text{Pr}, \text{Pr} \mid I}^{-1}
-            \CM_{\text{Pr}, k \mid I}
-           }{\CM_{kk \mid I}}
-    \right )
+  \logdet \left ( \CM_{\Pred, \Pred \mid \I \cup \{ k \}} \right )
+  &= \logdet \left ( \CM_{\Pred, \Pred \mid \I} -
+       \frac{\CM_{\Pred, k \mid \I} \CM_{\Pred, k \mid \I}^{\top}}
+            {\CM_{k, k \mid \I}}
+     \right ) \\
+  \shortintertext{By application of the matrix determinant lemma
+    (the details are in \cref{app:logdet_downdate}),}
   \label{eq:greedy_mult}
-  \shortintertext{By the quotient rule, we combine the conditioning:}
-           &= \logdet \left ( \CM_{\text{Pr}, \text{Pr} \mid I} \right ) +
-    \log
-    \left (
-      \frac{\CM_{kk \mid I, \text{Pr}}}{\CM_{kk \mid I}}
-    \right )
+  &= \logdet \left ( \CM_{\Pred, \Pred \mid \I} \right ) +
+     \log \left ( \frac{\CM_{k, k \mid \I, \Pred}}{\CM_{k, k \mid \I}} \right )
 \end{align}
-\Stodo{this maybe should be changed to information gain by flipping the sign}
-The greedy objective \cref{eq:greedy_mult} tells us that to minimize the
-log determinant, we can simply select the index \( k \) with the smallest
-ratio between the conditional variance after conditioning on the previously
-selected points as well as the prediction points, and the conditional
-variance after just conditioning on the selected points. Intuitively
-this tells us that we can place sensors \emph{backwards}, where we imagine
-placing sensors at the \emph{prediction points} instead of the candidates.
-We then measure the conditional variance at a candidate, and pick the
-candidate whose conditional variance decreases the most (relative from
-what it started out as). Intuitively, these candidates are likely to give
-information about the prediction points, because the prediction points
-give information about the candidate.
+Equation \cref{eq:greedy_mult} shows that to compute the updated log
+determinant, it suffices to only compute conditional variances of the
+candidate point. Intuitively this corresponds to \emph{backwards}
+regression, where we imagine measuring the values of the \emph{prediction
+points} instead of at the \emph{candidates}. We then infer the posterior
+variance at a candidate, and pick the candidate whose conditional variance
+decreases the most (relative to its starting value). These candidates
+are likely to give information about the prediction points, because the
+prediction points give information about the candidate.
 
-Re-writing the objective in this way also gives an efficient algorithm to
-compute the necessary quantities. We condition on the prediction points
-essentially the same as described in \cref{subsec:greedy}, by simply
-maintaining two structures instead of one, one for the conditional variance
-after conditioning on the previously selected points, and the other for the
-conditional variance after also conditioning on the prediction points. By
-the quotient rule, the order of conditioning does not matter as long as the
-order is consistent. For the second structure, we therefore condition on
-the prediction points \emph{first} before any points have been selected.
-We again have two strategies, one which explicitly maintains precisions and
-the other which relies on Cholesky factorization.
+\Stodo{image for ``backwards'' sensor placement}
 
-For the precision algorithm, using \cref{eq:cond_cov} directly, for \(
-m \) prediction points it costs \( \BigO(m^3) \) to compute \(
-\CM_{\text{Pr}, \text{Pr}}^{-1} \) and then \( \BigO(N m^2) \)
-to compute \( \CM_{kk \mid \text{Pr}} \) for the \( N \) candidates \(
-k \). For each of the \( s \) rounds of selecting candidates, it costs
-\( s^2 \) and \( m^2 \) to update the precisions \( \CM_{I, I}^{-1}
-\) and \( \CM_{\text{Pr}, \text{Pr}}^{-1} \) respectively, where the
-details of efficiently updating \( \CM_{\text{Pr}, \text{Pr}}^{-1}
-\) after the rank-one update in \cref{eq:obj_gp_mult} are given in
-\cref{app:prec_cond}. Given the precisions, \( \vec{u} = \frac{\CM_{:,
-k \mid I}}{\sqrt{\CM_{kk \mid I}}} \) and \( \vec{u}_\text{Pr} =
-\frac{\CM_{:, k \mid I, \text{Pr}}}{\sqrt{\CM_{kk \mid I, \text{Pr}}}}
-\) are computed as usual according to \cref{eq:cond_cov} in time \( Ns
-\) and \( Nm \). Finally, for each candidate \( j \), the conditional
-variance \( \CM_{jj \mid I} \) is updated by subtracting \( u_j^2 \),
-the conditional covariance \( \CM_{\text{Pr}, k \mid I} \) is updated
-for each prediction point index \( c \) each by subtracting \( u_j u_c
-\), and the conditional variance \( \CM_{jj \mid I, \text{Pr}} \) is
-updated by subtracting \( {u_\text{Pr}}_j^2 \). The total time complexity
-after simplification is \( \BigO(N s^2 + N m^2 + m^3) \).
+Re-writing the objective in this way motivates an efficient algorithm to
+compute the objective. We condition on a newly added point essentially
+the same as in \cref{subsec:greedy_select}, but now maintaining two data
+structures instead of one: one for the variance after conditioning on
+the previously selected points, and the other for the variance after
+also conditioning on the prediction points. By the quotient rule, the
+order of conditioning does not matter as long as the order is consistent.
+For the second data structure, we therefore condition on the prediction
+points \emph{first} before any points have been selected. We again have
+two strategies, one which explicitly maintains precisions and the other
+which relies on maintaining partial Cholesky factors.
 
-For the Cholesky algorithm, two Cholesky factorizations are stored. We first
-compute the Cholesky factorization after selecting each prediction point,
-for a cost of \( (N + m) m \) for each of the \( m \) columns. We then begin
-selecting candidates, which requires updating both Cholesky factors in time \(
-(N + m)(m + s) \) which is dominated by updating the preconditioned Cholesky
-factor. The columns of the Cholesky factors correspond precisely to \( \vec{u}
-\) and \( \vec{u}_\text{Pr} \) and both conditional variances \( \CM_{jj
-\mid I} \) and \( \CM_{jj \mid I, \text{Pr}} \) can be computed as above.
-The conditional covariances do not need to be computed. Over \( s \) rounds
-the total time complexity is \( \BigO((N + m) m^2 + s(N + m)(m + s)) \)
-which simplifies to \( \BigO(N s^2 + N m^2 + m^3) \).
+For the precision algorithm, using \cref{eq:cond_cov} directly, for \( m
+\) prediction points it costs \( \BigO(m^3) \) to compute \( \CM_{\Pred,
+\Pred}^{-1} \) and then \( \BigO(N m^2) \) to compute the initial conditional
+variances \( \CM_{k, k \mid \Pred} \) for the \( N \) candidates. For each of
+the \( s \) rounds of selecting candidates, it costs \( s^2 \) and \( m^2 \) to
+update the precisions \( \CM_{\I, \I}^{-1} \) and \( \CM_{\Pred, \Pred}^{-1}
+\) respectively, where the details of efficiently updating \( \CM_{\Pred,
+\Pred}^{-1} \) after the rank-one update in \cref{eq:obj_gp_mult} are given
+in \cref{app:prec_cond}. Given the precisions, \( \vec{u} = \frac{\CM_{:, k
+\mid \I}}{\sqrt{\CM_{k, k \mid \I}}} \) and \( \vec{u}_\Pred = \frac{\CM_{:,
+k \mid \I, \Pred}}{\sqrt{\CM_{k, k \mid \I, \Pred}}} \) are computed as usual
+according to \cref{eq:cond_cov} in time \( Ns \) and \( Nm \). Finally, for
+each candidate \( j \), the conditional variance \( \CM_{j, j \mid \I} \) is
+updated by subtracting \( u_j^2 \), the conditional covariance \( \CM_{\Pred,
+k \mid \I} \) is updated for each index \( c \) of a prediction point by
+subtracting \( u_j u_c \), and the conditional variance \( \CM_{j, j \mid
+I, \Pred} \) is updated by subtracting \( {u_\Pred}_j^2 \). The total time
+complexity after simplification is \( \BigO(N s^2 + N m^2 + m^3) \).
 
-Although both approaches have the same time complexity, like the single
-point case they differ in memory usage. The explicit precision requires \(
-\BigO(s^2 + m^2) \) memory to store both precisions, as well as \(
-\BigO(N m) \) memory to store the conditional covariances. The Cholesky
-algorithm, on the othe rhand, requires \( \BigO((n + m)(m + s)) \) to
-store the first \( m + s \) columns of the Cholesky factorization of the joint
-covariance matrix between training and prediction points, which simplifies
-to \( \BigO(N s + N m + m^2) \). Comparing the memory usage, they are
-the same except for \( s^2 \) versus \( N s \), so the Cholesky algorithm
-again uses more memory than the explicit precision algorithm.
+For the Cholesky algorithm, two partial Cholesky factors are stored. We
+first compute the Cholesky factorization after selecting each prediction
+point, for a cost of \( (N + m) m \) for each of the \( m \) columns. We then
+begin selecting candidates, which requires updating both Cholesky factors in
+time \( (N + m)(m + s) \) which is dominated by updating the preconditioned
+Cholesky factor. The columns of the Cholesky factors correspond precisely
+to \( \vec{u} \) and \( \vec{u}_\Pred \) and both conditional variances \(
+\CM_{j, j \mid I} \) and \( \CM_{j, j \mid I, \Pred} \) can be computed as
+above. The conditional covariances do not need to be computed. Over \( s \)
+rounds the total time complexity is \( \BigO((N + m) m^2 + s(N + m)(m + s))
+\) which simplifies to \( \BigO(N s^2 + N m^2 + m^3) \).
 
-\noindent
-\begin{minipage}[t]{0.49\textwidth}
-\begin{algorithm}[H]
-  \caption{Multiple prediction point selection by explicit precision}
-  \label{alg:gp_select_mult}
-  \input{figures/algorithms/gp_select_mult.tex}
-\end{algorithm}
-\end{minipage}
-\hfill
-\begin{minipage}[t]{0.49\textwidth}
-\begin{algorithm}[H]
-  \caption{Multiple prediction point selection by Cholesky factorization}
-  \label{alg:select_mult_chol}
-  \input{figures/algorithms/select_mult_chol.tex}
-\end{algorithm}
+Like the single-point case, both approaches have the same time complexity but
+differ in space complexity. The precision algorithm requires \( \BigO(s^2 +
+m^2) \) memory to store both precisions, as well as \( \BigO(N m) \) memory
+to store the conditional covariances. The Cholesky algorithm requires \(
+\BigO((N + m)(m + s)) \) memory to store the first \( m + s \) columns of
+the Cholesky factor for the joint covariance matrix between training and
+prediction points, which simplifies to \( \BigO(N s + N m + m^2) \). The
+memory usages are identical except for \( s^2 \) versus \( N s \), so the
+Cholesky algorithm again uses more memory than the precision algorithm.
 
-\begin{algorithm}[H]
-  \caption{Update Cholesky factor}
-  \label{alg:chol_update}
-  \input{figures/algorithms/chol_update.tex}
-\end{algorithm}
-\end{minipage}
+\begin{figure}
+  \centering
+  \begin{minipage}[t]{0.49\textwidth}
+  \begin{algorithm}[H]
+    \caption{Multiple prediction point selection by explicit precision}
+    \label{alg:select_mult_prec}
+    \input{figures/algorithms/select_mult_prec.tex}
+  \end{algorithm}
+  \end{minipage}
+  \hfill
+  \begin{minipage}[t]{0.49\textwidth}
+  \begin{algorithm}[H]
+    \caption{Multiple prediction point selection by Cholesky factorization}
+    \label{alg:select_mult_chol}
+    \input{figures/algorithms/select_mult_chol.tex}
+  \end{algorithm}
+
+  \begin{algorithm}[H]
+    \caption{Update Cholesky factor}
+    \label{alg:chol_update}
+    \input{figures/algorithms/chol_update.tex}
+  \end{algorithm}
+  \end{minipage}
+  \caption{Algorithms for multiple-point selection.}
+  \label{fig:alg_mult_select}
+\end{figure}
 
 \subsection{Near optimality by empirical submodularity}
 
@@ -891,15 +773,15 @@ reverse maximin ordering
 
 We have a covariance matrix \( \CM \) and wish to compute the Cholesky
 factorization of \( \CM \) into a lower triangular factor \( L \) such that
-\( \CM = L L^{\top} \). \Stodo{justify importance/downstream applications
-of Cholesky factorization}. This can be done in \( \BigO(N^3) \) with
-standard algorithms, which is often prohibitive. Recall the problem of
-inference in Gaussian process regression as described in \cref{subsec:gp_reg}
-also took \( \BigO(N^3) \) to invert the covariance matrix \( \CM
-\). Thus, similar to Guassian process regression, we will use \emph{sparsity}
-to mitigate the computational cost. In fact, we will be able to re-use our
-previous algorithms \cref{alg:gp_select,alg:gp_select_mult} on each column
-of the Cholesky factorization.
+\( \CM = L L^{\top} \). \Stodo{justify importance/downstream applications of
+Cholesky factorization}. This can be done in \( \BigO(N^3) \) with standard
+algorithms, which is often prohibitive. Recall the problem of inference in
+Gaussian process regression as described in \cref{sec:select} also took
+\( \BigO(N^3) \) to invert the covariance matrix \( \CM \). Thus, similar
+to Guassian process regression, we will use \emph{sparsity} to mitigate
+the computational cost. In fact, we will be able to re-use our previous
+algorithms \cref{alg:select_chol,alg:select_mult_chol} on each column of
+the Cholesky factorization.
 
 We will first compute the Cholesky factorization of \( \CM^{-1} \),
 also known as the \emph{precision matrix}, and use the resulting sparse
@@ -1006,7 +888,7 @@ fact that marginalization in covariance is conditioning in precision.
 So our objective on each column is to minimize the conditional variance of
 the \( i \)th variable, conditional on the entries we've selected --- \( s_i
 \) contains \( i \) to begin with, so \( s_i - \{ i \} \) is the selected
-entries. We can therefore use algorithm \cref{alg:gp_select} directly on each
+entries. We can therefore use algorithm \cref{alg:select_chol} directly on each
 column, where the prediction point is the \( i \) variable and the number
 of points selected is the number of nonzero entries per column. The only
 difference is that the candidates is limited to indices lower than \( i \),
@@ -1065,7 +947,7 @@ We see that the objective \cref{eq:obj_mult} is equivalent to the
 objective \cref{eq:obj_gp_mult}, that is, to minimize the log
 determinant of the conditional covariance matrix corresponding to a
 set of prediction points, conditional on the selected entries. We can
-therefore directly use \cref{alg:gp_select_mult} on the aggregated
+therefore directly use \cref{alg:select_mult_chol} on the aggregated
 columns, where the prediction points correspond to indices in the
 aggregation and where we restrict the candidates \( k \) to those
 below each column in the aggregation, \( k > \max \tilde{i} \).
@@ -1093,9 +975,9 @@ entry in the aggregation. This viewpoint leads directly to \cref{alg:chol}.
         \{ \max(\tilde{i}) + 1, \max(\tilde{i}) + 2, \dotsc, n \}
       \)
       \STATE Compute \( I \) using
-        \cref{alg:gp_select_mult} or \cref{alg:select_mult_chol} \\ where
-        \( \vec{x}_\text{Tr} = \vec{x}[J],
-           \vec{x}_\text{Pr} = \vec{x}[\tilde{i}],
+        \cref{alg:select_mult_prec} or \cref{alg:select_mult_chol} \\ where
+        \( \vec{x}_\Train = \vec{x}[J],
+           \vec{x}_\Pred = \vec{x}[\tilde{i}],
            s = s - \lvert \tilde{i} \rvert
         \)
       \STATE \( \tilde{s} \gets J[I] \)
@@ -1197,7 +1079,7 @@ s}^{-1} \) equal to \cref{eq:L_col} because the Cholesky factorization is
 unique. Computing \( U^{-\top} \) leads directly to \cref{alg:L_mult}.
 
 Recall that the complexity of selecting \( s \) out of \( N \) total training
-points for \( m \) prediction points using \cref{alg:gp_select_mult} or
+points for \( m \) prediction points using \cref{alg:select_mult_prec} or
 \cref{alg:select_mult_chol} was \( \BigO(N s^2 + N m^2 + m^3) \). In the
 context of Cholesky factorization, \( N \) is the size of the matrix, \( m \)
 is the number of columns to aggregate, and \( s \) is the number of nonzero
@@ -1205,22 +1087,22 @@ entries in each column of \( L \). We therefore need to do \( \frac{N}{m} \)
 selections, one for each aggregated group, where we only need to select \( s
 - m \) entries (since the \( m \) prediction points are automatically added).
 We then need to actually construct each column of \( L \) after determining
-the sparsity pattern, with \cref{alg:L_mult}. This costs \( \BigO(s^3)
-\) for each aggregated group to compute the Cholesky factor of the submatrix,
+the sparsity pattern, with \cref{alg:L_mult}. This costs \( \BigO(s^3) \)
+for each aggregated group to compute the Cholesky factor of the submatrix,
 which dominates the time to compute each column of \( L \) for the \( m \)
-columns in the group, \( \BigO(m s^2) \) (\( N > s > m \)). Thus, the
-overall complexity is \( \BigO(\frac{N}{m} (N (s - m)^2 + N m^2 + m^3 +
-s^3)) \), which simplifies to \( \BigO(\frac{N^2 s^2}{m}) \) by making
-use of the bound that \( (s - m)^2 = \BigO(s^2 + m^2) \).
+columns in the group, \( \BigO(m s^2) \) (\( N > s > m \)). Thus, the overall
+complexity is \( \BigO(\frac{N}{m} (N (s - m)^2 + N m^2 + m^3 + s^3)) \),
+which simplifies to \( \BigO(\frac{N^2 s^2}{m}) \) by making use of the bound
+that \( (s - m)^2 = \BigO(s^2 + m^2) \).
 
 Note that the non-aggregated factorization is equivalent to \( m = 1 \),
 which yields \( \BigO(N^2 s^2) \) (using the non-aggregated algorithms
-\cref{alg:gp_select,alg:L}, but one can also use the aggregated versions
-\cref{alg:gp_select_mult,alg:L_mult} with \( m = 1 \) and achieve equivalent
-complexity). Thus, we see that the aggregated version is \( m \) times faster
-than its non-aggregated counterpart, at the cost that the resulting sparsity
-pattern will be lower quality (since the algorithm is forced to select the
-same entry for \emph{all} columns in the group).
+\cref{alg:select_chol,alg:L}, but one can also use the aggregated versions
+\cref{alg:select_mult_chol,alg:L_mult} with \( m = 1 \) and achieve
+equivalent complexity). Thus, we see that the aggregated version is \( m
+\) times faster than its non-aggregated counterpart, at the cost that the
+resulting sparsity pattern will be lower quality (since the algorithm is
+forced to select the same entry for \emph{all} columns in the group).
 
 Unlike the geometric algorithms of \cite{schafer2021sparse,
 schafer2020compression} which rely on the pairwise distance between points,
@@ -1256,7 +1138,7 @@ label in the \( k \) selected points.
 
 \Stodo{cite mnist dataset}
 
-\begin{figure}[h!]
+\begin{figure}[h]
   \centering
   \input{figures/mnist/accuracy_k.tex}
   \caption{Accuracy with increasing \( k \)}
@@ -1386,20 +1268,21 @@ USA.
 \subsection{Updating precision after insertion}
 \label{app:prec_insert}
 
-We have the matrix \( \CM_{I, I}^{-1} \) corresponding to the precision of
-the selected entries, and wish to take into account the addition of a new entry
-\( k \) into \( I \). That is, we wish to compute \( \CM_{I', I'}^{-1} \)
-for \( I' = I \cup \{ k \} \), which in effect adds a new row and column to \(
-\CM_{I, I}^{-1} \). In order to invert the new matrix efficiently, we can
-block the matrix to separate the new and old information.
+Assuming we have the precision of the selected entries, \( \CM_{\I, \I}^{-1}
+\), we wish to account for adding a new index \( k \) to \( \I \), that is, we
+wish to compute \( \CM_{\I \cup \{ k \}, \I \cup \{ k \}}^{-1} \), adding a new
+row and column to \( \CM_{\I, \I}^{-1} \). In order to update efficiently, we
+block the matrix to separate new and old information.
 \begin{align}
+  \shortintertext{Using the same block \( L D
+    L^{\top} \) factorization as \cref{eq:chol_schur},}
   \begin{pmatrix}
     \CM_{1, 1} & \CM_{1, 2} \\
     \CM_{2, 1} & \CM_{2, 2}
   \end{pmatrix} &=
   \begin{pmatrix}
-    I & 0 \\
-    \textcolor{darkorange}{\CM_{2, 1} \CM_{1, 1}^{-1}} & I
+    \Id & 0 \\
+    \textcolor{darkorange}{\CM_{2, 1} \CM_{1, 1}^{-1}} & \Id
   \end{pmatrix}
   \begin{pmatrix}
     \CM_{1, 1} & 0 \\
@@ -1408,25 +1291,25 @@ block the matrix to separate the new and old information.
     }
   \end{pmatrix}
   \begin{pmatrix}
-    I & \textcolor{darkorange}{\CM_{1, 1}^{-1} \CM_{1, 2}} \\
-    0 & I
+    \Id & \textcolor{darkorange}{\CM_{1, 1}^{-1} \CM_{1, 2}} \\
+    0 & \Id
   \end{pmatrix}
-  \shortintertext{For notational convenience, we denote the Schur
-    complement \textcolor{lightblue}{\( \CM_{2, 2} - \CM_{2, 1}
-    \CM_{1, 1}^{-1} \CM_{1, 2} \)} as \textcolor{lightblue}{\(
-    \CM_{2, 2 \mid 1} \)}. Inverting both sides of the equation,}
+  \shortintertext{For brevity of notation, we denote the Schur complement
+    \textcolor{lightblue}{\( \CM_{2, 2} - \CM_{2, 1} \CM_{1, 1}^{-1} \CM_{1,
+    2} \)} as the conditional covariance \textcolor{lightblue}{\( \CM_{2, 2
+    \mid 1} \)}. Inverting both sides of the equation,}
   \CM^{-1} &=
   \begin{pmatrix}
-    I & -\textcolor{darkorange}{\CM_{1, 1}^{-1} \CM_{1, 2}} \\
-    0 & I
+    \Id & -\textcolor{darkorange}{\CM_{1, 1}^{-1} \CM_{1, 2}} \\
+    0 & \Id
   \end{pmatrix}
   \begin{pmatrix}
     \CM_{1, 1}^{-1} & 0 \\
     0 & \textcolor{lightblue}{\CM_{2, 2 \mid 1}^{-1}}
   \end{pmatrix}
   \begin{pmatrix}
-    I & 0 \\
-    -\textcolor{darkorange}{\CM_{2, 1} \CM_{1, 1}^{-1}} & I
+    \Id & 0 \\
+    -\textcolor{darkorange}{\CM_{2, 1} \CM_{1, 1}^{-1}} & \Id
   \end{pmatrix} \\
   &=
   \begin{pmatrix}
@@ -1444,24 +1327,23 @@ block the matrix to separate the new and old information.
       \left (\CM_{2, 1} \CM_{1, 1}^{-1} \right )
     } & \textcolor{lightblue}{\CM_{2, 2 \mid 1}^{-1}}
   \end{pmatrix}
-  \shortintertext{In the context of adding a new entry to the matrix,
-    \( \CM_{1, 1} = \CM_{I, I} \), \( \CM_{1, 2} = \CM_{I,
-    k} \), and \( \CM_{2, 2} = \CM_{kk} \). Also note that \(
-    \textcolor{lightblue}{\CM_{kk \mid I}^{-1}} \) is the inverse
-    of the variance of \( k \) conditional on the entries in \( I \),
-    which has already been computed in \cref{alg:gp_select}. If we let
-    \( \vec{v} = \textcolor{darkorange}{\CM_{I, I}^{-1} \CM_{I,
-    k}} \), then we can write the update as:}
+  \shortintertext{In the context of adding a new entry to the matrix, \(
+    \CM_{1, 1} = \CM_{\I, \I} \), \( \CM_{1, 2} = \CM_{\I, k} \), and \(
+    \CM_{2, 2} = \CM_{k, k} \). Also note that \( \textcolor{lightblue}{\CM_{k,
+    k \mid \I}^{-1}} \) is the precision of \( k \) conditional on the entries
+    in \( \I \), which has already been computed in \cref{alg:select_prec}.
+    If we let \( \vec{v} = \textcolor{darkorange}{\CM_{\I, \I}^{-1} \CM_{\I,
+    k}} \), then}
   &=
   \begin{pmatrix}
-    \CM_{I, I}^{-1} + \CM_{kk \mid I}^{-1} \vec{v} \vec{v}^T &
-    -\CM_{kk \mid I}^{-1} \vec{v} \\
-    -\CM_{kk \mid I}^{-1} \vec{v}^{\top} & \CM_{kk \mid I}^{-1} \\
+    \CM_{\I, \I}^{-1} + \CM_{k, k \mid \I}^{-1} \vec{v} \vec{v}^T &
+    -\CM_{k, k \mid \I}^{-1} \vec{v} \\
+    -\CM_{k, k \mid \I}^{-1} \vec{v}^{\top} & \CM_{k, k \mid \I}^{-1} \\
   \end{pmatrix}
 \end{align}
-which is precisely the update in line 13 of \cref{alg:gp_select}. Note that
-the update is a rank-one update to \( \CM_{1, 1}^{-1} \), which can
-be computed in \( \BigO(\lvert I \rvert^2) = \BigO(s^2) \).
+which is precisely the update in line 13 of \cref{alg:select_prec}.
+Note that the bulk of the update is a rank-one update to \( \CM_{1,
+1}^{-1} \), which can be computed in \( \BigO(\card{\I}) = \BigO(s^2) \).
 
 \subsection{Updating precision after marginalization}
 \label{app:prec_delete}
@@ -1493,54 +1375,87 @@ can be computed in \\ \( \BigO(\text{\# rows}(\CM^{-1}))^2 \).
 \Stodo{this is not used in the paper but is nice to know +
 used in the sensor placement}
 
+\subsection{Updating the log determinant after a rank-one downdate}
+\label{app:logdet_downdate}
+
+Assuming we already have the log determinant of the covariance matrix of the
+prediction points conditional on the selected entries, \( \logdet(\CM_{\Pred,
+\Pred \mid \I}) \), we wish to compute the log determinant after we add an
+index \( k \) to \( I \), that is, to compute \( \logdet(\CM_{\Pred, \Pred
+\mid \I \cup \{ k \}}) \).
+\begin{align}
+  \shortintertext{From \cref{eq:cond_select}, selecting a
+    new point is a rank-one downdate on the covariance matrix.}
+  \logdet \left ( \CM_{\Pred, \Pred \mid \I \cup \{ k \}} \right )
+  &= \logdet \left ( \CM_{\Pred, \Pred \mid \I} -
+       \frac{\CM_{\Pred, k \mid \I} \CM_{\Pred, k \mid \I}^{\top}}
+            {\CM_{k, k \mid \I}}
+     \right ) \\
+  \shortintertext{Using the matrix determinant lemma,}
+  &= \logdet \left ( \CM_{\Pred, \Pred \mid \I} \right ) +
+     \log \left ( 1 -
+       \frac{\CM_{\Pred, k \mid \I}^{\top} \CM_{\Pred, \Pred \mid \I}^{-1}
+             \CM_{\Pred, k \mid \I}
+            }{\CM_{k, k \mid \I}}
+     \right )
+  \shortintertext{Focusing on the second term, we can turn
+    the quadratic form into condtioning.}
+  &= \logdet \left ( \CM_{\Pred, \Pred \mid \I} \right ) +
+     \log \left (
+       \frac{\CM_{k, k \mid \I} -
+             \CM_{k, \Pred \mid \I} \CM_{\Pred, \Pred \mid \I}^{-1}
+             \CM_{\Pred, k \mid \I}
+            }{\CM_{k, k \mid \I}}
+     \right )
+  \shortintertext{By the quotient rule, we combine the conditioning.}
+  &= \logdet \left ( \CM_{\Pred, \Pred \mid \I} \right ) +
+     \log \left ( \frac{\CM_{k, k \mid \I, \Pred}}{\CM_{k, k \mid \I}} \right )
+\end{align}
+
 \subsection{Updating precision after conditioning}
 \label{app:prec_cond}
 
-We have the matrix \( \CM_{\text{Pr}, \text{Pr} \mid I}^{-1} \), or
-the precision of the prediction points, conditional on the selected
-entries. We want to take into account selecting an entry \( k \), or to compute
-\( \CM_{\text{Pr}, \text{Pr} \mid I \cup \{ k \}}^{-1} \) which is a rank-one
-update to the original matrix from \cref{eq:obj_gp_mult}.
-We can directly apply
-the Sherman–Morrison–Woodbury formula which states that:
+Assuming we have the precision matrix of the prediction points conditional on
+the selected entries, \( \CM_{\Pred, \Pred \mid \I}^{-1} \), we want to take
+into account selecting an index \( k \), or to compute \( \CM_{\Pred, \Pred
+\mid \I \cup \{ k \}}^{-1} \), which is a rank-one update to the covariance
+(but not necessarily the precision) from \cref{eq:obj_gp_mult}. We can directly
+apply the Sherman–Morrison–Woodbury formula which states that:
 \begin{align}
   \CM_{1, 1 \mid 2}^{-1} &= \CM_{1, 1}^{-1} +
-    \left (\CM_{1, 1}^{-1} \CM_{1, 2} \right )
-    \CM_{2, 2 \mid 1}^{-1}
+    \left (\CM_{1, 1}^{-1} \CM_{1, 2} \right ) \CM_{2, 2 \mid 1}^{-1}
     \left (\CM_{2, 1} \CM_{1, 1}^{-1} \right )
-  \shortintertext{Expanding the conditioning by definition,}
+  \shortintertext{Expanding the conditioning from \cref{eq:cond_cov},}
   \left (
     \CM_{1, 1} - \CM_{1, 2} \CM_{2, 2}^{-1} \CM_{2, 1}
-  \right )^{-1} &=
-    \CM_{1, 1}^{-1} +
-    \left (\CM_{1, 1}^{-1} \CM_{1, 2} \right )
-    \CM_{2, 2 \mid 1}^{-1}
+  \right )^{-1} &= \CM_{1, 1}^{-1} +
+    \left (\CM_{1, 1}^{-1} \CM_{1, 2} \right ) \CM_{2, 2 \mid 1}^{-1}
     \left (\CM_{2, 1} \CM_{1, 1}^{-1} \right )
-  \shortintertext{Letting \( \vec{u} = \CM_{1, 2} \) and \( \vec{v}
-    = \CM_{1, 1}^{-1} \CM_{1, 2} = \CM_{1, 1}^{-1} \vec{u} \),}
+  \shortintertext{For brevity of notation, letting \( \vec{u} = \CM_{1, 2} \)
+    and \( \vec{v} = \CM_{1, 1}^{-1} \CM_{1, 2} = \CM_{1, 1}^{-1} \vec{u} \),}
   (\CM_{1, 1} - \CM_{2, 2}^{-1} \vec{u} \vec{u}^{\top})^{-1} &=
     \CM_{1, 1}^{-1} + \CM_{2, 2 \mid 1}^{-1} \vec{v} \vec{v}^{\top}
-  \shortintertext{So we see that a rank-one update to \( \CM_{1, 1} \)
-    then inverting is a rank-one update to \( \CM_{1, 1}^{-1} \). In our
-    context, \( \CM_{1, 1} = \CM_{\text{Pr}, \text{Pr} \mid I}, \vec{u} =
-    \CM_{\text{Pr}, k \mid I}, \CM_{2, 2} = \CM_{kk \mid I} \) so \(
-    \CM_{2, 2 \mid 1}^{-1} = \CM_{kk \mid \text{Pr}, I}^{-1} \) (this can
-    be rigorously shown by expanding the Schur complement and taking advantage
-    of the quotient rule as in \cref{eq:greedy_mult}). \( \vec{v} \) can be
-    computed according to definition as \( \CM_{\text{Pr}, \text{Pr} \mid
-    I}^{-1} \vec{u} \). Thus, we can write the update as}
-  \left ( \CM_{\text{Pr}, \text{Pr} \mid I} -
-    \frac{\CM_{\text{Pr}, k \mid I} \CM_{\text{Pr}, k \mid I}^{\top}}
-    {\CM_{kk \mid I}}
+  \shortintertext{So we see that a rank-one update to \( \CM_{1, 1}
+    \) then inverting is a rank-one update to \( \CM_{1, 1}^{-1} \). In
+    our context, \( \CM_{1, 1} = \CM_{\Pred, \Pred \mid \I}, \vec{u}
+    = \CM_{\Pred, k \mid I}, \CM_{2, 2} = \CM_{k, k \mid \I} \) so \(
+    \CM_{2, 2 \mid 1}^{-1} = \CM_{k, k \mid \Pred, I}^{-1} \) (this can
+    be rigorously shown by expanding the Schur complement and taking
+    advantage of the quotient rule as in \cref{eq:greedy_mult}). \(
+    \vec{v} \) can be computed according to definition as \( \CM_{\Pred,
+    \Pred \mid \I}^{-1} \vec{u} \). Thus, we can write the update as}
+  \left ( \CM_{\Pred, \Pred \mid \I} -
+    \frac{\CM_{\Pred, k \mid \I} \CM_{\Pred, k \mid \I}^{\top}}
+         {\CM_{kk \mid \I}}
   \right )^{-1} &=
     \CM_{1, 1}^{-1} +
-    \CM_{kk \mid \text{Pr}, I}^{-1} \vec{v} \vec{v}^{\top}
+    \CM_{k, k \mid \Pred, \I}^{-1} \vec{v} \vec{v}^{\top}
 \end{align}
-which is the update in line 18 of \cref{alg:gp_select_mult}.
-Since the update is a rank-one update, it can be computed in \(
-\BigO(\lvert \text{Pr} \rvert^2) = \BigO(m^2) \).
+which is the update in line 18 of \cref{alg:select_mult_prec}.
+Since the update is a rank-one update, it can be
+computed in \( \BigO(\card{\Pred}^2) = \BigO(m^2) \).
 
-\subsection{Updating Cholesky factorization after rank-one downdate}
+\subsection{Updating a Cholesky factor after a rank-one downdate}
 \label{app:chol_downdate}
 
 \Stodo{remove because unnecessary, describe insertion instead}
@@ -1723,7 +1638,7 @@ and conditioned \( y_j \) is. By definition,
   \CM_{:, :, \shortmid k}
 \end{align}
 
-\begin{figure}[h!]
+\begin{figure}[h]
   \centering
   \input{figures/partial_factor.tex}
   \caption{Illustration of the Cholesky
@@ -1816,7 +1731,7 @@ be selected points and \( 1 \) and \( 2 \) be prediction points.
     \logdet(\CM) - \logdet(\CM_{-y, -y})
   \shortintertext{In general,}
   \label{eq:logdet_diff}
-  \log(\CM_{kk \mid I, \text{Pr}}) &=
+  \log(\CM_{kk \mid I, \Pred}) &=
     \logdet(\CM) - \logdet(\CM_{-k, -k})
 \end{align}
 Another way to arrive at the same result is to note that if we inserted
@@ -1834,7 +1749,7 @@ The multiple prediction point algorithm can therefore be interpreted as
 we insert the candidate \emph{after} all the previously selected points
 (so it is conditional on all the previous points) and \emph{before}
 the prediction points (which conditions all of them). We then compute
-\( \log(\CM_{kk \mid I, \text{Pr}}) \) for some candidate \( k \)
+\( \log(\CM_{kk \mid I, \Pred}) \) for some candidate \( k \)
 which represents the difference in log determinant and then subtract \(
 \log(\CM_{kk \mid I}) \) which is the spurious variance introduced by
 inserting \( k \) into the matrix. We do not need to subtract the spurious
@@ -1938,31 +1853,31 @@ must be made to the selection algorithms to support global comparison.
 
 \subsubsection{Single column selection}
 
-For a single prediction point, the objective is \( \frac{\CM_{k, \text{Pr}
+For a single prediction point, the objective is \( \frac{\CM_{k, \Pred
 \mid I}^2}{\CM_{kk \mid I}} \) \cref{eq:obj_gp} which is exactly the amount
 the variance of the prediction point is decreased if the \( k \)th candidate is
-selected, that is, \( \CM_{\text{Pr}, \text{Pr} \mid I} - \CM_{\text{Pr},
-\text{Pr} \mid I, k} = \frac{\CM_{k, \text{Pr} \mid I}^2}{\CM_{kk \mid
+selected, that is, \( \CM_{\Pred, \Pred \mid I} - \CM_{\Pred,
+\Pred \mid I, k} = \frac{\CM_{k, \Pred \mid I}^2}{\CM_{kk \mid
 I}} \). From the global perspective, all other prediction points are untouched,
 so the amount the sum of the log variances of all the prediction points changes
 is
 \begin{align}
   \min \Delta &= \min \left [
-    \log(\CM_{\text{Pr}, \text{Pr} \mid I, k}) -
-  \log(\CM_{\text{Pr}, \text{Pr} \mid I}) \right ] \\
-              &= \min \frac{\CM_{\text{Pr}, \text{Pr} \mid I, k}}
-                           {\CM_{\text{Pr}, \text{Pr} \mid I}} \\
-              &= \min \frac{\CM_{\text{Pr}, \text{Pr} \mid I}
-              - \frac{\CM_{k, \text{Pr} \mid I}^2}{\CM_{kk \mid I}}}
-                           {\CM_{\text{Pr}, \text{Pr} \mid I}} \\
+    \log(\CM_{\Pred, \Pred \mid I, k}) -
+  \log(\CM_{\Pred, \Pred \mid I}) \right ] \\
+              &= \min \frac{\CM_{\Pred, \Pred \mid I, k}}
+                           {\CM_{\Pred, \Pred \mid I}} \\
+              &= \min \frac{\CM_{\Pred, \Pred \mid I}
+              - \frac{\CM_{k, \Pred \mid I}^2}{\CM_{kk \mid I}}}
+                           {\CM_{\Pred, \Pred \mid I}} \\
               &= \min \left [ 1 -
-                \frac{\CM_{k, \text{Pr} \mid I}^2}
-                     {\CM_{kk \mid I} \CM_{\text{Pr}, \text{Pr} \mid I}}
+                \frac{\CM_{k, \Pred \mid I}^2}
+                     {\CM_{kk \mid I} \CM_{\Pred, \Pred \mid I}}
                  \right ] \\
   \label{eq:global_obj}
               &= \max
-                \frac{\CM_{k, \text{Pr} \mid I}^2}
-                     {\CM_{kk \mid I} \CM_{\text{Pr}, \text{Pr} \mid I}}
+                \frac{\CM_{k, \Pred \mid I}^2}
+                     {\CM_{kk \mid I} \CM_{\Pred, \Pred \mid I}}
 \end{align}
 where \cref{eq:global_obj} can be interpreted as the
 \emph{percentage} of the decrease in variance from selecting
@@ -2020,7 +1935,7 @@ to iterative conditioning in covariance.
 \label{app:omp}
 
 We show that the single-point selection algorithm described in
-\cref{alg:gp_select} is the covariance space equivalent to the
+\cref{alg:select_chol} is the covariance space equivalent to the
 feature space orthogonal matching pursuit (OMP) algorithm described
 in \cite{tropp2007signal}. The equivalence comes from the fact
 that Cholesky factorization is Gram-Schmitt in feature space.
@@ -2061,11 +1976,11 @@ that Cholesky factorization is Gram-Schmitt in feature space.
   \shortintertext{Comparing \cref{eq:cov_step} and \cref{eq:feature_step},
     we see that they are the same as expected. As a corollary, the objective
     of selecting the point \( \vec{x}_k \) that minimizes the residual of some
-    target point \( \vec{x}_\text{Pr} \) can be written as}
+    target point \( \vec{x}_\Pred \) can be written as}
   \lVert
-    \vec{x}_\text{Pr} - \text{proj}_{\vec{x}_k} \vec{x}_\text{Pr}
-  \rVert &= \langle \vec{x}_\text{Pr}, \vec{x}_\text{Pr} \rangle -
-    \frac{\langle \vec{x}_\text{Pr}, \vec{x}_k \rangle^2}
+    \vec{x}_\Pred - \text{proj}_{\vec{x}_k} \vec{x}_\Pred
+  \rVert &= \langle \vec{x}_\Pred, \vec{x}_\Pred \rangle -
+    \frac{\langle \vec{x}_\Pred, \vec{x}_k \rangle^2}
         {\langle \vec{x}_k, \vec{x}_k \rangle}
   % \shortintertext{By induction, one can show}
   % F_2' = F_2 - P_1 F_2
@@ -2085,54 +2000,54 @@ points \cref{eq:info}. A natural question is whether this objective is
 submodular with respect to the training set. The answer is no in general,
 see \cite{krause2008nearoptimal}, section 8.3 for a simple counterexample.
 However, we can empirically check submodularity for particular geometries
-and choices of kernel function. If \( \text{Pr} \) is the set of prediction
+and choices of kernel function. If \( \Pred \) is the set of prediction
 points, \( I \) is a set of indexes, and \( x_1, x_2 \) are additional
 indices not in \( I \), then the set function is submodular if and only if
 \begin{align*}
-  \MI(\text{Pr}, I \cup \{ x_2 \}) - \MI(I) &\overset{?}{\geq}
-    \MI(\text{Pr}, I \cup \{ x_1, x_2 \}) - \MI(\text{Pr}, I \cup \{ x_1 \})
+  \MI(\Pred, I \cup \{ x_2 \}) - \MI(I) &\overset{?}{\geq}
+    \MI(\Pred, I \cup \{ x_1, x_2 \}) - \MI(\Pred, I \cup \{ x_1 \})
   \shortintertext{Expanding from the definition
     of mutual information \cref{eq:info},}
-  \entropy[\text{Pr} \mid I] - \entropy[\text{Pr} \mid I \cup \{ x_2 \}]
+  \entropy[\Pred \mid I] - \entropy[\Pred \mid I \cup \{ x_2 \}]
     &\overset{?}{\geq}
-    \entropy[\text{Pr} \mid I \cup \{ x_1 \}] -
-    \entropy[\text{Pr} \mid I \cup \{ x_1, x_2 \}]
+    \entropy[\Pred \mid I \cup \{ x_1 \}] -
+    \entropy[\Pred \mid I \cup \{ x_1, x_2 \}]
   \shortintertext{Since this is the objective \cref{eq:obj_gp_mult}
     (with additional log),}
-  \frac{\CM_{x_2, x_2 \mid I}}{\CM_{x_2, x_2 \mid I, \text{Pr}}}
+  \frac{\CM_{x_2, x_2 \mid I}}{\CM_{x_2, x_2 \mid I, \Pred}}
     &\overset{?}{\geq}
     \frac{\CM_{x_2, x_2 \mid I} -
           \frac{\CM_{x_1, x_2 \mid I}^2}{\CM_{x_1, x_1 \mid I}}}
-         {\CM_{x_2, x_2 \mid I, \text{Pr}} -
-         \frac{\CM_{x_1, x_2 \mid I, \text{Pr}}^2}
-              {\CM_{x_1, x_1 \mid I, \text{Pr}}}}
+         {\CM_{x_2, x_2 \mid I, \Pred} -
+         \frac{\CM_{x_1, x_2 \mid I, \Pred}^2}
+              {\CM_{x_1, x_1 \mid I, \Pred}}}
     \shortintertext{From the fact that \(
     \frac{a}{b} \geq \frac{a - c}{b - d} \) if and only if
      \( \frac{a}{b} \leq \frac{c}{d} \),}
-  \frac{\CM_{x_2, x_2 \mid I}}{\CM_{x_2, x_2 \mid I, \text{Pr}}}
+  \frac{\CM_{x_2, x_2 \mid I}}{\CM_{x_2, x_2 \mid I, \Pred}}
     &\overset{?}{\leq}
     \frac{\frac{\CM_{x_1, x_2 \mid I}^2}{\CM_{x_1, x_1 \mid I}}}
-         {\frac{\CM_{x_1, x_2 \mid I, \text{Pr}}^2}
-               {\CM_{x_1, x_1 \mid I, \text{Pr}}}}
+         {\frac{\CM_{x_1, x_2 \mid I, \Pred}^2}
+               {\CM_{x_1, x_1 \mid I, \Pred}}}
   \shortintertext{Multiplying by \( \frac{\CM_{x_1, x_1 \mid
-    I}}{\CM_{x_1, x_1 \mid I, \text{Pr}}} \) on both sides,}
+    I}}{\CM_{x_1, x_1 \mid I, \Pred}} \) on both sides,}
   \frac{\CM_{x_1, x_1 \mid I} \CM_{x_2, x_2 \mid I}}
-       {\CM_{x_1, x_1 \mid I, \text{Pr}}
-        \CM_{x_2, x_2 \mid I, \text{Pr}}}
+       {\CM_{x_1, x_1 \mid I, \Pred}
+        \CM_{x_2, x_2 \mid I, \Pred}}
     &\overset{?}{\leq}
     \frac{\CM_{x_1, x_2 \mid I}^2}
-         {\CM_{x_1, x_2 \mid I, \text{Pr}}^2}
+         {\CM_{x_1, x_2 \mid I, \Pred}^2}
   \shortintertext{Multiplying by \( \frac{\CM_{x_1,
-    x_2 \mid I, \text{Pr}}^2}{\CM_{x_1, x_1 \mid
+    x_2 \mid I, \Pred}^2}{\CM_{x_1, x_1 \mid
     I} \CM_{x_2, x_2 \mid I}} \) on both sides,}
-  \frac{\CM_{x_1, x_2 \mid I, \text{Pr}}^2}
-       {\CM_{x_1, x_1 \mid I, \text{Pr}}
-        \CM_{x_2, x_2 \mid I, \text{Pr}}}
+  \frac{\CM_{x_1, x_2 \mid I, \Pred}^2}
+       {\CM_{x_1, x_1 \mid I, \Pred}
+        \CM_{x_2, x_2 \mid I, \Pred}}
     &\overset{?}{\leq}
     \frac{\CM_{x_1, x_2 \mid I}^2}
          {\CM_{x_1, x_1 \mid I} \CM_{x_2, x_2 \mid I}}
   \shortintertext{By definition, this is}
-  \Corr[x_1, x_2 \mid I, \text{Pr}] &\overset{?}{\leq}
+  \Corr[x_1, x_2 \mid I, \Pred] &\overset{?}{\leq}
     \Corr[x_1, x_2 \mid I]
 \end{align*}
 so the mutual information objective is submodular if and only if
@@ -2361,5 +2276,13 @@ the order of the arguments. A statistical interpretation comes from the
 fact that the KL divergence can be interpreted as the likelihood-ratio
 test, so the non-symmetry of the order of the arguments corresponds to
 the asymmetry between the null and alternative hypotheses.
+
+\section{Algorithms}
+
+\begin{algorithm}
+  \caption{Direct Gaussian process regression by selection}
+  \label{alg:infer_select}
+  \input{figures/algorithms/infer_select.tex}
+\end{algorithm}
 
 \end{document}

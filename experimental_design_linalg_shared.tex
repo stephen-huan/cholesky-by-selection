@@ -120,19 +120,27 @@ S. Huan, J. Guinness, M. Katzfuss, H. Owhadi, F. Sch{\"a}fer}
 \newcommand*{\BigO}{\mathcal{O}}
 \newcommand*{\N}{\mathcal{N}}
 \newcommand*{\SpSet}{\mathcal{S}}
+\newcommand*{\GP}{\mathcal{GP}}
 \newcommand*{\I}{I}
+\newcommand*{\J}{J}
+\newcommand*{\V}{V}
 
-\renewcommand{\vec}[1]{\bm{#1}}
+\renewcommand*{\vec}[1]{\bm{#1}}
 \newcommand*{\Id}{\text{Id}}
 
 % Names of variables
 % covariance matrix
 \newcommand*{\CM}{\Theta}
-\DeclareMathOperator{\Train}{Tr}
-\DeclareMathOperator{\Pred}{Pr}
+\newcommand*{\mean}{\mu}
+\newcommand*{\var}{\sigma^2}
+% kernel function
+\newcommand*{\K}{K}
+\newcommand*{\Train}{\text{Tr}}
+\newcommand*{\Pred}{\text{Pr}}
 
 % Names of operators
 \DeclarePairedDelimiter{\norm}{\lVert}{\rVert}
+\DeclarePairedDelimiter{\card}{\lvert}{\rvert}
 \DeclareMathOperator{\diag}{diag}
 \let\trace\relax
 \DeclareMathOperator{\trace}{trace}

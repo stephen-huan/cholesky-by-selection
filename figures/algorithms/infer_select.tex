@@ -1,39 +1,39 @@
 \begin{algorithmic}[1]
   \REQUIRE \(
-    \vec{x}_\text{Tr}, \vec{y}_\text{Tr},
-    \vec{x}_\text{Pr}, K(\cdot, \cdot), s
+    \vec{x}_\Train, \vec{y}_\Train,
+    \vec{x}_\Pred, \K(\cdot, \cdot), s
   \)
   \ENSURE \(
-      \E[\vec{y}_\text{Pr} \mid \vec{y}_\text{Tr}],
-    \Cov[\vec{y}_\text{Pr} \mid \vec{y}_\text{Tr}]
+      \E[\vec{y}_\Pred \mid \vec{y}_\Train],
+    \Cov[\vec{y}_\Pred \mid \vec{y}_\Train]
   \)
 
-  \STATE Compute \( I \) using \cref{alg:gp_select} or \cref{alg:select_chol}
+  \STATE Compute \( \I \) using \cref{alg:select_prec} or \cref{alg:select_chol}
   \STATE \(
-    \Theta_{\text{Tr}, \text{Tr}} \gets
-    K(\vec{x}_\text{Tr}[I], \vec{x}_\text{Tr}[I])
+    \CM_{\Train, \Train} \gets
+    \K(\vec{x}_\Train[I], \vec{x}_\Train[\I])
   \)
   \STATE \(
-    \Theta_{\text{Pr}, \text{Pr}} \gets
-    K(\vec{x}_\text{Pr}, \vec{x}_\text{Pr})
+    \CM_{\Pred, \Pred} \gets
+    K(\vec{x}_\Pred, \vec{x}_\Pred)
   \)
   \STATE \(
-    \Theta_{\text{Tr}, \text{Pr}} \gets
-    K(\vec{x}_\text{Tr}[I], \vec{x}_\text{Pr})
+    \CM_{\Train, \Pred} \gets
+    K(\vec{x}_\Train[\I], \vec{x}_\Pred)
   \)
   \STATE \(
-    \E[\vec{y}_\text{Pr} \mid \vec{y}_\text{Tr}] \gets
-    \Theta_{\text{Pr}, \text{Tr}} \Theta_{\text{Tr}, \text{Tr}}^{-1}
-    \vec{y}_\text{Tr}[I]
+    \E[\vec{y}_\Pred \mid \vec{y}_\Train] \gets
+    \CM_{\Pred, \Train} \Theta_{\Train, \Train}^{-1}
+    \vec{y}_\Train[\I]
   \)
   \STATE \(
-    \Cov[\vec{y}_\text{Pr} \mid \vec{y}_\text{Tr}] \gets
-    \Theta_{\text{Pr}, \text{Pr}} -
-    \Theta_{\text{Tr}, \text{Pr}}^{\top} \Theta_{\text{Tr}, \text{Tr}}^{-1}
-    \Theta_{\text{Tr}, \text{Pr}}
+    \Cov[\vec{y}_\Pred \mid \vec{y}_\Train] \gets
+    \CM_{\Pred, \Pred} -
+    \CM_{\Train, \Pred}^{\top} \Theta_{\Train, \Train}^{-1}
+    \CM_{\Train, \Pred}
   \)
   \RETURN \(
-      \E[\vec{y}_\text{Pr} \mid \vec{y}_\text{Tr}],
-    \Cov[\vec{y}_\text{Pr} \mid \vec{y}_\text{Tr}]
+      \E[\vec{y}_\Pred \mid \vec{y}_\Train],
+    \Cov[\vec{y}_\Pred \mid \vec{y}_\Train]
   \)
 \end{algorithmic}
