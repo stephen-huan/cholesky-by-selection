@@ -177,6 +177,7 @@ be sparse if the ordering and sparsity pattern are chosen carefully.
 
 \paragraph{Sparsity selection by geometry}
 
+\todo{Might want to add a quick common explaining the maximin ordering here?}
 Assuming that a suitable elimination ordering is chosen, it remains to
 be decided the sparsity set for each point. Indices are often chosen
 to be the closest points to the current point by Euclidean distance
@@ -207,6 +208,7 @@ based on conditional mutual information with the point of interest.
 
 \paragraph{Conditional selection}
 
+\todo{We should start with something like "In this work we propose a conditional .." or so. That is, first make it clear that applying conditional selection is the main contribution of the pres4ent work and thenm relate it to all the other approaches / techniques.}
 The machine learning community has long developed algorithms that greedily
 select the next point to include by maximizing an information-theoretic
 objective \cite{smola2000sparse, herbrich2002fast, seeger2003fast}.
@@ -239,6 +241,7 @@ vice-versa.
 
 \paragraph{Main results}
 
+\todo{Want to start a one-dentence descrption of our contributions, something like" We propose ...". We shoudl first fully describe what we are doing (greedy selection, integration into the KL framework etc.) We want to start talking about technical things like the computational costs and the improvement only afterrward, once we have estaglished what it is that we are accelerating.}
 For a single point of interest, a direct computation of the conditional
 mutual information criterion would have a computational time complexity of \(
 \BigO(N k^4) \) to greedily select \( k \) points out of \( N \) total, but by
