@@ -39,27 +39,29 @@
 
 % REQUIRED
 \begin{abstract}
-  Dense kernel matrices resulting from pairwise evaluations of a kernel
-  function arise naturally in machine learning and statistics. Previous work
-  in constructing sparse transport maps or sparse approximate inverse Cholesky
-  factors for such matrices by minimizing Kullback-Leibler divergence recovers
-  the Vecchia approximation for Gaussian processes. However, this method for
-  Cholesky factorization usually relies only on geometry to construct the
-  sparsity pattern, ignoring the conditional effect of adding an entry. In this
-  work, we construct the sparsity pattern by leveraging a greedy selection
-  algorithm which selects points that maximize mutual information with target
-  points, conditional on all points selected previously. For selecting \( k \)
-  points out of \( N \), the naive time complexity is \( \BigO(N k^4) \), but
-  by maintaining a partial Cholesky factor we reduce this to \( \BigO(N k^2)
-  \). Furthermore, for multiple (\( m \)) targets we achieve a time complexity
+  Dense kernel matrices resulting from pairwise evaluations of a
+  kernel function arise naturally in machine learning and statistics.
+  Previous work in constructing sparse transport maps or sparse approximate
+  inverse Cholesky factors of such matrices by minimizing Kullback-Leibler
+  divergence recovers the Vecchia approximation for Gaussian processes.
+  However, these methods often rely only on geometry to construct the
+  sparsity pattern, ignoring the conditional effect of adding an entry.
+  In this work, we construct the sparsity pattern by leveraging a
+  greedy selection algorithm that maximizes mutual information with
+  target points, conditional on all points selected previously.
+  For selecting \( k \) points out of \( N \), the naive time
+  complexity is \( \BigO(N k^4) \), but by maintaining a
+  partial Cholesky factor we reduce this to \( \BigO(N k^2) \).
+  Furthermore, for multiple (\( m \)) targets we achieve a time complexity
   of \( \BigO(N k^2 + N m^2 + m^3) \) which is maintained in the setting of
-  Cholesky factorization where a selected point need not condition every
-  target. We directly apply the selection algorithm to image classification
-  and recovery of sparse Cholesky factors, improving upon \( k \)-th nearest
-  neighbors in every case. By minimizing Kullback-Leibler divergence, we apply
-  the algorithm to Cholesky factorization and Gaussian process regression,
-  improving in high dimensional geometries as well as when preconditioning
-  with the conjugate gradient.
+  aggregated Cholesky factorization where a selected point need not condition
+  every target.
+  We directly apply the selection algorithm to image
+  classification and recovery of sparse Cholesky
+  factors, improving upon \( k \)-th nearest neighbors.
+  By minimizing Kullback-Leibler divergence, we apply the
+  algorithm to Cholesky factorization, Gaussian process
+  regression, and preconditioning with the conjugate gradient.
 \end{abstract}
 
 % REQUIRED
