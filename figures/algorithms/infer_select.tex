@@ -1,7 +1,7 @@
 \begin{algorithmic}[1]
   \REQUIRE \(
-    \vec{x}_\Train, \vec{y}_\Train,
-    \vec{x}_\Pred, \K(\cdot, \cdot), s
+    X_\Train, \vec{y}_\Train,
+    X_\Pred, \K(\cdot, \cdot), s
   \)
   \ENSURE \(
       \E[\vec{y}_\Pred \mid \vec{y}_\Train],
@@ -11,15 +11,15 @@
   \STATE Compute \( \I \) using \cref{alg:select_prec} or \cref{alg:select_chol}
   \STATE \(
     \CM_{\Train, \Train} \gets
-    \K(\vec{x}_\Train[I], \vec{x}_\Train[\I])
+    \K(X_\Train[I], X_\Train[\I])
   \)
   \STATE \(
     \CM_{\Pred, \Pred} \gets
-    K(\vec{x}_\Pred, \vec{x}_\Pred)
+    K(X_\Pred, X_\Pred)
   \)
   \STATE \(
     \CM_{\Train, \Pred} \gets
-    K(\vec{x}_\Train[\I], \vec{x}_\Pred)
+    K(X_\Train[\I], X_\Pred)
   \)
   \STATE \(
     \E[\vec{y}_\Pred \mid \vec{y}_\Train] \gets

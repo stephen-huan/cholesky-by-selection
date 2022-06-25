@@ -1,14 +1,14 @@
 \begin{algorithmic}[1]
-  \REQUIRE \( \vec{x}_\Train, \vec{x}_\Pred, \K(\cdot, \cdot), s \)
+  \REQUIRE \( X_\Train, X_\Pred, \K(\cdot, \cdot), s \)
   \ENSURE \( \I \)
 
-  \STATE \( N \gets \card{\vec{x}_\Train} \)
-  \STATE \( m \gets \card{\vec{x}_\Pred} \)
+  \STATE \( N \gets \card{X_\Train} \)
+  \STATE \( m \gets \card{X_\Pred} \)
   \STATE \(
-    \vec{x} \gets
+    X \gets
     \begin{pmatrix}
-      \vec{x}_\Train \\
-      \vec{x}_\Pred
+      X_\Train \\
+      X_\Pred
     \end{pmatrix}
   \)
   \STATE \( \I \gets \emptyset \)
@@ -16,15 +16,15 @@
   \STATE \( \CM_{\I, \I}^{-1} \gets \Reals^{0 \times 0} \)
   \STATE \(
     \CM_{\Pred, \Pred \mid \I}^{-1} \gets
-    \K(\vec{x}_\Pred, \vec{x}_\Pred)
+    \K(X_\Pred, X_\Pred)
   \)
   \STATE \(
     \CM_{\Train, \Pred \mid \I} \gets
-    \K(\vec{x}_\Train, \vec{x}_\Pred)
+    \K(X_\Train, X_\Pred)
   \)
   \STATE \(
     \diag(\CM_{\Train, \Train \mid \I}) \gets
-    \diag(\K(\vec{x}_\Train, \vec{x}_\Train))
+    \diag(\K(X_\Train, X_\Train))
   \)
   \STATE \(
     \diag(\CM_{\Train, \Train \mid \I, \Pred}) \gets
@@ -43,10 +43,7 @@
     \)
     \STATE \( \I \gets \I \cup \{ k \} \)
     \STATE \( -\I \gets -\I - \{ k \} \)
-    \STATE \(
-      \vec{v} \gets \CM_{\I, \I}^{-1}
-      \K(\vec{x}_\Train[\I - \{ k \}], \vec{x}_\Train[k])
-    \)
+    \STATE \( \vec{v} \gets \CM_{\I, \I}^{-1} \K(X_{\I - \{ k \}}, X_k) \)
     \STATE \(
       \CM_{\I, \I}^{-1} \gets
       \begin{pmatrix}
@@ -66,15 +63,16 @@
       \CM_{\Pred, \Pred \mid \I}^{-1} +
       \frac{\vec{w} \vec{w}^{\top}}{\CM_{k, k \mid \I, \Pred}}
     \)
+    \STATE \( \CM_{:, k} \gets \K(X, X_k) \)
     \STATE \(
       \CM_{:, k \mid \I} \gets
-        \K(\vec{x}, \vec{x}_k) -
-        \K(\vec{x}, \vec{x}_{\I - \{ k \}}) \vec{v}
+      \CM_{:, k} -
+      \K(X, X_{\I - \{ k \}}) \vec{v}
     \)
     \STATE \(
-        \CM_{:, k \mid \I, \Pred} \gets
-        \CM_{:, k \mid \I} -
-        \CM_{:, \Pred \mid \I} \vec{w}
+      \CM_{:, k \mid \I, \Pred} \gets
+      \CM_{:, k \mid \I} -
+      \CM_{:, \Pred \mid \I} \vec{w}
     \)
     \STATE \(
       \vec{u} \gets

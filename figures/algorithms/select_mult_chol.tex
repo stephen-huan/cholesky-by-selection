@@ -1,14 +1,14 @@
 \begin{algorithmic}[1]
-  \REQUIRE \( \vec{x}_\Train, \vec{x}_\Pred, \K(\cdot, \cdot), s \)
+  \REQUIRE \( X_\Train, X_\Pred, \K(\cdot, \cdot), s \)
   \ENSURE \( \I \)
 
-  \STATE \( N \gets \card{\vec{x}_\Train} \)
-  \STATE \( m \gets \card{\vec{x}_\Pred} \)
+  \STATE \( N \gets \card{X_\Train} \)
+  \STATE \( m \gets \card{X_\Pred} \)
   \STATE \(
-    \vec{x} \gets
+    X \gets
     \begin{pmatrix}
-      \vec{x}_\Train \\
-      \vec{x}_\Pred
+      X_\Train \\
+      X_\Pred
     \end{pmatrix}
   \)
   \STATE \( \I \gets \emptyset \)
@@ -17,7 +17,7 @@
   \STATE \( L_\Pred \gets \vec{0}^{(N + m) \times (s + m)} \)
   \STATE \(
     \diag(\CM_{\Train, \Train \mid \I}) \gets
-    \diag(K(\vec{x}_\Train, \vec{x}_\Train))
+    \diag(K(X_\Train, X_\Train))
   \)
   \STATE \(
     \diag(\CM_{\Train, \Train \mid \I, \Pred}) \gets

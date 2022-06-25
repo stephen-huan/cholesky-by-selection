@@ -360,8 +360,8 @@ where the inputs \( \vec{x}_i \in \Reals^D \) are collected in the matrix
 \( X_\Train = [\vec{x}_1, \dotsc, \vec{x}_N]^{\top} \in \Reals^{N \times
 D} \) and the measurements at those points are collected in the vector \(
 \vec{y}_\Train = [y_1, \dotsc, y_N]^{\top} \in \Reals^N \), we wish to
-predict the values at \( M \) new points \( X_\Pred \in \Reals^{M \times
-D} \) for which \( \vec{y}_\Pred \in \Reals^M \) is unknown.
+predict the values at \( M \) new points \( X_\Pred \in \Reals^{m \times
+D} \) for which \( \vec{y}_\Pred \in \Reals^m \) is unknown.
 We assume the function \( f(\vec{x}) \) that maps input points to their
 outputs is distributed according to a Gaussian process with zero mean
 function, \( f(\vec{x}) \sim \GP(\vec{0}, \K(\vec{x}, \vec{x}')) \).
@@ -2414,7 +2414,7 @@ to the asymmetry between the null and alternative hypotheses.
 \section{Algorithms}
 
 \begin{algorithm}
-  \caption{Direct Gaussian process regression by selection}
+  \caption{Direct sparse Gaussian process regression by selection}
   \label{alg:infer_select}
   \input{figures/algorithms/infer_select.tex}
 \end{algorithm}

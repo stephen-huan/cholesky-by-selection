@@ -1,11 +1,11 @@
 \begin{algorithmic}[1]
-  \REQUIRE \( \vec{x}, \K(\cdot, \cdot), i, k, L, \diag(\CM) \)
+  \REQUIRE \( X, \K(\cdot, \cdot), i, k, L, \diag(\CM) \)
   \ENSURE \( L_{:, i}, \diag(\CM_{\mid k}) \)
 
   \STATE \( N \gets \card{\diag(\CM)} \)
   \STATE \(
     L_{:, i} \gets
-    \K(\vec{x}, \vec{x}_k) - L_{:, :i - 1} L_{k, :i - 1}^{\top}
+    \K(X, X_k) - L_{:, :i - 1} L_{k, :i - 1}^{\top}
   \)
   \STATE \( L_{:, i} \gets \frac{L{:, i}}{\sqrt{L_{k, i}}} \)
   \FOR{\( j \in \{ 1, \dotsc, N \} \)}

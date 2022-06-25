@@ -1,13 +1,13 @@
 \begin{algorithmic}[1]
-  \REQUIRE \( \vec{x}_\Train, \vec{x}_\Pred, \K(\cdot, \cdot), s \)
+  \REQUIRE \( X_\Train, X_\Pred, \K(\cdot, \cdot), s \)
   \ENSURE \( \I \)
 
-  \STATE \( N \gets \lvert \vec{x}_\Train \rvert \)
+  \STATE \( N \gets \lvert X_\Train \rvert \)
   \STATE \(
-    \vec{x} \gets
+    X \gets
     \begin{pmatrix}
-      \vec{x}_\Train \\
-      \vec{x}_\Pred
+      X_\Train \\
+      X_\Pred
     \end{pmatrix}
   \)
   \STATE \( \I \gets \emptyset \)
@@ -15,11 +15,11 @@
   \STATE \( L \gets \vec{0}^{(N + 1) \times s} \)
   \STATE \(
     \CM_{\Train, \Pred \mid \I} \gets
-    \K(\vec{x}_\Train, \vec{x}_\Pred)
+    \K(X_\Train, X_\Pred)
   \)
   \STATE \(
     \diag(\CM_{\Train, \Train \mid \I}) \gets
-    \diag(\K(\vec{x}_\Train, \vec{x}_\Train))
+    \diag(\K(X_\Train, X_\Train))
   \)
   \WHILE{\( \card{-\I} > 0 \) and \( \card{\I} < s \)}
     \STATE \(
@@ -29,10 +29,8 @@
     \STATE \( \I \gets \I \cup \{ k \} \)
     \STATE \( -\I \gets -\I - \{ k \} \)
     \STATE \( i \gets \card{\I} \)
-    \STATE \(
-      L_{:, i} \gets
-      \K(\vec{x}, \vec{x}_k) - L_{:, :i - 1} L_{k, :i - 1}^{\top}
-    \)
+    \STATE \( L_{:, i} \gets \K(X, X_k) \)
+    \STATE \( L_{:, i} \gets L_{:, i} - L_{:, :i - 1} L_{k, :i - 1}^{\top} \)
     \STATE \( L_{:, i} \gets \frac{L{:, i}}{\sqrt{L_{k, i}}} \)
     \FOR{\( j \in -\I \)}
       \STATE \(
@@ -43,7 +41,7 @@
       \STATE \(
         \CM_{j, \Pred \mid \I} \gets
         \CM_{j, \Pred \mid \I} -
-        L_{j, i} L_{N, i}
+        L_{j, i} L_{N + 1, i}
       \)
     \ENDFOR
   \ENDWHILE
