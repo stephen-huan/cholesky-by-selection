@@ -1275,11 +1275,18 @@ USA.
 \subsection{Updating precision after insertion}
 \label{app:prec_insert}
 
-Assuming we have the precision of the selected entries, \( \CM_{\I, \I}^{-1}
-\), we wish to account for adding a new index \( k \) to \( \I \), that is, we
-wish to compute \( \CM_{\I \cup \{ k \}, \I \cup \{ k \}}^{-1} \), adding a new
-row and column to \( \CM_{\I, \I}^{-1} \). In order to update efficiently, we
-block the matrix to separate new and old information.
+Assuming we have the precision matrix \( \CM_{1, 1}^{-1} \), we wish
+to compute the precision of the covariance \( \CM_{1, 1} \) with a
+new row and column added to it, that is, compute \( \CM^{-1} \) for
+\(
+  \CM =
+    \begin{pmatrix}
+      \CM_{1, 1} & \CM_{1, 2} \\
+      \CM_{2, 1} & \CM_{2, 2}
+    \end{pmatrix}
+\)
+where \( \CM_{2, 1} = \CM_{1, 2}^{\top} \) is a column vector and \(
+\CM_{2, 2} \) is a scalar, assuming \( \CM \) is positive-definite.
 \begin{align}
   \shortintertext{Using the same block \( L D
     L^{\top} \) factorization as \cref{eq:chol_schur},}
@@ -1355,69 +1362,35 @@ Note that the bulk of the update is a rank-one update to \( \CM_{1,
 \subsection{Updating precision after marginalization}
 \label{app:prec_delete}
 
-Suppose we have the precision \( \CM^{-1} \) and wish to compute the
-precision of the marginalized covariance after ignoring an index \( k \).
-That is, we wish to compute the inverse of a matrix after deleting a row and
-column, given the inverse of the original matrix. We could use the result
-in \cref{app:prec_insert} by ``reading'' the update backwards. That is, we
-could identify \( \CM_{2, 2 \mid 1}^{-1} \) from \( (\CM^{-1})_{kk}
-\) and \( \vec{v} = \CM_{1, 1}^{-1} \CM_{1, 2} \) from \( -
-\frac{(\CM^{-1})_{-k, k}}{\CM_{2, 2 \mid 1}^{-1}} \) where \( -k \)
-denotes all rows excluding the \( k \)th row. We can then revert the rank-one
-update by subtracting out the update, computing \( \CM_{-k, -k}^{-1} =
-(\CM^{-1})_{-k, -k} - \CM_{kk \mid I}^{-1} \vec{v} \vec{v}^{\top} \).
-However, a more intuitive derivation relies on the fact that marginalization
-in covariance is conditioning in precision. Using \cref{eq:inverse_cond},
-we see that \( \CM_{-k, -k}^{-1} = (\CM^{-1})_{-k, -k \mid k} \), or
-the precision conditional on the deleted entry. By \cref{eq:cond_cov}, we
-immediately obtain the equivalent update
+Suppose we have the precision \( \CM^{-1} \) and wish to compute the precision
+of the marginalized covariance \( \CM \) after ignoring an index \( k \).
+That is, we wish to compute the inverse of a matrix after deleting
+a row and column, given the inverse of the original matrix.
+We could use the result in \cref{app:prec_insert}
+by ``reading'' the update backwards.
+That is, we could identify \( \CM_{2, 2 \mid 1}^{-1} \) from \(
+(\CM^{-1})_{k, k} \) and \( \vec{v} = \CM_{1, 1}^{-1} \CM_{1, 2} \)
+from \( - \frac{(\CM^{-1})_{-k, k}}{\CM_{2, 2 \mid 1}^{-1}} \)
+where \( -k \) denotes all rows excluding the \( k \)th row.
+We can then revert the rank-one update by subtracting out
+the update, computing \( \CM_{-k, -k}^{-1} = (\CM^{-1})_{-k,
+-k} - \CM_{k, k \mid I}^{-1} \vec{v} \vec{v}^{\top} \).
+However, a more intuitive derivation relies on the fact that
+marginalization in covariance is conditioning in precision.
+Using \cref{eq:inverse_cond}, we see that \(
+\CM_{-k, -k}^{-1} = (\CM^{-1})_{-k, -k \mid k} \),
+or the precision conditional on the deleted entry.
+By \cref{eq:cond_cov}, we immediately obtain the equivalent update
 \begin{align}
   (\CM^{-1})_{-k, -k \mid k} &= \CM^{-1}_{-k, -k} -
     \frac{(\CM^{-1})_{-k, k}
-          (\CM^{-1})_{-k, k}^{\top}}{(\CM^{-1})_{kk}}
+          (\CM^{-1})_{-k, k}^{\top}}{(\CM^{-1})_{k, k}}
 \end{align}
-Since this is a rank-one update to the precision \( \CM^{-1} \), this
-can be computed in \\ \( \BigO(\text{\# rows}(\CM^{-1}))^2 \).
+Since this is a rank-one update to the precision \( \CM^{-1} \),
+this can be computed in \( \BigO(\text{\# rows}(\CM^{-1}))^2 \).
 
-\Stodo{this is not used in the paper but is nice to know +
-used in the sensor placement}
-
-\subsection{Updating the log determinant after a rank-one downdate}
-\label{app:logdet_downdate}
-
-Assuming we already have the log determinant of the covariance matrix of the
-prediction points conditional on the selected entries, \( \logdet(\CM_{\Pred,
-\Pred \mid \I}) \), we wish to compute the log determinant after we add an
-index \( k \) to \( I \), that is, to compute \( \logdet(\CM_{\Pred, \Pred
-\mid \I \cup \{ k \}}) \).
-\begin{align}
-  \shortintertext{From \cref{eq:cond_select}, selecting a
-    new point is a rank-one downdate on the covariance matrix.}
-  \logdet \left ( \CM_{\Pred, \Pred \mid \I \cup \{ k \}} \right )
-  &= \logdet \left ( \CM_{\Pred, \Pred \mid \I} -
-       \frac{\CM_{\Pred, k \mid \I} \CM_{\Pred, k \mid \I}^{\top}}
-            {\CM_{k, k \mid \I}}
-     \right ) \\
-  \shortintertext{Using the matrix determinant lemma,}
-  &= \logdet \left ( \CM_{\Pred, \Pred \mid \I} \right ) +
-     \log \left ( 1 -
-       \frac{\CM_{\Pred, k \mid \I}^{\top} \CM_{\Pred, \Pred \mid \I}^{-1}
-             \CM_{\Pred, k \mid \I}
-            }{\CM_{k, k \mid \I}}
-     \right )
-  \shortintertext{Focusing on the second term, we can turn
-    the quadratic form into condtioning.}
-  &= \logdet \left ( \CM_{\Pred, \Pred \mid \I} \right ) +
-     \log \left (
-       \frac{\CM_{k, k \mid \I} -
-             \CM_{k, \Pred \mid \I} \CM_{\Pred, \Pred \mid \I}^{-1}
-             \CM_{\Pred, k \mid \I}
-            }{\CM_{k, k \mid \I}}
-     \right )
-  \shortintertext{By the quotient rule, we combine the conditioning.}
-  &= \logdet \left ( \CM_{\Pred, \Pred \mid \I} \right ) +
-     \log \left ( \frac{\CM_{k, k \mid \I, \Pred}}{\CM_{k, k \mid \I}} \right )
-\end{align}
+\Stodo{this is not used in the paper but is
+nice to know + used in the sensor placement}
 
 \subsection{Updating precision after conditioning}
 \label{app:prec_cond}
@@ -1426,8 +1399,9 @@ Assuming we have the precision matrix of the prediction points conditional on
 the selected entries, \( \CM_{\Pred, \Pred \mid \I}^{-1} \), we want to take
 into account selecting an index \( k \), or to compute \( \CM_{\Pred, \Pred
 \mid \I \cup \{ k \}}^{-1} \), which is a rank-one update to the covariance
-(but not necessarily the precision) from \cref{eq:obj_gp_mult}. We can directly
-apply the Sherman–Morrison–Woodbury formula which states that:
+(but not necessarily the precision) from \cref{eq:obj_gp_mult}.
+We can directly apply the Sherman–Morrison–Woodbury
+formula which states that:
 \begin{align}
   \CM_{1, 1 \mid 2}^{-1} &= \CM_{1, 1}^{-1} +
     \left (\CM_{1, 1}^{-1} \CM_{1, 2} \right ) \CM_{2, 2 \mid 1}^{-1}
@@ -1461,6 +1435,43 @@ apply the Sherman–Morrison–Woodbury formula which states that:
 which is the update in line 18 of \cref{alg:select_mult_prec}.
 Since the update is a rank-one update, it can be
 computed in \( \BigO(\card{\Pred}^2) = \BigO(m^2) \).
+
+\subsection{Updating the log determinant after a rank-one downdate}
+\label{app:logdet_downdate}
+
+Assuming we already have the log determinant of the covariance matrix of the
+prediction points conditional on the selected entries, \( \logdet(\CM_{\Pred,
+\Pred \mid \I}) \), we wish to compute the log determinant after we add an
+index \( k \) to \( \I \), that is, to compute \( \logdet(\CM_{\Pred, \Pred
+\mid \I \cup \{ k \}}) \).
+\begin{align}
+  \shortintertext{From \cref{eq:cond_select}, selecting a
+    new point is a rank-one downdate on the covariance matrix.}
+  \logdet \left ( \CM_{\Pred, \Pred \mid \I \cup \{ k \}} \right )
+  &= \logdet \left ( \CM_{\Pred, \Pred \mid \I} -
+       \frac{\CM_{\Pred, k \mid \I} \CM_{\Pred, k \mid \I}^{\top}}
+            {\CM_{k, k \mid \I}}
+     \right ) \\
+  \shortintertext{Using the matrix determinant lemma,}
+  &= \logdet \left ( \CM_{\Pred, \Pred \mid \I} \right ) +
+     \log \left ( 1 -
+       \frac{\CM_{\Pred, k \mid \I}^{\top} \CM_{\Pred, \Pred \mid \I}^{-1}
+             \CM_{\Pred, k \mid \I}
+            }{\CM_{k, k \mid \I}}
+     \right )
+  \shortintertext{Focusing on the second term, we can turn
+    the quadratic form into condtioning.}
+  &= \logdet \left ( \CM_{\Pred, \Pred \mid \I} \right ) +
+     \log \left (
+       \frac{\CM_{k, k \mid \I} -
+             \CM_{k, \Pred \mid \I} \CM_{\Pred, \Pred \mid \I}^{-1}
+             \CM_{\Pred, k \mid \I}
+            }{\CM_{k, k \mid \I}}
+     \right )
+  \shortintertext{By the quotient rule, we combine the conditioning.}
+  &= \logdet \left ( \CM_{\Pred, \Pred \mid \I} \right ) +
+     \log \left ( \frac{\CM_{k, k \mid \I, \Pred}}{\CM_{k, k \mid \I}} \right )
+\end{align}
 
 \subsection{Updating a Cholesky factor after a rank-one downdate}
 \label{app:chol_downdate}
