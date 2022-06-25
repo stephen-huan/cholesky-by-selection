@@ -2077,33 +2077,23 @@ a nearby point decreases the correlation for far away points.
 
 \section{Derivations in KL-minimization}
 
-\subsection{Linear-algebraic formulation of objective}
+\subsection{KL divergence of two multivariate Gaussians}
 \label{app:kl_obj}
 
-We want to show that the KL divergence between two multivariate
-Gaussians centered at \( \vec{0} \) with covariance matrices
-\( \CM_1 \) and \( \CM_2 \) can be written as
+We want to show that the KL divergence between \(
+\N(\vec{0}, \CM_1) \) and \( \N(\vec{0}, \CM_2) \) for \(
+\CM_1, \CM_2 \in \Reals^{N \times N} \) can be written
 \begin{align}
-  2 \mathbb{D}_{\text{KL}}
-  \left (
-    \mathcal{N}(\vec{0}, \CM_1) \, \Big \| \,
-    \mathcal{N}(\vec{0}, \CM_2)
-  \right )
-  &= \trace(\CM_2^{-1} \CM_1) + \logdet(\CM_2) - \logdet(\CM_1) - N
-  \shortintertext{where \( \CM_1 \) and \( \CM_2 \) are both
-    of size \( N \times N \). Recall that the log density \( \log
-    \pi(\vec{x}) \) for \( \vec{x} \sim \mathcal{N}(\vec{0}, \CM) \) is}
-  \log \pi(\vec{x}) &= -\frac{1}{2} (N \log(2 \pi) + \logdet(\CM) +
+  2 \KL*{\N(\vec{0}, \CM_1)}{\N(\vec{0}, \CM_2)} &=
+    \trace(\CM_2^{-1} \CM_1) + \logdet(\CM_2) - \logdet(\CM_1) - N
+  \shortintertext{Recall that the log density \( \log
+    \p(\vec{x}) \) for \( \vec{x} \sim \N(\vec{0}, \CM) \) is}
+  \log \p(\vec{x}) &= -\frac{1}{2} (N \log(2 \pi) + \logdet(\CM) +
     \vec{x}^{\top} \CM^{-1} \vec{x})
-  \shortintertext{By the definition of KL divergence,}
-  2 \mathbb{D}_{\text{KL}}
-  \left (
-    \mathcal{N}(\vec{0}, \CM_1) \, \Big \| \,
-    \mathcal{N}(\vec{0}, \CM_2)
-  \right ) &= 2 \E_P[\log P - \log Q]
-  \shortintertext{where \( P \) and \( Q \) are the corresponding
-    densities for \( \CM_1 \) and \( \CM_2 \) respectively,
-    and \( \E_P \) denotes expectation under \( P \).}
+  \shortintertext{If \( P \) and \( Q \) are the respective densities for
+    \( \CM_1 \) and \( \CM_2 \), then by definition}
+  2 \KL*{\N(\vec{0}, \CM_1)}{\N(\vec{0}, \CM_2)} &= 2 \E_P[\log P - \log Q]
+  \shortintertext{where \( \E_P \) denotes expectation under \( P \).}
   &= 2 \E_P[-\frac{1}{2} (N \log(2 \pi) + \logdet(\CM_1) +
             \vec{x}^{\top} \CM_1^{-1} \vec{x}) \\
   \nonumber
@@ -2141,25 +2131,21 @@ because the trace of a scalar is a scalar, and the linearity of trace.
   && \text{linearity of expectation} \\
   &= \trace((\CM_2^{-1} - \CM_1^{-1}) \CM_1)
   && \text{\( \CM_1 = \E_P[\vec{x} \vec{x}^{\top} \)]} \\
-  &= \trace(\CM_2^{-1} \CM_1 - I)
+  &= \trace(\CM_2^{-1} \CM_1 - \Id_N)
   && \text{multiplying} \\
-  &= \trace(\CM_2^{-1} \CM_1) - \trace(I)
+  &= \trace(\CM_2^{-1} \CM_1) - \trace(\Id_N)
   && \text{linearity of trace} \\
   &= \trace(\CM_2^{-1} \CM_1) - N
   \label{eq:kl_after_trace}
   && \text{trace of \( N \times N \) identity \( N \)}
 \end{align}
-Combining \cref{eq:kl_after_trace} with \cref{eq:kl_after_logdet}, we obtain
+Combining \cref{eq:kl_after_trace} with
+\cref{eq:kl_after_logdet}, we obtain the desired result
 \begin{align}
   \nonumber
-  2 \mathbb{D}_{\text{KL}}
-  \left (
-    \mathcal{N}(\vec{0}, \CM_1) \, \Big \| \,
-    \mathcal{N}(\vec{0}, \CM_2)
-  \right )
-  &= \trace(\CM_2^{-1} \CM_1) + \logdet(\CM_2) - \logdet(\CM_1) - N
+  2 \KL*{\N(\vec{0}, \CM_1)}{\N(\vec{0}, \CM_2)} &=
+    \trace(\CM_2^{-1} \CM_1) + \logdet(\CM_2) - \logdet(\CM_1) - N
 \end{align}
-as desired.
 
 \subsection{Reduction for optimal factor}
 \label{app:kl_L}
@@ -2168,12 +2154,8 @@ We wish to compute the KL divergence between \( \CM \) and the Cholesky
 factor \( L \) computed according to \cref{thm:L}. From \cref{eq:kl},
 \begin{align}
   \label{eq:kl_L}
-  2 \mathbb{D}_{\text{KL}}
-  \left (
-    \mathcal{N}(\vec{0}, \CM) \, \Big \| \,
-    \mathcal{N}(\vec{0}, (L L^{\top})^{-1})
-  \right )
-  &= \trace(L L^{\top} \CM) - \logdet(L L^{\top}) - \logdet(\CM) - N
+  2 \KL*{\N(\vec{0}, \CM)}{\N(\vec{0}, (L L^{\top})^{-1})} &=
+    \trace(L L^{\top} \CM) - \logdet(L L^{\top}) - \logdet(\CM) - N
   \shortintertext{Ignoring terms not depending on \( L \),}
   &= \trace(L L^{\top} \CM) - \logdet(L L^{\top})
   \shortintertext{By the cyclic property of trace,}
@@ -2202,15 +2184,11 @@ factor \( L \) computed according to \cref{thm:L}. From \cref{eq:kl},
 \begin{align}
   \shortintertext{Using \( N \) for \( \trace(L
     L^{\top} \CM) \) in \cref{eq:kl_L},}
-  2 \mathbb{D}_{\text{KL}}
-  \left (
-    \mathcal{N}(\vec{0}, \CM) \, \Big \| \,
-    \mathcal{N}(\vec{0}, (L L^{\top})^{-1})
-  \right )
-  &= -\logdet(L L^{\top}) - \logdet(\CM)
+  2 \KL*{\N(\vec{0}, \CM)}{\N(\vec{0}, (L L^{\top})^{-1})} &=
+    -\logdet(L L^{\top}) - \logdet(\CM)
   \shortintertext{\( L^{\top} \) has the same log determinant
     as \( L \), and because \( L \) is lower triangular, its
-    log determinant is just the sum of its diagonal entries:}
+    log determinant is the sum of its diagonal entries:}
   &= -2 \sum_{i = 1}^N \left [ \log(L_{ii}) \right ] - \logdet(\CM)
   \shortintertext{Plugging \cref{eq:L_col} for the diagonal entries,}
   &= -\sum_{i = 1}^N
@@ -2219,20 +2197,23 @@ factor \( L \) computed according to \cref{thm:L}. From \cref{eq:kl},
   \shortintertext{Bringing the negative inside,}
   &= \sum_{i = 1}^N
     \left [
-      \log \left (
+      \log
+      \left (
         (\vec{e}_1^{\top} \CM_{s_i, s_i}^{-1} \vec{e}_1)^{-1}
       \right )
     \right ]
     - \logdet(\CM)
 \end{align}
-So minimizing the KL divergence (given optimal \( L \)) corresponds to
-minimizing the sum of the inverse of the diagonal entries. We can give
-an intuitive view of this result by making use of \cref{eq:L_cond_var}
-and expanding the log determinant by the chain rule \cref{eq:det_chain}.
+So minimizing the KL divergence (given optimal \( L \)) corresponds
+to minimizing the sum of the inverse of the diagonal entries.
+We can give an intuitive view of this result by making
+use of \cref{eq:L_cond_var} and expanding the log
+determinant by the chain rule \cref{eq:det_chain}.
 \begin{align}
   \sum_{i = 1}^N
     \left [
-      \log \left (
+      \log
+      \left (
         (\vec{e}_1^{\top} \CM_{s_i, s_i}^{-1} \vec{e}_1)^{-1}
       \right )
     \right ]
@@ -2253,29 +2234,31 @@ and expanding the log determinant by the chain rule \cref{eq:det_chain}.
     \right ]
 \end{align}
 We can view this sum as the accumulated \emph{difference} in prediction
-error for a series of prediction problems, where each prediction problem is
-to predict the value of the \( i \)th variable given variables \( i + 1, i
-+ 2, \dotsc, N \). The left term \( \log \left ( \CM_{ii \mid s_i - \{ i
-\}} \right ) \) is restricted to only using those variables in the sparsity
-pattern \( s_i \), while the right term \( \log \left ( \CM_{ii \mid i +
-1:} \right ) \) is able to use every variable after \( i \). The left term
-will necessarily have greater variance than the right, and the goal is to
-minimize the accumulated deviation. Thus, the KL divergence gives a natural
-way to measure the quality of a sparsity pattern as a good sparsity pattern
-should maintain predictive accuracy while subject to the constraint that
-some variables have no interaction with others. This interpretation is also
-given in \cite{katzfuss2022scalable}.
+error for a series of prediction problems, where each prediction problem
+is to predict the value of the \( i \)th variable given variables \( i +
+1, i + 2, \dotsc, N \).
+The left term \( \log \left ( \CM_{ii \mid s_i - \{ i \}} \right ) \) is
+restricted to only using those variables in the sparsity pattern \( s_i
+\), while the right term \( \log \left ( \CM_{ii \mid i + 1:} \right ) \)
+is able to use every variable after \( i \).
+The left term will necessarily have greater variance than the
+right, and the goal is to minimize the accumulated deviation.
+Thus, the KL divergence gives a natural way to measure the quality of a
+sparsity pattern as a good sparsity pattern should maintain predictive
+accuracy while subject to the constraint that some variables have no
+interaction with others.
+This interpretation is also given in \cite{katzfuss2022scalable}.
 
-Another interpretation is from \cite{bartels2022adaptive}, where they view
-the full prediction problems as the log likelihood of the variables. Under
-this interpretation, conditional independence (through the screening effect)
-corresponds to a near-constant value of \( \log(\CM_{ii \mid i + 1:}) \),
-which results in a linear plot of log-likelihood with increasing \( N \).
+Another interpretation is from \cite{bartels2022adaptive}, where they
+view the full prediction problems as the log likelihood of the variables.
+Under this interpretation, conditional independence (through the screening
+effect) corresponds to a near-constant value of \( \log(\CM_{ii \mid i + 1:})
+\), which results in a linear plot of log-likelihood with increasing \( N \).
 
-Because the KL divergence is not symmetric, it matters which way the
-KL divergence is taken as well as whether both matrices have been
-inverted or not. This seems to imply that there are four possible
-ways to compare two covariance matrices. However, note that
+Because the KL divergence is not symmetric, it matters which way the KL
+divergence is taken as well as whether both matrices have been inverted or not.
+This seems to imply that there are four possible ways
+to compare two covariance matrices. However, note that
 \begin{align}
 \mathbb{D}_{\text{KL}}
   \left (
@@ -2289,12 +2272,13 @@ ways to compare two covariance matrices. However, note that
   \right )
 \end{align}
 from \cref{eq:kl} and the cyclic property of trace, so inverting both
-matrices implicitly reverses the order of the KL divergence. There are
-therefore only two possible ways to compare the two, which depends on
-the order of the arguments. A statistical interpretation comes from the
-fact that the KL divergence can be interpreted as the likelihood-ratio
-test, so the non-symmetry of the order of the arguments corresponds to
-the asymmetry between the null and alternative hypotheses.
+matrices implicitly reverses the order of the KL divergence.
+There are therefore only two possible ways to compare
+the two, which depends on the order of the arguments.
+A statistical interpretation comes from the fact that the KL divergence
+can be interpreted as the likelihood-ratio test, so the non-symmetry of
+the order of the arguments corresponds to the asymmetry between the null
+and alternative hypotheses.
 
 \section{Algorithms}
 
