@@ -291,11 +291,11 @@ The remainder of the paper is organized as follows.
   \centering
   \input{figures/screening/uncond.tex}%
   \input{figures/screening/cond.tex}
-  \caption{An illustration of the screening effect with the Mat{\'e}rn
-    kernel with a length scale of 1 and smoothness \( \nu = \frac{5}{2}
-    \). The first figure shows the unconditional covariance with the point
-    at (0, 0). The second figure shows the conditional covariance after
-    conditioning on the four points in orange.}
+  \caption{An illustration of the screening effect with the Mat{\'e}rn kernel
+    with length scale \( \ell = 1 \) and smoothness \( \nu = \frac{5}{2} \).
+    The first figure shows the unconditional covariance with the point at (0,
+    0). The second figure shows the conditional covariance after conditioning
+    on the four points in orange.}
   \label{fig:screen}
 \end{figure}
 
@@ -309,9 +309,9 @@ The remainder of the paper is organized as follows.
     or the point to make a prediction at, and the \textcolor{seagreen}{green}
     points are the \( k \) \textcolor{seagreen}{selected} points. The
     \textcolor{rust}{red} line is the \textcolor{rust}{conditional mean}
-    \( \mu \), conditional on the \( k \) selected points, and the \( \mu
-    - 2 \sigma \) to \( \mu + 2 \sigma \) confidence interval is shaded
-    for the conditional variance \( \sigma^2 \).}
+    \( \mu \), conditional on the \( k \) selected points, and the \(
+    \mu - 2 \std \) to \( \mu + 2 \std \) confidence interval is shaded
+    for the conditional variance \( \var \).}
   \label{fig:select}
 \end{figure}
 
@@ -328,11 +328,277 @@ The remainder of the paper is organized as follows.
   \label{fig:select_chol}
 \end{figure}
 
-\Ftodo{"specific" and "intuitively" are fluff, meaning that they
+\Ftodo{``specific'' and ``intuitively'' are fluff, meaning that they
 don't really add information. In order to achieve crisp, high-quality
-academic writing, it is important to try to those fluff words as much as
-possible. It's normal to add them out of reflex initially, so it requires
-active postprocessing.}
+academic writing, it is important to try to those fluff words as much
+as possible. It's normal to add them out of reflex initially, so it
+requires active postprocessing.}
+
+\section{Sparse Cholesky factorization by KL-minimization}
+\label{sec:chol}
+
+Let \( \Theta \in \Reals^{N \times N} \) be a positive-definite matrix.
+We view \( \Theta \) as the covariance matrix of a Gaussian process;
+we say a function \( f(\vec{x}) \) is distributed according to a
+Gaussian process prior with mean function \( \mean(\vec{x}) \) and
+covariance function or kernel function \( \K(\vec{x}, \vec{x}')
+\), if for any finite set of points \( X = \{ \vec{x}_i \}^N_{i =
+1} \), \( f(X) \sim \N(\vec{\mean}, \CM) \), where \( \mean_i =
+\mu(\vec{x}_i) \) and \( \CM_{ij} = \K(\vec{x}_i, \vec{x}_j) \).
+\begin{align}
+  f(\vec{x}) &\sim \GP(\mean(\vec{x}), \K(\vec{x}, \vec{x}'))
+\end{align}
+For any positive-definite matrix \( \CM \) there exists a set of points \( X
+\) and kernel function \( \K \) such that \( \CM = \K(X, X) \), and for any \(
+X \) the matrix \( \K(X, X) \) is positive-definite, so we freely move between
+positive-definite matrices and point sets with kernel functions.
+
+In many applications of Gaussian processes we wish
+to infer unknown data given a training dataset.
+Given the dataset \( \mathcal{D} = \{ (\vec{x}_i, y_i) \}^N_{i = 1} \)
+where the inputs \( \vec{x}_i \in \Reals^D \) are collected in the matrix
+\( X_\Train = [\vec{x}_1, \dotsc, \vec{x}_N]^{\top} \in \Reals^{N \times
+D} \) and the measurements at those points are collected in the vector \(
+\vec{y}_\Train = [y_1, \dotsc, y_N]^{\top} \in \Reals^N \), we wish to
+predict the values at \( M \) new points \( X_\Pred \in \Reals^{M \times
+D} \) for which \( \vec{y}_\Pred \in \Reals^M \) is unknown.
+We assume the function \( f(\vec{x}) \) that maps input points to their
+outputs is distributed according to a Gaussian process with zero mean
+function, \( f(\vec{x}) \sim \GP(\vec{0}, \K(\vec{x}, \vec{x}')) \).
+From the distribution of \( f(\vec{x}) \), the joint distribution
+of training and testing data \( \vec{y} \) has covariance
+\(
+  \CM =
+  \begin{pmatrix}
+    \CM_{\Train, \Train} & \CM_{\Train, \Pred} \\
+    \CM_{\Pred, \Train} & \CM_{\Pred, \Pred}
+  \end{pmatrix}
+\)
+where \( \CM_{\I, \J} \defeq \K(X_\I, X_\J) \) for index sets \( \I, \J \).
+In order to make predictions at \( X_\Pred \), we condition the desired
+prediction \( \vec{y}_\Pred \) on the known data \( \vec{y}_\Train \).
+For Gaussian processes, the closed-form posterior distribution is
+\begin{align}
+  \label{eq:cond_mean}
+  \E[\vec{y}_\Pred \mid \vec{y}_\Train] &=
+    \vec{\mean}_\Pred +
+    \CM_{\Pred, \Train} \CM_{\Train, \Train}^{-1}
+    (\vec{y}_\Train - \vec{\mean}_\Train) \\
+  \label{eq:cond_cov}
+  \Cov[\vec{y}_\Pred \mid \vec{y}_\Train] &=
+    \CM_{\Pred, \Pred} -
+    \CM_{\Pred, \Train} \CM_{\Train, \Train}^{-1}
+    \CM_{\Train, \Pred}
+  \shortintertext{For brevity of notation, we
+    denote the conditional covariance matrix as}
+  \label{eq:cond_cov_notation}
+  \CM_{\I, \J \mid \V} &\defeq
+    \CM_{\I, \J} - \CM_{\I, \V} \CM_{\V, \V}^{-1} \CM_{\V, \J}
+  \shortintertext{where \( \CM_{\V, \V}^{-1} \defeq (\CM_{\V, \V})^{-1} \).
+    To denote the covariance between the variables in index sets \( \I \) and
+    \( \J \), conditional on the variables in \( \V_1, \V_2, \dots, \V_n \) we
+    write}
+  \CM_{I, J \mid \V_1, \V_2, \dotsc, \V_n} &\defeq
+    \Cov[\vec{y}_\I, \vec{y}_\J \mid
+         \vec{y}_{\V_1 \cup \V_2 \cup \dotsb \cup \V_n}]
+  \shortintertext{The sets \( \V_1, \dotsc, \V_n \) are written in order
+    of computation. Although the final covariance matrix is the same, a
+    different order of conditioning means different intermediate results
+    in repeated application of \cref{eq:cond_cov}. By the quotient rule
+    of Schur complementation:}
+  \label{eq:quotient_rule}
+  \CM_{\I,   \J   \mid \V_{1 \dots n}} &=
+  \CM_{\I,   \J   \mid \V_{1 \dots n - 1}} -
+  \CM_{\I,   \V_n \mid \V_{1 \dots n - 1}}
+  \CM_{\V_n, \V_n \mid \V_{1 \dots n - 1}}^{-1}
+  \CM_{\V_n, \J   \mid \V_{1 \dots n - 1}}
+\end{align}
+Calculating the posterior mean \cref{eq:cond_mean} and covariance
+\cref{eq:cond_cov} requires inverting the training covariance matrix.
+Often the inverse Cholesky factor \( L = \chol(\CM_{\Train,
+\Train})^{-1} \) is used instead of the direct inverse \( \CM_{\Train,
+\Train}^{-1} \) for improved numerical stability and performance.
+However, the time complexity of computing the Cholesky factorization
+is \( \BigO(N^3) \), which is prohibitive for large \( N \).
+For computational efficiency, we will enforce that \(
+L \) is \emph{sparse}, yielding an approximate factor.
+A significant factor affecting the approximation quality is whether \( L
+\) is computed as an approximate inverse factor of the covariance (\( L
+\chol(\Theta) \approx \Id \)) or as an approximate factor of the precision
+(\( L L^{\top} \approx \Theta^{-1} \)).
+
+\subsection{Vecchia approximation}
+\label{subsec:vecchia}
+
+In the literature, factorized sparse approximate inverse (FSAI)
+preconditioners are computed by \cite{kaporin1990alternative,
+yeremin2000factorized}, while sparse approximate Cholesky factors
+of the precision are computed by \cite{schafer2021sparse}.
+Both of these approaches can be viewed through the lens of an
+early approach for fast Gaussian process regression, the Vecchia
+approximation \cite{vecchia1988estimation, katzfuss2021general}.
+We start by decomposing the joint likelihood \( \pi \).
+\begin{align}
+  \label{eq:joint}
+  \p(\vec{x}) &= \p(x_1) \p(x_2 \mid x_1) \p(x_3 \mid x_1, x_2) \dots
+    \p(x_N \mid x_1, x_2, \dotsc, x_{N - 1})
+  \shortintertext{The key assumption is that many of the points are
+    redundant after conditioning on a carefully chosen subset of the
+    points. Letting \( i_1, \dotsc, i_N \) denote an ordering of the
+    points and \( s_k \) the indices of points that condition the \(
+    k \)th point in the ordering, the Vecchia approximation proposes
+    to approximate \cref{eq:joint} by the sparse approximation}
+  \label{eq:vecchia}
+  \p(\vec{x}) &\approx \p(x_{i_1}) \p(x_{i_2} \mid x_{s_2})
+    \p(x_{i_3} \mid x_{s_3}) \dots \p(x_{i_N} \mid x_{s_N})
+\end{align}
+Following \cref{eq:vecchia} if an elimination ordering \( \prec \) is fixed
+(a permutation of \( \{ 1, \dotsc, N \} \)) and a lower-triangular sparsity
+pattern \( S \defeq \{ (i, j) : i \in s_j, i \succeq j \} \) specified then
+all is needed is a functional criterion \( \loss: \Reals^{N \times N} \to
+\Reals \) to specify the optimization problem
+\begin{align}
+  \label{eq:generic_obj}
+  L &\defeq \argmax_{\hat{L} \in \SpSet} \loss(\hat{L})
+\end{align}
+where \( \SpSet \defeq \{ M \in \Reals^{N \times N} :
+M_{ij} \neq 0 \Rightarrow (i, j) \in S \} \) is the space
+of matrices satisfying the sparsity pattern \( S \).
+Multiple functionals in the literature actually converge to the same
+closed-form expression for the entries of the resulting Cholesky factor
+\( L \): Minimizers of the Kaporin condition number \( (\trace(L \CM
+L^{\top})/N)^N/\det(L \CM L^{\top}) \) \cite{kaporin1990alternative},
+minimizes of \( \norm{\Id - L \chol(\CM)}_{\FRO} \) additionally subject to
+the constraint \( \diag(L \CM L^{\top}) = 1 \) \cite{yeremin2000factorized},
+and minimizers of the KL divergence \( \KL{\N(\vec{0},
+\CM)} {\N(\vec{0}, (L L^{\top})^{-1})} \) \cite{schafer2021sparse}.
+This shared closed-form expression for the entries of the resulting
+factor can be shown to be equivalent to the formula used to compute the
+Vecchia approximation for Gaussian processes \cite{vecchia1988estimation}.
+In addition, using the KL divergence to compute Cholesky factors can
+be seen as a linear special case of computing sparse lower-triangular
+maps in \cite{marzouk2016introduction, katzfuss2022scalable}.
+
+The primary difference between the numerical linear algebra viewpoints
+(Kaporin conditional number or Frobenius norm) and the statistical viewpoints
+(KL divergence, transport maps) is whether the covariance is factored, \( L
+\chol(\CM) \approx \Id \), or the precision, \( L L^{\top} \approx \CM^{-1} \).
+As observed in \cite{schafer2021sparse, spantini2018inference}, factors of
+the precision are often much sparser than factors of the covariance, because
+the precision encodes conditional independence while the covariance encodes
+marginal independence.
+Covariance matrices arising from kernel functions are often fully
+dense, but the approximate factors of their precision can be
+sparse if the ordering and sparsity pattern are chosen carefully.
+
+\subsection{Ordering and sparsity pattern}
+\label{subsec:ordering}
+
+\Stodo{reverse maximin ordering \cite{guinness2018permutation,
+schafer2021sparse, schafer2020compression}}
+
+\subsection{Review of KL-minimization}
+\label{subsec:kl}
+
+The Kullback-Leibler (KL) divergence between two probability distributions \( P
+\) and \( Q \) is defined as \( \KL*{P}{Q} \defeq \E_P[\log(\frac{P}{Q})] \).
+As the expected difference between true and approximate
+log-densities, the KL divergence is a natural way to
+judge the quality of an approximating distribution.
+In line with the Gaussian process regression problem in \cref{sec:chol}, we
+identify the positive-definite matrix \( \CM \in \Reals^{N \times N} \) as
+the covariance of a centered Gaussian process \( \N(\vec{0}, \CM) \) which we
+seek to approximate by a sparse approximate Cholesky factor \( L \in \SpSet
+\) of its precision, \( \N(\vec{0}, (L L^{\top})^{-1}) \).
+In order to compare the resulting distributions, we specialize
+the generic optimization problem \cref{eq:generic_obj}
+to the KL divergence as \cite{schafer2021sparse} does.
+\begin{align}
+  \label{eq:L_obj}
+  L \defeq \argmin_{\hat{L} \in S} \,
+    \KL*{\N(\vec{0}, \CM)}
+        {\N(\vec{0}, (\hat{L} \hat{L}^{\top})^{-1})}
+\end{align}
+For multivariate Gaussians, the KL divergence
+has a closed-form expression given by
+\begin{align}
+  \label{eq:kl}
+  2 \KL*{\N(\vec{0}, \CM_1)}{\N(\vec{0}, \CM_2)} &=
+    \trace(\CM_2^{-1} \CM_1) + \logdet(\CM_2) - \logdet(\CM_1) - N
+\end{align}
+where \( \CM_1, \CM_2 \in \Reals^{N \times
+N} \) (see \cref{app:kl_obj} for details).
+Writing \cref{eq:L_obj} in the form of \cref{eq:kl} and optimizing for \(
+L \) yields the following closed-form expression for the \( i \)th column
+of \( L \) with sparsity pattern \( s_i \), reproduced from Theorem 2.1 of
+\cite{schafer2021sparse}:
+\begin{align}
+  \label{eq:L_col}
+  L_{s_i, i} &= \frac{\CM_{s_i, s_i}^{-1} \vec{e}_1}
+    {\sqrt{\vec{e}_1^{\top} \CM_{s_i, s_i}^{-1} \vec{e}_1}}
+\end{align}
+where the notation for \( \CM_{s_i, s_i}^{-1} \) is from
+\cref{eq:cond_cov_notation} and \( \vec{e}_1 \in \Reals^{\card{s_i}
+\times 1} \) denotes the vector with first entry one and the rest zero.
+We enforce the convention that \( i \) is the first entry
+of \( s_i \), also implying that \( L \) is of full rank.
+Plugging the optimal \( L \) \cref{eq:L_col} back into the KL divergence
+\cref{eq:kl}, we obtain the objective as a function of the sparsity pattern.
+\begin{align}
+  \label{eq:obj_chol}
+  2 \mathbb{D}_{\text{KL}}
+  \left (
+    \mathcal{N}(\vec{0}, \CM) \, \Big \| \,
+    \mathcal{N}(\vec{0}, (L L^{\top})^{-1})
+  \right )
+  &= \sum_{i = 1}^N
+    \left [
+      \log \left (
+        (\vec{e}_1^{\top} \CM_{s_i, s_i}^{-1} \vec{e}_1)^{-1}
+      \right )
+    \right ]
+    - \logdet(\CM)
+\end{align}
+See \cref{app:kl_L} for details. In particular, it is important
+which direction the KL divergence is taken or cancellation
+of the \( \trace(\CM_2^{-1} \CM_1) \) term may not occur.
+
+In order to pick a sparsity pattern that minimizes the KL divergence
+\cref{eq:obj_chol}, we can ignore the constant \( \logdet(\CM) \) and minimize
+over each column independently, as each term \( (\vec{e}_1^{\top} \CM_{s_i,
+s_i}^{-1} \vec{e}_1)^{-1} \) in the sum depends only on \( s_i \).
+To do so, we recall that conditioning in
+covariance is marginalization in precision.
+For
+\( \CM =
+    \begin{pmatrix}
+      \CM_{1, 1} & \CM_{1, 2} \\
+      \CM_{2, 1} & \CM_{2, 2}
+    \end{pmatrix}
+\),
+\begin{align}
+  \label{eq:inverse_cond}
+  \CM_{1, 1 \mid 2} &= \left ( \CM^{-1} \right )_{1, 1}^{-1} \\
+  \shortintertext{Viewing \( (\vec{e}_1^{\top} \CM_{s_i, s_i}^{-1}
+    \vec{e}_1)^{-1} = \left (\CM_{s_i, s_i}^{-1} \right )_{1, 1}^{-1}
+    \) as a marginalization of \( \CM_{s_i, s_i}^{-1} \) to apply
+    \cref{eq:inverse_cond},}
+  \label{eq:L_cond_var}
+  (\vec{e}_1^{\top} \CM_{s_i, s_i}^{-1} \vec{e}_1)^{-1}
+         &= \CM_{i, i \mid s_i - \{ i \}}
+\end{align}
+So minimizing the KL divergence of the sparse Cholesky factor \( L \) is
+equivalent to independently minimizing over each column the variance of the
+\( i \)th variable, conditional on the entries \( s_i \) (excluding itself).
+From a Gaussian process regression perspective, we wish to carefully select the
+most effective points \( s_i \) out of the possible candidates \( i + 1, i +
+2, \dotsc, N \) that most reduce predictive error at the point of interest \(
+\vec{x}_i \).
+
+In the next section, we develop such a greedy selection
+algorithm for directed inference in Gaussian processes.
+We will return to sparse Cholesky factorization and apply this algorithm
+for sparsity selection of Cholesky factors in \cref{sec:chol_select}.
 
 \section{Greedy selection for directed inference}
 \label{sec:select}
@@ -775,136 +1041,17 @@ kernel function seems to be submodular, but not for any higher dimension.
 \cite{das2011submodular, jagalur-mohan2021batch}
 
 \section{Greedy selection for \emph{global} approximation by KL-minimization}
+\label{sec:chol_select}
 
-reverse maximin ordering
-\cite{guinness2018permutation, schafer2021sparse, schafer2020compression}
-
-We have a covariance matrix \( \CM \) and wish to compute the Cholesky
-factorization of \( \CM \) into a lower triangular factor \( L \) such that
-\( \CM = L L^{\top} \). \Stodo{justify importance/downstream applications of
-Cholesky factorization}. This can be done in \( \BigO(N^3) \) with standard
-algorithms, which is often prohibitive. Recall the problem of inference in
-Gaussian process regression as described in \cref{sec:select} also took
-\( \BigO(N^3) \) to invert the covariance matrix \( \CM \). Thus, similar
-to Guassian process regression, we will use \emph{sparsity} to mitigate
-the computational cost. In fact, we will be able to re-use our previous
-algorithms \cref{alg:select_chol,alg:select_mult_chol} on each column of
-the Cholesky factorization.
-
-We will first compute the Cholesky factorization of \( \CM^{-1} \),
-also known as the \emph{precision matrix}, and use the resulting sparse
-factorization to efficiently compute an approximation for \( \CM
-\). Because the precision matrix encodes the distribution of the full
-conditionals, the \( (i, j) \)th entry of the precision matrix is 0 if and
-only if the variables \( x_i \) and \( x_j \) are conditionally independent,
-conditional on the rest of the variables. Thus, the precision matrix \(
-\CM^{-1} \) can be sparse as a result of conditional independence even
-if the original covariance matrix \( \CM \) is dense. It therefore
-makes sense to attempt to approximately ``sparsify'' \( \CM^{-1} \)
-instead of \( \CM \) with iterated conditioning.
-
-Because of sparsity, we can only get an approximate Cholesky factor \( L \),
-\( \hat{L} \) belonging to a pre-specified sparsity pattern \( S \) --- a set
-of (row, column) indices that are allowed to be nonzero. In order to measure
-the performance of the estimator, we treat the matrices as covariance matrices
-of centered Gaussian processes (mean \( \vec{0} \)). In order to compare the
-resulting distributions, we use the \emph{KL divergence} according to
-\cite{schafer2021sparse}, or the expected difference in log-densities:
-\begin{align}
-  \label{eq:L_obj}
-  L \defeq \argmin_{\hat{L} \in S} \,
-    \KL*{\N(\vec{0}, \CM)}
-        {\N(\vec{0}, (\hat{L} \hat{L}^{\top})^{-1})}
-\end{align}
-
-Note that here we are computing the Cholesky factorization
-of \( \CM^{-1} \). Surprisingly enough, it is possible to
-exactly compute \( L \). First, we re-write the KL-divergence:
-\begin{align}
-  \label{eq:kl}
-  2 \mathbb{D}_{\text{KL}}
-  \left (
-    \mathcal{N}(\vec{0}, \CM_1) \, \Big \| \,
-    \mathcal{N}(\vec{0}, \CM_2)
-  \right )
-  = \trace(\CM_2^{-1} \CM_1) + \logdet(\CM_2) - \logdet(\CM_1) - N
-\end{align}
-where \( \CM_1 \) and \( \CM_2 \) are both of size
-\( N \times N \). See \cref{app:kl_obj} for details.
-
-\begin{theorem}
-  \label{thm:L}
-  \cite{schafer2021sparse}.
-  The non-zero entries of the \( i \)th
-  column of \( L \) in \cref{eq:L_obj} are:
-  \begin{align}
-    \label{eq:L_col}
-    L_{s_i, i} = \frac{\CM_{s_i, s_i}^{-1} \vec{e}_1}
-    {\sqrt{\vec{e}_1^{\top} \CM_{s_i, s_i}^{-1} \vec{e}_1}}
-  \end{align}
-\end{theorem}
-
-Plugging the optimal \( L \) \cref{eq:L_col} back
-into the KL divergence \cref{eq:kl}, we obtain:
-\begin{align}
-  \label{eq:obj_chol}
-  2 \mathbb{D}_{\text{KL}}
-  \left (
-    \mathcal{N}(\vec{0}, \CM) \, \Big \| \,
-    \mathcal{N}(\vec{0}, (L L^{\top})^{-1})
-  \right )
-  &= \sum_{i = 1}^N
-    \left [
-      \log \left (
-        (\vec{e}_1^{\top} \CM_{s_i, s_i}^{-1} \vec{e}_1)^{-1}
-      \right )
-    \right ]
-    - \logdet(\CM)
-\end{align}
-
-See \cref{app:kl_L} for details. In particular, it is important
-which direction the KL divergence is or else cancellation of
-the \( \trace(\CM_2^{-1} \CM_1) \) term may not occur.
-
-In order to maximize \cref{eq:obj_chol}, we can ignore \( \logdet(\CM)
-\) since it does not depend on \( L \) and maximize over each column
-independently, since each term in the sum only depends on a single
-column. We want to minimize \( (\vec{e}_1^{\top} \CM_{s_i, s_i}^{-1}
-\vec{e}_1)^{-1} \), the term corresponding to the diagonal entry in the
-inverse of the submatrix of \( \CM \) corresponding to the entries we've
-taken. We can give this value statistical interpretation by using the
-fact that marginalization in covariance is conditioning in precision.
-\begin{align}
-  \label{eq:inverse_cond}
-  \CM_{1, 1 \mid 2} &=
-    ((\CM^{-1})_{1, 1})^{-1}
-  \shortintertext{where \( \CM \) is blocked according to}
-  \label{eq:blocking}
-  \CM &=
-  \begin{pmatrix}
-    \CM_{1, 1} & \CM_{1, 2} \\
-    \CM_{2, 1} & \CM_{2, 2}
-  \end{pmatrix}
-  \shortintertext{Thus, we see that}
-  \nonumber
-  (\vec{e}_1^{\top} \CM_{s_i, s_i}^{-1} \vec{e}_1)^{-1}
-         &= ((\CM_{s_i, s_i}^{-1})_{11})^{-1} \\
-  \label{eq:L_cond_var}
-         &= \CM_{ii \mid s_i - \{ i \}}
-\end{align}
-
-So our objective on each column is to minimize the conditional variance of
-the \( i \)th variable, conditional on the entries we've selected --- \( s_i
-\) contains \( i \) to begin with, so \( s_i - \{ i \} \) is the selected
-entries. We can therefore use algorithm \cref{alg:select_chol} directly on each
+We can therefore use algorithm \cref{alg:select_chol} directly on each
 column, where the prediction point is the \( i \) variable and the number
 of points selected is the number of nonzero entries per column. The only
-difference is that the candidates is limited to indices lower than \( i \),
-that is, candidate indices \( k \) such that \( k > i \) to maintain the
-lower triangularity of \( L \). Once \( s_i \) has been computed for each \(
-i \), \( L \) can be constructed according to \cref{thm:L}. Each column costs
-\( \BigO(s^3) \) to compute \( \CM_{s_i, s_i}^{-1} \) for a total
-cost of \( \BigO(N s^3) \) for the \( N \) columns of \( L \).
+difference is that the candidates is limited to indices lower than \( i
+\), that is, candidate indices \( k \) such that \( k > i \) to maintain
+the lower triangularity of \( L \). Once \( s_i \) has been computed for
+each \( i \), \( L \) can be constructed according to \cref{eq:L_col}. Each
+column costs \( \BigO(s^3) \) to compute \( \CM_{s_i, s_i}^{-1} \) for a
+total cost of \( \BigO(N s^3) \) for the \( N \) columns of \( L \).
 
 \subsection{Aggregated sparsity pattern}
 
@@ -936,7 +1083,7 @@ conditioning.
   \label{eq:det_chain}
   \logdet(\CM) &= \logdet(\CM_{1, 1 \mid 2}) + \logdet(\CM_{2, 2})
   \shortintertext{where \( \CM \) is blocked according to
-    \cref{eq:blocking}. The KL divergence objective for \( \tilde{i} \) is:}
+    TODO. The KL divergence objective for \( \tilde{i} \) is:}
   \nonumber
   \sum_{i \in \tilde{i}} \log(\CM_{ii \mid s_i - \{ i \} })
   &= \log(\CM_{i_m i_m \mid \tilde{s}}) +
@@ -2080,6 +2227,8 @@ a nearby point decreases the correlation for far away points.
 \subsection{KL divergence of two multivariate Gaussians}
 \label{app:kl_obj}
 
+\Stodo{this is useless, remove}
+
 We want to show that the KL divergence between \(
 \N(\vec{0}, \CM_1) \) and \( \N(\vec{0}, \CM_2) \) for \(
 \CM_1, \CM_2 \in \Reals^{N \times N} \) can be written
@@ -2151,7 +2300,7 @@ Combining \cref{eq:kl_after_trace} with
 \label{app:kl_L}
 
 We wish to compute the KL divergence between \( \CM \) and the Cholesky
-factor \( L \) computed according to \cref{thm:L}. From \cref{eq:kl},
+factor \( L \) computed according to \cref{eq:L_col}. From \cref{eq:kl},
 \begin{align}
   \label{eq:kl_L}
   2 \KL*{\N(\vec{0}, \CM)}{\N(\vec{0}, (L L^{\top})^{-1})} &=
@@ -2164,7 +2313,7 @@ factor \( L \) computed according to \cref{thm:L}. From \cref{eq:kl},
     L^{\top}) \) and expanding on the columns of \( L \),}
   \trace(L \CM L^{\top}) &= \sum_{i = 1}^N
     L_{s_i, i}^{\top} \CM_{s_i, s_i} L_{s_i, i}
-  \shortintertext{Plugging in \( L_{s_i, i} \) from \cref{thm:L},}
+  \shortintertext{Plugging in \( L_{s_i, i} \) from \cref{eq:L_col},}
   &= \sum_{i = 1}^N
     \left (
       \frac{\left ( \CM_{s_i, s_i}^{-1} \vec{e}_1 \right )^{\top}}
@@ -2220,65 +2369,47 @@ determinant by the chain rule \cref{eq:det_chain}.
     - \logdet(\CM)
   &= \sum_{i = 1}^N
     \left [
-      \log \left ( \CM_{ii \mid s_i - \{ i \}} \right )
+      \log \left ( \CM_{i, i \mid s_i - \{ i \}} \right )
     \right ]
     - \logdet(\CM) \\
   &= \sum_{i = 1}^N
-      \log \left ( \CM_{ii \mid s_i - \{ i \}} \right ) -
+      \log \left ( \CM_{i, i \mid s_i - \{ i \}} \right ) -
     \sum_{i = 1}^N
-      \log \left ( \CM_{ii \mid i + 1:} \right ) \\
+      \log \left ( \CM_{i, i \mid i + 1:} \right ) \\
   &= \sum_{i = 1}^N
     \left [
-      \log \left ( \CM_{ii \mid s_i - \{ i \}} \right ) -
-      \log \left ( \CM_{ii \mid i + 1:} \right )
+      \log \left ( \CM_{i, i \mid s_i - \{ i \}} \right ) -
+      \log \left ( \CM_{i, i \mid i + 1:} \right )
     \right ]
 \end{align}
-We can view this sum as the accumulated \emph{difference} in prediction
-error for a series of prediction problems, where each prediction problem
-is to predict the value of the \( i \)th variable given variables \( i +
-1, i + 2, \dotsc, N \).
-The left term \( \log \left ( \CM_{ii \mid s_i - \{ i \}} \right ) \) is
-restricted to only using those variables in the sparsity pattern \( s_i
-\), while the right term \( \log \left ( \CM_{ii \mid i + 1:} \right ) \)
-is able to use every variable after \( i \).
-The left term will necessarily have greater variance than the
+This sum is the accumulated \emph{difference} in error for a series of
+independent prediction problems: to predict the \( i \)th variable given
+the variables after it in the ordering, \( i + 1, i + 2, \dotsc, N \).
+The left term \( \log \left ( \CM_{i, i \mid s_i - \{ i \}} \right ) \) is
+restricted to the variables in the sparsity pattern \( s_i \), while the right
+term \( \log \left ( \CM_{i, i \mid i + 1:} \right ) \) is unconstrained.
+As a result, the left term will necessarily be greater than the
 right, and the goal is to minimize the accumulated deviation.
-Thus, the KL divergence gives a natural way to measure the quality of a
-sparsity pattern as a good sparsity pattern should maintain predictive
-accuracy while subject to the constraint that some variables have no
-interaction with others.
-This interpretation is also given in \cite{katzfuss2022scalable}.
+Thus, the KL divergence measures the maintenance of predictive accuracy after
+adding conditional independence (sparsity) to the original distribution.
+This independent regression problem interpretation of the KL
+divergence is also given in \cite{katzfuss2022scalable}, equation 5.
 
-Another interpretation is from \cite{bartels2022adaptive}, where they
-view the full prediction problems as the log likelihood of the variables.
-Under this interpretation, conditional independence (through the screening
-effect) corresponds to a near-constant value of \( \log(\CM_{ii \mid i + 1:})
-\), which results in a linear plot of log-likelihood with increasing \( N \).
-
-Because the KL divergence is not symmetric, it matters which way the KL
-divergence is taken as well as whether both matrices have been inverted or not.
-This seems to imply that there are four possible ways
-to compare two covariance matrices. However, note that
+The asymmetry of KL divergence implies the order of the matrices matters as
+well as whether both matrices have been inverted or not. This seems to imply
+that there are four possible ways to compare two covariance matrices. However,
+note that
 \begin{align}
-\mathbb{D}_{\text{KL}}
-  \left (
-    \mathcal{N}(\vec{0}, \CM) \, \Big \| \,
-    \mathcal{N}(\vec{0}, (L L^{\top})^{-1})
-  \right ) &=
-\mathbb{D}_{\text{KL}}
-  \left (
-    \mathcal{N}(\vec{0}, L L^{\top}) \, \Big \| \,
-    \mathcal{N}(\vec{0}, \CM^{-1})
-  \right )
+  \KL*{\N(\vec{0}, \CM_1)}{\N(\vec{0}, \CM_2)} &=
+    \KL*{\N(\vec{0}, \CM_2^{-1})}{\N(\vec{0}, \CM_1^{-1})}
 \end{align}
 from \cref{eq:kl} and the cyclic property of trace, so inverting both
 matrices implicitly reverses the order of the KL divergence.
-There are therefore only two possible ways to compare
-the two, which depends on the order of the arguments.
-A statistical interpretation comes from the fact that the KL divergence
-can be interpreted as the likelihood-ratio test, so the non-symmetry of
-the order of the arguments corresponds to the asymmetry between the null
-and alternative hypotheses.
+There are therefore only two possible ways to
+compare the two matrices, depending on their order.
+From a statistical perspective, the KL divergence can interpreted
+as the likelihood-ratio test, so the asymmetry in order corresponds
+to the asymmetry between the null and alternative hypotheses.
 
 \section{Algorithms}
 
