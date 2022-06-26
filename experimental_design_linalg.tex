@@ -147,8 +147,8 @@ significant effect on the quality of the resulting factor.
 Vecchia originally proposed ordering points lexicographically
 \cite{vecchia1988estimation}, but more recent work exploits space-covering
 orderings like the maximum-minimum ordering \cite{guinness2018permutation},
-which have become relatively popular \cite{schafer2020compression,
-schafer2021sparse, kang2021correlationbased}.
+which has become popular \cite{schafer2020compression, schafer2021sparse,
+katzfuss2021general, kang2021correlationbased, katzfuss2022scalable}.
 Once the ordering is fixed, the sparsity set for a particular
 point can include any point prior to it in the ordering.
 Following Vecchia's recommendation, the points are often chosen to be
@@ -393,13 +393,9 @@ A significant factor affecting the approximation quality is whether \( L
 \subsection{Vecchia approximation}
 \label{subsec:vecchia}
 
-In the literature, factorized sparse approximate inverse (FSAI)
-preconditioners are computed by \cite{kaporin1990alternative,
-yeremin2000factorized}, while sparse approximate Cholesky factors
-of the precision are computed by \cite{schafer2021sparse}.
-Both of these approaches can be viewed through the lens of an
-early approach for fast Gaussian process regression, the Vecchia
-approximation \cite{vecchia1988estimation, katzfuss2021general}.
+Both sparse inverse factors of the covariance and sparse
+factors of the precision can be computed from the Vecchia
+approximation for Gaussian processes \cite{vecchia1988estimation}.
 We start by decomposing the joint likelihood \( \pi \).
 \begin{align}
   \label{eq:joint}
@@ -418,34 +414,25 @@ We start by decomposing the joint likelihood \( \pi \).
 Following \cref{eq:vecchia} if an elimination ordering \( \prec \) is fixed
 (a permutation of \( \{ 1, \dotsc, N \} \)) and a lower triangular sparsity
 pattern \( S \defeq \{ (i, j) : i \in s_j, i \succeq j \} \) is specified
-then all is needed is a functional criterion \( \loss: \Reals^{N \times N}
+then all is needed is a functional criterion \( \Loss: \Reals^{N \times N}
 \to \Reals \) to specify the optimization problem
 \begin{align}
   \label{eq:generic_obj}
-  L &\defeq \argmax_{\hat{L} \in \SpSet} \loss(\hat{L})
+  L &\defeq \argmin_{\hat{L} \in \SpSet} \Loss(\hat{L})
 \end{align}
 where \( \SpSet \defeq \{ M \in \Reals^{N \times N} :
 M_{ij} \neq 0 \Rightarrow (i, j) \in S \} \) is the space
 of matrices satisfying the sparsity pattern \( S \).
-Multiple functionals in the literature actually converge to the same
-closed-form expression for the entries of the resulting Cholesky factor
-\( L \): Minimizers of the Kaporin condition number \( (\trace(L \CM
-L^{\top})/N)^N/\det(L \CM L^{\top}) \) \cite{kaporin1990alternative},
-minimizes of \( \norm{\Id - L \chol(\CM)}_{\FRO} \) additionally subject to
-the constraint \( \diag(L \CM L^{\top}) = 1 \) \cite{yeremin2000factorized},
-and minimizers of the KL divergence \( \KL{\N(\vec{0},
-\CM)} {\N(\vec{0}, (L L^{\top})^{-1})} \) \cite{schafer2021sparse}.
-This shared closed-form expression for the entries of the resulting
-factor can be shown to be equivalent to the formula used to compute the
-Vecchia approximation for Gaussian processes \cite{vecchia1988estimation}.
-In addition, using the KL divergence to compute Cholesky factors can
-be seen as a linear special case of computing sparse lower triangular
-maps in \cite{marzouk2016introduction, katzfuss2022scalable}.
+Proposed functionals which compute inverse Cholesky factors of the
+covariance, \( L \chol(\CM) \approx \Id \), include the Kaporin
+condition number \( (\trace(L \CM L^{\top})/N)^N/\det(L \CM L^{\top})
+\) \cite{kaporin1990alternative} and the Frobenius norm \( \norm{\Id
+- L \chol(\CM)}_{\FRO} \) additionally subject to the constraint \(
+\diag(L \CM L^{\top}) = 1 \) \cite{yeremin2000factorized}, while the KL
+divergence \( \KL{\N(\vec{0}, \CM)} {\N(\vec{0}, (L L^{\top})^{-1})}
+\) \cite{schafer2021sparse} computes factors of the precision, \( L
+L^{\top} \approx \CM^{-1} \).
 
-The primary difference between the numerical linear algebra viewpoints
-(Kaporin conditional number or Frobenius norm) and the statistical viewpoints
-(KL divergence, transport maps) is whether the covariance is factored, \( L
-\chol(\CM) \approx \Id \), or the precision, \( L L^{\top} \approx \CM^{-1} \).
 As observed in \cite{schafer2021sparse}, factors of the precision are often
 much sparser than factors of the covariance, because the precision encodes
 conditional independence while the covariance encodes marginal independence.
@@ -458,8 +445,39 @@ sparse if the ordering and sparsity pattern are chosen carefully.
 \subsection{Ordering and sparsity pattern}
 \label{subsec:ordering}
 
-\Stodo{reverse maximin ordering \cite{guinness2018permutation,
-schafer2021sparse, schafer2020compression}}
+Although in this work we focus on constructing sparsity
+patterns, a good ordering is critical since the sparsity for
+a point can only include points before it in the ordering.
+Vecchia originally proposed ordering points lexicographically, which is
+most natural in a one-dimensional setting \cite{vecchia1988estimation}.
+More recent work finds that in higher dimensions, exploiting
+space-covering orderings leads to significantly better
+approximation quality \cite{guinness2018permutation}.
+We specifically use the maximum-minimum (maximin) ordering
+\cite{guinness2018permutation}, which has become popular for the
+Vecchia approximation \cite{katzfuss2021general} and Cholesky
+factorization \cite{schafer2020compression, schafer2021sparse,
+kang2021correlationbased, katzfuss2022scalable}.
+The reverse-maximin ordering \( i_1, \dotsc, i_N \) on a set of \( N \) points
+\( \{ \vec{x}_i \}^N_{i = 1} \) is defined by first selecting the last index \(
+i_N \) arbitrarily and then choosing for \( k = N - 1, N - 2, \dotsc, 1 \) the
+index
+\begin{align}
+  i_k = \argmax_{i \in -\Order_{k + 1}} \; \min_{j \in \Order_{k + 1}}
+    \norm{\vec{x}_i - \vec{x}_j}
+\end{align}
+where \( -\Order \defeq \{ 1, \dotsc, N \} \setminus \Order \)
+and \( \Order_n \defeq \{ i_n, i_{n + 1}, \dotsc, i_N \} \),
+i.e. select the point farthest from previously selected points.
+The ordering is reversed for factorizing the precision.
+
+Vecchia also originally proposed to select the sparsity set by Euclidean
+distance \cite{vecchia1988estimation}, which, unlike the lexicographic
+ordering, still remains widely used \cite{schafer2020compression,
+schafer2021sparse, katzfuss2022scalable}.
+Instead, we show how to select the sparsity pattern to directly
+optimize the objective \( \Loss \) \cref{eq:generic_obj} in an
+end-to-end manner by decomposing the KL divergence along each column.
 
 \subsection{Review of KL-minimization}
 \label{subsec:kl}
@@ -551,21 +569,21 @@ For
   (\vec{e}_1^{\top} \CM_{s_i, s_i}^{-1} \vec{e}_1)^{-1}
          &= \CM_{i, i \mid s_i - \{ i \}}
 \end{align}
-So minimizing the KL divergence of the sparse Cholesky factor \( L \) is
-equivalent to independently minimizing over each column the variance of the
-\( i \)th variable, conditional on the entries \( s_i \) (excluding itself).
-A decomposition of the KL divergence into
-independent regression problems was also observed in
+So minimizing the KL divergence of a sparse Cholesky factor is equivalent
+to independently minimizing over each column the variance of the \( i
+\)th variable, conditional on the entries \( s_i \) (excluding itself).
+Decomposition of the KL divergence into independent
+regression problems was also observed in
 \cite{katzfuss2022scalable} for lower triangular transport maps.
+
 From a Gaussian process regression perspective, we wish to carefully select the
 most effective points \( s_i \) out of the possible candidates \( i + 1, i +
 2, \dotsc, N \) that most reduce predictive error at the point of interest \(
 \vec{x}_i \).
-
 In the next section, we develop such a greedy selection
 algorithm for directed inference in Gaussian processes.
-We will return to sparse Cholesky factorization and apply this algorithm
-for sparsity selection of Cholesky factors in \cref{sec:chol_select}.
+We will apply this algorithm for sparsity selection
+of Cholesky factors in \cref{sec:chol_select}.
 
 \section{Greedy selection for directed inference}
 \label{sec:select}
