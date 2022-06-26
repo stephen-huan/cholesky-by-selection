@@ -97,90 +97,47 @@ motivating the search for faster, approximate algorithms.
 
 \paragraph{Existing work}
 
-\todo{I would put knothe rosenblatt, FSAI, and sparse Cholesky factorization into the Vecchia paragraph and use the "existing work" paragraph to disucuss other approaches such as inducing points, wavelet method, h matrices, fast multiplol, random features, Nystrom approximation, sparse Cholesky of covariance, etc.}
-Computation with positive-definite matrices is often accelerated with sparse
-Cholesky factorization, either through incomplete Cholesky factorization
-of the covariance \( \CM \) \cite{schafer2020compression, chenparallel,
-chow2015finegrained}, sparse approximate Cholesky factorization of the
-precision \( \CM^{-1} \) \cite{schafer2021sparse}, or factorized sparse
-approximate inverse (FSAI) preconditioners \cite{kaporin1990alternative,
-yeremin2000factorized}. From the perspective of transport maps, the Cholesky
-factor \( L \) satisfying \( \CM^{-1} = L^{\top} L \) can be viewed as a linear
-transport map mapping an arbitrary multivariate Gaussian distribution \(
-\vec{x} \sim \mathcal{N}(\vec{0}, \CM) \) to the standard Gaussian \( \vec{z}
-\sim \mathcal{N}(\vec{0}, I_N) \) through \( \vec{z} = L \vec{x} \). Thus,
-one generalization of Cholesky factorization to nonlinear and non-Gaussian
-distributions is the Knothe-Rosenblatt rearrangement, which preserves lower
-triangularity, monotonicity, and sparsity, particularly in the inverse mapping
-\cite{spantini2018inference}. These triangular transport maps have been
-applied to problems in spatial statistics, particularly for simulation and
-sampling problems \cite{marzouk2016introduction, katzfuss2022scalable}.
-
-% not sure this is necessary
-% In the special case of the Mat{\'e}rn kernel function with half-integer
-% smoothness on one-dimensional points, the covariance matrix \( \CM \) admits
-% a sparse, banded factorization, allowing for an exact algorithm linear
-% in both time and space with the number of points, and only additionally
-% depending on the smoothness parameter \( \nu \) \cite{chen2022kernel}.
+\todo{I would put knothe rosenblatt, FSAI, and sparse Cholesky
+factorization into the Vecchia paragraph and use the ``existing work''
+paragraph to disucuss other approaches such as inducing points,
+wavelet method, h matrices, fast multiplol, random features, Nystrom
+approximation, sparse Cholesky of covariance, etc.}
+TODO
 
 \paragraph{Vecchia approximation}
 
-\todo{I would make this one integrated section on Vecchia, FSAI, KL-Cholesky, and transport maps}
-
-Many of these existing approaches can be viewed through the lens of an early
-approach for fast Gaussian process regression, the Vecchia approximation
-\cite{vecchia1988estimation, katzfuss2021general}. The key observation is a
-decomposition of the joint likelihood \( \pi \).
-\begin{align}
-  \label{eq:joint}
-  \p(\vec{x}) &= \p(x_1) \p(x_2 \mid x_1) \dots
-    \p(x_N \mid x_1, x_2, \dotsc, x_{N - 1})
-  \shortintertext{Assuming that there are many points, the key assumption
-    is that many of the points contribute little additional information,
-    conditional on a carefully chosen subset of the points. Letting \(
-    s_i \) denote the indices of training points to include for the \(
-    i \)th variable, the Vecchia approximation proposes to approximate
-    \cref{eq:joint} by the sparse approximation}
-  \label{eq:vecchia}
-  \p(\vec{x}) &\approx \p(x_1) \p(x_2 \mid x_{s_2}) \dots
-    \p(x_N \mid x_{s_N})
-\end{align}
-From the Vecchia approximation, the joint likelihood can be factored into
-\( N \) independent regression problems, where each regression problem is
-to approximate the conditional distribution of the \( i \)th variable.
-Independence allows for embarrassingly parallel algorithms, which is exploited
-both in Gaussian process regression \cite{katzfuss2021general} and Cholesky
-factorization \cite{schafer2021sparse}. The difference is that while the
-Gaussian process perspective emphasizes local regression problems and sparsity
-in point selection (or variable interaction), Cholesky factorization emphasizes
-minimizing global functionals and sparsity in the resulting matrix factor.
-If an appropriate functional is chosen and a sparsity pattern \( \SpSet \)
-specified, then it is an optimization problem to determine the entries of
-the matrix factor. Multiple functionals in the literature actually converge
-to the same closed-form expression for the entries of the resulting Cholesky
-factor \( L \) subject to the constraint that \( L \in \SpSet \): Minimizers
-of the Kaporin condition number \( (\trace(L \CM L^{\top})/N)^N/\det(L \CM
-L^{\top}) \) \cite{kaporin1990alternative}, minimizes of \( \norm{\Id - L
-\chol(\CM)}_{\FRO} \) additionally subject to the constraint \( \diag(L
-\CM L^{\top}) = 1 \) \cite{yeremin2000factorized}, and minimizers of the
-KL-divergence \( \KL{\N(\vec{0}, \CM)} {\N(\vec{0}, (L L^{\top})^{-1})}
-\) \cite{schafer2021sparse}. This shared closed-form expression for the
-entries of the resulting factor can be shown to be equivalent to the
-formula used to compute the Vecchia approximation for Gaussian processes
-\cite{vecchia1988estimation}. In addition, the KL-divergence is used to
-compute sparse lower-triangular maps in \cite{marzouk2016introduction,
-katzfuss2022scalable}.
-
-The primary difference between the numerical linear algebra viewpoint (Kaporin
-conditional number or Frobenius norm minimization) and the statistical
-viewpoint (KL-minimization) is whether the covariance is factored, \( L
-\approx \chol(\CM)^{-1} \), or the precision, \( L \approx \chol(\CM^{-1}) \).
-As observed in \cite{schafer2021sparse, spantini2018inference}, factors of
-the precision are often much sparser than factors of the covariance, because
-the precision encodes conditional independence while the covariance encodes
-marginal independence. Covariance matrices arising from kernel functions
-are often fully dense, but the approximate factors of their precision can
-be sparse if the ordering and sparsity pattern are chosen carefully.
+\todo{I would make this one integrated section on
+Vecchia, FSAI, KL-Cholesky, and transport maps}
+As \cite{katzfuss2021general} points out, many sparse
+factorizations of covariance matrices can be viewed as special
+cases of the Vecchia approximation \cite{vecchia1988estimation}.
+The Vecchia approximation decomposes the joint distribution
+into the product of univariate densities, each density
+conditional on only a subset of those prior in the ordering.
+If an ordering and sparsity pattern are determined, then
+an approximate Cholesky factor obeying the sparsity
+can be computed by optimizing a chosen objective.
+Within the context of factorized sparse approximate inverse (FSAI)
+preconditioners, the Kaporin condition number \cite{kaporin1990alternative}
+and the Frobenius norm with an additional Jacobi scaling constraint
+\cite{yeremin2000factorized} have been proposed as objectives, and
+from a statistical perspective the Kullback-Leibler (KL) divergence
+\cite{schafer2021sparse} has been proposed.
+These three objectives actually converge to the same closed-form expression
+for the entries of the resulting Cholesky factor \cite{schafer2021sparse},
+and this expression is equivalent to the formula used to compute the Vecchia
+approximation for Gaussian processes \cite{vecchia1988estimation}.
+In addition, using the KL divergence to compute Cholesky factors
+can be viewed as a special case of computing sparse transport
+maps in \cite{marzouk2016introduction, katzfuss2022scalable}.
+Transport maps with Knothe-Rosenblatt structure generalize Cholesky factors to
+nonlinear and non-Gaussian distributions while preserving lower triangularity
+and sparsity \cite{spantini2018inference}, and have been applied to simulation
+and sampling problems \cite{marzouk2016introduction, katzfuss2022scalable}.
+Finally, exploiting the independence of the Vecchia approximation allows
+for embarrassingly parallel algorithms for Gaussian process regression
+\cite{katzfuss2021general}, Cholesky factorization \cite{schafer2021sparse},
+and transport map construction \cite{marzouk2016introduction}.
 
 \paragraph{Sparsity selection by geometry}
 
@@ -453,10 +410,10 @@ We start by decomposing the joint likelihood \( \pi \).
     \p(x_{i_3} \mid x_{s_3}) \dots \p(x_{i_N} \mid x_{s_N})
 \end{align}
 Following \cref{eq:vecchia} if an elimination ordering \( \prec \) is fixed
-(a permutation of \( \{ 1, \dotsc, N \} \)) and a lower-triangular sparsity
-pattern \( S \defeq \{ (i, j) : i \in s_j, i \succeq j \} \) specified then
-all is needed is a functional criterion \( \loss: \Reals^{N \times N} \to
-\Reals \) to specify the optimization problem
+(a permutation of \( \{ 1, \dotsc, N \} \)) and a lower triangular sparsity
+pattern \( S \defeq \{ (i, j) : i \in s_j, i \succeq j \} \) is specified
+then all is needed is a functional criterion \( \loss: \Reals^{N \times N}
+\to \Reals \) to specify the optimization problem
 \begin{align}
   \label{eq:generic_obj}
   L &\defeq \argmax_{\hat{L} \in \SpSet} \loss(\hat{L})
@@ -476,17 +433,18 @@ This shared closed-form expression for the entries of the resulting
 factor can be shown to be equivalent to the formula used to compute the
 Vecchia approximation for Gaussian processes \cite{vecchia1988estimation}.
 In addition, using the KL divergence to compute Cholesky factors can
-be seen as a linear special case of computing sparse lower-triangular
+be seen as a linear special case of computing sparse lower triangular
 maps in \cite{marzouk2016introduction, katzfuss2022scalable}.
 
 The primary difference between the numerical linear algebra viewpoints
 (Kaporin conditional number or Frobenius norm) and the statistical viewpoints
 (KL divergence, transport maps) is whether the covariance is factored, \( L
 \chol(\CM) \approx \Id \), or the precision, \( L L^{\top} \approx \CM^{-1} \).
-As observed in \cite{schafer2021sparse, spantini2018inference}, factors of
-the precision are often much sparser than factors of the covariance, because
-the precision encodes conditional independence while the covariance encodes
-marginal independence.
+As observed in \cite{schafer2021sparse}, factors of the precision are often
+much sparser than factors of the covariance, because the precision encodes
+conditional independence while the covariance encodes marginal independence.
+The same phenomenon is observed by \cite{spantini2018inference}
+working with the more general transport maps.
 Covariance matrices arising from kernel functions are often fully
 dense, but the approximate factors of their precision can be
 sparse if the ordering and sparsity pattern are chosen carefully.
@@ -1418,7 +1376,262 @@ USA.
 
 \todo{add proofs, if any, in appendix}
 
+\section{Derivations in KL-minimization}
+
+\subsection{KL divergence of two multivariate Gaussians}
+\label{app:kl_obj}
+
+\Stodo{this is useless, remove}
+We want to show that the KL divergence between \(
+\N(\vec{0}, \CM_1) \) and \( \N(\vec{0}, \CM_2) \) for \(
+\CM_1, \CM_2 \in \Reals^{N \times N} \) can be written
+\begin{align}
+  2 \KL*{\N(\vec{0}, \CM_1)}{\N(\vec{0}, \CM_2)} &=
+    \trace(\CM_2^{-1} \CM_1) + \logdet(\CM_2) - \logdet(\CM_1) - N
+  \shortintertext{Recall that the log density \( \log
+    \p(\vec{x}) \) for \( \vec{x} \sim \N(\vec{0}, \CM) \) is}
+  \log \p(\vec{x}) &= -\frac{1}{2} (N \log(2 \pi) + \logdet(\CM) +
+    \vec{x}^{\top} \CM^{-1} \vec{x})
+  \shortintertext{If \( P \) and \( Q \) are the respective densities for
+    \( \CM_1 \) and \( \CM_2 \), then by definition}
+  2 \KL*{\N(\vec{0}, \CM_1)}{\N(\vec{0}, \CM_2)} &= 2 \E_P[\log P - \log Q]
+  \shortintertext{where \( \E_P \) denotes expectation under \( P \).}
+  &= 2 \E_P[-\frac{1}{2} (N \log(2 \pi) + \logdet(\CM_1) +
+            \vec{x}^{\top} \CM_1^{-1} \vec{x}) \\
+  \nonumber
+  & \hphantom{= 2 \E_P[}
+            +\frac{1}{2} (N \log(2 \pi) + \logdet(\CM_2) +
+            \vec{x}^{\top} \CM_2^{-1} \vec{x})] \\
+  \label{eq:kl_after_logdet}
+  &= \E_P[\vec{x}^{\top} \CM_2^{-1} \vec{x} -
+          \vec{x}^{\top} \CM_1^{-1} \vec{x}]
+          + \logdet(\CM_2) - \logdet(\CM_1) \\
+  \E_P[\vec{x}^{\top} \CM_2^{-1} \vec{x} -
+          \vec{x}^{\top} \CM_1^{-1} \vec{x}]
+  &=
+  \E_P[\trace(\vec{x}^{\top} \CM_2^{-1} \vec{x}) -
+       \trace(\vec{x}^{\top} \CM_1^{-1} \vec{x})]
+\end{align}
+because the trace of a scalar is a scalar, and the linearity of trace.
+\begin{align}
+  &=
+  \E_P[\trace(\CM_2^{-1} \vec{x} \vec{x}^{\top}) -
+       \trace(\CM_1^{-1} \vec{x} \vec{x}^{\top})]
+  && \text{cyclic property of trace} \\
+  &=
+  \E_P[\trace(\CM_2^{-1} \vec{x} \vec{x}^{\top} -
+              \CM_1^{-1} \vec{x} \vec{x}^{\top})]
+  && \text{linearity of trace} \\
+  &= \E_P[\trace \left (
+    (\CM_2^{-1} - \CM_1^{-1}) \vec{x} \vec{x}^{\top} \right )]
+  && \text{factoring} \\
+  &= \trace(\E_P \left [
+    (\CM_2^{-1} - \CM_1^{-1}) \vec{x} \vec{x}^{\top} \right])
+  && \text{swapping trace and expectation} \\
+  &= \trace((\CM_2^{-1} - \CM_1^{-1})
+    \E_P \left [ \vec{x} \vec{x}^{\top} \right])
+  && \text{linearity of expectation} \\
+  &= \trace((\CM_2^{-1} - \CM_1^{-1}) \CM_1)
+  && \text{\( \CM_1 = \E_P[\vec{x} \vec{x}^{\top} \)]} \\
+  &= \trace(\CM_2^{-1} \CM_1 - \Id_N)
+  && \text{multiplying} \\
+  &= \trace(\CM_2^{-1} \CM_1) - \trace(\Id_N)
+  && \text{linearity of trace} \\
+  &= \trace(\CM_2^{-1} \CM_1) - N
+  \label{eq:kl_after_trace}
+  && \text{trace of \( N \times N \) identity \( N \)}
+\end{align}
+Combining \cref{eq:kl_after_trace} with
+\cref{eq:kl_after_logdet}, we obtain the desired result
+\begin{align}
+  \nonumber
+  2 \KL*{\N(\vec{0}, \CM_1)}{\N(\vec{0}, \CM_2)} &=
+    \trace(\CM_2^{-1} \CM_1) + \logdet(\CM_2) - \logdet(\CM_1) - N
+\end{align}
+
+\subsection{Reduction for optimal factor}
+\label{app:kl_L}
+
+We wish to compute the KL divergence between \( \CM \) and the Cholesky
+factor \( L \) computed according to \cref{eq:L_col}. From \cref{eq:kl},
+\begin{align}
+  \label{eq:kl_L}
+  2 \KL*{\N(\vec{0}, \CM)}{\N(\vec{0}, (L L^{\top})^{-1})} &=
+    \trace(L L^{\top} \CM) - \logdet(L L^{\top}) - \logdet(\CM) - N
+  \shortintertext{Ignoring terms not depending on \( L \),}
+  &= \trace(L L^{\top} \CM) - \logdet(L L^{\top})
+  \shortintertext{By the cyclic property of trace,}
+  &= \trace(L \CM L^{\top}) - \logdet(L L^{\top})
+  \shortintertext{Focusing on \( \trace(L \CM
+    L^{\top}) \) and expanding on the columns of \( L \),}
+  \trace(L \CM L^{\top}) &= \sum_{i = 1}^N
+    L_{s_i, i}^{\top} \CM_{s_i, s_i} L_{s_i, i}
+  \shortintertext{Plugging in \( L_{s_i, i} \) from \cref{eq:L_col},}
+  &= \sum_{i = 1}^N
+    \left (
+      \frac{\left ( \CM_{s_i, s_i}^{-1} \vec{e}_1 \right )^{\top}}
+        {\sqrt{\vec{e}_1^{\top} \CM_{s_i, s_i}^{-1} \vec{e}_1}}
+    \right )
+    \CM_{s_i, s_i}
+    \left (
+      \frac{\CM_{s_i, s_i}^{-1} \vec{e}_1}
+        {\sqrt{\vec{e}_1^{\top} \CM_{s_i, s_i}^{-1} \vec{e}_1}}
+    \right ) \\
+  &= \sum_{i = 1}^N
+    \frac{\vec{e}_1^{\top} \CM_{s_i, s_i}^{-1}
+          \CM_{s_i, s_i} \CM_{s_i, s_i}^{-1}
+          \vec{e}_1}{\vec{e}_1^{\top} \CM_{s_i, s_i}^{-1} \vec{e}_1} \\
+  &= \sum_{i = 1}^N 1 = N
+\end{align}
+\begin{align}
+  \shortintertext{Using \( N \) for \( \trace(L
+    L^{\top} \CM) \) in \cref{eq:kl_L},}
+  2 \KL*{\N(\vec{0}, \CM)}{\N(\vec{0}, (L L^{\top})^{-1})} &=
+    -\logdet(L L^{\top}) - \logdet(\CM)
+  \shortintertext{\( L^{\top} \) has the same log determinant
+    as \( L \), and because \( L \) is lower triangular, its
+    log determinant is the sum of its diagonal entries:}
+  &= -2 \sum_{i = 1}^N \left [ \log(L_{ii}) \right ] - \logdet(\CM)
+  \shortintertext{Plugging \cref{eq:L_col} for the diagonal entries,}
+  &= -\sum_{i = 1}^N
+    \left [ \log(\vec{e}_1^{\top} \CM_{s_i, s_i}^{-1} \vec{e}_1) \right ]
+    - \logdet(\CM)
+  \shortintertext{Bringing the negative inside,}
+  &= \sum_{i = 1}^N
+    \left [
+      \log
+      \left (
+        (\vec{e}_1^{\top} \CM_{s_i, s_i}^{-1} \vec{e}_1)^{-1}
+      \right )
+    \right ]
+    - \logdet(\CM)
+\end{align}
+So minimizing the KL divergence (given optimal \( L \)) corresponds
+to minimizing the sum of the inverse of the diagonal entries.
+We can give an intuitive view of this result by making
+use of \cref{eq:L_cond_var} and expanding the log
+determinant by the chain rule \cref{eq:det_chain}.
+\begin{align}
+  \sum_{i = 1}^N
+    \left [
+      \log
+      \left (
+        (\vec{e}_1^{\top} \CM_{s_i, s_i}^{-1} \vec{e}_1)^{-1}
+      \right )
+    \right ]
+    - \logdet(\CM)
+  &= \sum_{i = 1}^N
+    \left [
+      \log \left ( \CM_{i, i \mid s_i - \{ i \}} \right )
+    \right ]
+    - \logdet(\CM) \\
+  &= \sum_{i = 1}^N
+      \log \left ( \CM_{i, i \mid s_i - \{ i \}} \right ) -
+    \sum_{i = 1}^N
+      \log \left ( \CM_{i, i \mid i + 1:} \right ) \\
+  &= \sum_{i = 1}^N
+    \left [
+      \log \left ( \CM_{i, i \mid s_i - \{ i \}} \right ) -
+      \log \left ( \CM_{i, i \mid i + 1:} \right )
+    \right ]
+\end{align}
+This sum is the accumulated \emph{difference} in error for a series of
+independent prediction problems: to predict the \( i \)th variable given
+the variables after it in the ordering, \( i + 1, i + 2, \dotsc, N \).
+The left term \( \log \left ( \CM_{i, i \mid s_i - \{ i \}} \right ) \) is
+restricted to the variables in the sparsity pattern \( s_i \), while the right
+term \( \log \left ( \CM_{i, i \mid i + 1:} \right ) \) is unconstrained.
+As a result, the left term will necessarily be greater than the
+right, and the goal is to minimize the accumulated deviation.
+Thus, the KL divergence measures the maintenance of predictive accuracy after
+adding conditional independence (sparsity) to the original distribution.
+This independent regression problem interpretation of the KL
+divergence is also given in \cite{katzfuss2022scalable}, equation 5.
+
+The asymmetry of KL divergence implies the order of the matrices matters as
+well as whether both matrices have been inverted or not. This seems to imply
+that there are four possible ways to compare two covariance matrices. However,
+note that
+\begin{align}
+  \KL*{\N(\vec{0}, \CM_1)}{\N(\vec{0}, \CM_2)} &=
+    \KL*{\N(\vec{0}, \CM_2^{-1})}{\N(\vec{0}, \CM_1^{-1})}
+\end{align}
+from \cref{eq:kl} and the cyclic property of trace, so inverting both
+matrices implicitly reverses the order of the KL divergence.
+There are therefore only two possible ways to
+compare the two matrices, depending on their order.
+From a statistical perspective, the KL divergence can interpreted
+as the likelihood-ratio test, so the asymmetry in order corresponds
+to the asymmetry between the null and alternative hypotheses.
+
 \section{Computation in sparse Gaussian process selection}
+
+\subsection{Mutual information objective}
+\label{app:mutual_info}
+
+The mutual information or information gain between two collections of
+random variables \( \vec{y}_\Pred \) and \( \vec{y}_\Train \) is defined as
+\begin{align}
+  \label{eq:info}
+  \MI[\vec{y}_\Pred;\vec{y}_\Train] &= \entropy[\vec{y}_\Pred] -
+    \entropy[\vec{y}_\Pred \mid \vec{y}_\Train]
+\end{align}
+Maximizing the mutual information is equivalent to minimizing the
+conditional entropy since the entropy of \( \vec{y}_\Pred \) is constant.
+Because the differential entropy of a multivariate Gaussian is monotonically
+increasing with the log determinant of its covariance matrix, minimizing the
+conditional entropy is equivalent to minimizing the log determinant of the
+posterior covariance matrix.
+For a single predictive point, its log determinant is simply its variance.
+Thus, maximizing mutual information minimizes the
+\emph{conditional variance} of the target point.
+In particular, because our estimator is the conditional
+expectation \cref{eq:cond_mean}, it is unbiased because \(
+\E[\E[\vec{y}_\Pred \mid \vec{y}_\Train]] = \E[\vec{y}_\Pred] \).
+Because it is unbiased, its expected mean squared error is simply the
+conditional variance since \( \E[(\vec{y}_\Pred - \E[\vec{y}_\Pred
+\mid \vec{y}_\Train])^2 \mid \vec{y}_\Train] = \Var[\vec{y}_\Pred
+\mid \vec{y}_\Train] \) where the outer expectation is taken under
+conditioning because of the assumption that \( \vec{y}_\Pred \) is
+distributed according to the Gaussian process.
+So maximizing the mutual information is equivalent to minimizing
+the conditional variance which is in turn equivalent to
+minimizing the expected mean squared error of the prediction.
+Another perspective arises from comparing the definition of mutual
+information \cref{eq:info} to the EV-VE identity \cref{eq:eve},
+\begin{align}
+  \label{eq:info_eve}
+  \textcolor{orange}{\entropy[\vec{y}_\Pred]} &=
+    \textcolor{lightblue}{\entropy[\vec{y}_\Pred \mid \vec{y}_\Train]} +
+    \textcolor{rust}{\MI[\vec{y}_\Pred;\vec{y}_\Train]} \\
+  \label{eq:eve}
+  \textcolor{orange}{\Var[\vec{y}_\Pred]} &=
+    \textcolor{lightblue}{\E[\Var[\vec{y}_\Pred \mid \vec{y}_\Train]]} +
+    \textcolor{rust}{     \Var[\E[\vec{y}_\Pred \mid \vec{y}_\Train]]}
+\end{align}
+On the left hand side, entropy is monotone with variance.
+On the right hand side, the expectation of conditional variance
+is monotone with conditional entropy and can be interpreted to
+be the fluctuation of the prediction point after conditioning.
+Because the sum of the two terms on the right hand side is constant,
+minimizing the expectation of conditional variance is equivalent to
+maximizing the variance of conditional expectation, which corresponds
+to the mutual information.
+
+Supposing \( \vec{y}_\Pred \) was independent of \( \vec{y}_\Train
+\), then the predictor \( \E[\vec{y}_\Pred \mid \vec{y}_\Train] \)
+reduces to the constant \( \E[\vec{y}_\Pred] \) whose variance is 0.
+Meanwhile, the error \( \E[\Var[\vec{y}_\Pred \mid \vec{y}_\Train]]
+\) becomes \( \E[\Var[\vec{y}_\Pred]] = \Var[\vec{y}_\Pred] \).
+On the other extreme, supposing \( \vec{y}_\Pred \) was a deterministic
+function of \( \vec{y}_\Train \), then \( \Var[\E[\vec{y}_\Pred \mid
+\vec{y}_\Train]] = \Var[\vec{y}_\Pred] \) while the error term becomes
+\( \E[\Var[\vec{y}_\Pred \mid \vec{y}_\Train]] = \E[0] = 0 \).
+Thus, the variance of conditional expectation is the information shared
+between \( \vec{y}_\Pred \) and \( \vec{y}_\Train \), as it increases
+when the predictor for \( \vec{y}_\Pred \) (the conditional expectation
+\( \E[\vec{y}_\Pred \mid \vec{y}_\Train] \)) depends on the observed
+results of \( \vec{y}_\Train \).
 
 \subsection{Updating precision after insertion}
 \label{app:prec_insert}
@@ -2221,195 +2434,6 @@ conditioning on additional point(s) decreases the correlation between
 every pair of points. Intuitively, this corresponds to the screening
 effect observed in spatial statistics literature --- conditioning on
 a nearby point decreases the correlation for far away points.
-
-\section{Derivations in KL-minimization}
-
-\subsection{KL divergence of two multivariate Gaussians}
-\label{app:kl_obj}
-
-\Stodo{this is useless, remove}
-
-We want to show that the KL divergence between \(
-\N(\vec{0}, \CM_1) \) and \( \N(\vec{0}, \CM_2) \) for \(
-\CM_1, \CM_2 \in \Reals^{N \times N} \) can be written
-\begin{align}
-  2 \KL*{\N(\vec{0}, \CM_1)}{\N(\vec{0}, \CM_2)} &=
-    \trace(\CM_2^{-1} \CM_1) + \logdet(\CM_2) - \logdet(\CM_1) - N
-  \shortintertext{Recall that the log density \( \log
-    \p(\vec{x}) \) for \( \vec{x} \sim \N(\vec{0}, \CM) \) is}
-  \log \p(\vec{x}) &= -\frac{1}{2} (N \log(2 \pi) + \logdet(\CM) +
-    \vec{x}^{\top} \CM^{-1} \vec{x})
-  \shortintertext{If \( P \) and \( Q \) are the respective densities for
-    \( \CM_1 \) and \( \CM_2 \), then by definition}
-  2 \KL*{\N(\vec{0}, \CM_1)}{\N(\vec{0}, \CM_2)} &= 2 \E_P[\log P - \log Q]
-  \shortintertext{where \( \E_P \) denotes expectation under \( P \).}
-  &= 2 \E_P[-\frac{1}{2} (N \log(2 \pi) + \logdet(\CM_1) +
-            \vec{x}^{\top} \CM_1^{-1} \vec{x}) \\
-  \nonumber
-  & \hphantom{= 2 \E_P[}
-            +\frac{1}{2} (N \log(2 \pi) + \logdet(\CM_2) +
-            \vec{x}^{\top} \CM_2^{-1} \vec{x})] \\
-  \label{eq:kl_after_logdet}
-  &= \E_P[\vec{x}^{\top} \CM_2^{-1} \vec{x} -
-          \vec{x}^{\top} \CM_1^{-1} \vec{x}]
-          + \logdet(\CM_2) - \logdet(\CM_1) \\
-  \E_P[\vec{x}^{\top} \CM_2^{-1} \vec{x} -
-          \vec{x}^{\top} \CM_1^{-1} \vec{x}]
-  &=
-  \E_P[\trace(\vec{x}^{\top} \CM_2^{-1} \vec{x}) -
-       \trace(\vec{x}^{\top} \CM_1^{-1} \vec{x})]
-\end{align}
-because the trace of a scalar is a scalar, and the linearity of trace.
-\begin{align}
-  &=
-  \E_P[\trace(\CM_2^{-1} \vec{x} \vec{x}^{\top}) -
-       \trace(\CM_1^{-1} \vec{x} \vec{x}^{\top})]
-  && \text{cyclic property of trace} \\
-  &=
-  \E_P[\trace(\CM_2^{-1} \vec{x} \vec{x}^{\top} -
-              \CM_1^{-1} \vec{x} \vec{x}^{\top})]
-  && \text{linearity of trace} \\
-  &= \E_P[\trace \left (
-    (\CM_2^{-1} - \CM_1^{-1}) \vec{x} \vec{x}^{\top} \right )]
-  && \text{factoring} \\
-  &= \trace(\E_P \left [
-    (\CM_2^{-1} - \CM_1^{-1}) \vec{x} \vec{x}^{\top} \right])
-  && \text{swapping trace and expectation} \\
-  &= \trace((\CM_2^{-1} - \CM_1^{-1})
-    \E_P \left [ \vec{x} \vec{x}^{\top} \right])
-  && \text{linearity of expectation} \\
-  &= \trace((\CM_2^{-1} - \CM_1^{-1}) \CM_1)
-  && \text{\( \CM_1 = \E_P[\vec{x} \vec{x}^{\top} \)]} \\
-  &= \trace(\CM_2^{-1} \CM_1 - \Id_N)
-  && \text{multiplying} \\
-  &= \trace(\CM_2^{-1} \CM_1) - \trace(\Id_N)
-  && \text{linearity of trace} \\
-  &= \trace(\CM_2^{-1} \CM_1) - N
-  \label{eq:kl_after_trace}
-  && \text{trace of \( N \times N \) identity \( N \)}
-\end{align}
-Combining \cref{eq:kl_after_trace} with
-\cref{eq:kl_after_logdet}, we obtain the desired result
-\begin{align}
-  \nonumber
-  2 \KL*{\N(\vec{0}, \CM_1)}{\N(\vec{0}, \CM_2)} &=
-    \trace(\CM_2^{-1} \CM_1) + \logdet(\CM_2) - \logdet(\CM_1) - N
-\end{align}
-
-\subsection{Reduction for optimal factor}
-\label{app:kl_L}
-
-We wish to compute the KL divergence between \( \CM \) and the Cholesky
-factor \( L \) computed according to \cref{eq:L_col}. From \cref{eq:kl},
-\begin{align}
-  \label{eq:kl_L}
-  2 \KL*{\N(\vec{0}, \CM)}{\N(\vec{0}, (L L^{\top})^{-1})} &=
-    \trace(L L^{\top} \CM) - \logdet(L L^{\top}) - \logdet(\CM) - N
-  \shortintertext{Ignoring terms not depending on \( L \),}
-  &= \trace(L L^{\top} \CM) - \logdet(L L^{\top})
-  \shortintertext{By the cyclic property of trace,}
-  &= \trace(L \CM L^{\top}) - \logdet(L L^{\top})
-  \shortintertext{Focusing on \( \trace(L \CM
-    L^{\top}) \) and expanding on the columns of \( L \),}
-  \trace(L \CM L^{\top}) &= \sum_{i = 1}^N
-    L_{s_i, i}^{\top} \CM_{s_i, s_i} L_{s_i, i}
-  \shortintertext{Plugging in \( L_{s_i, i} \) from \cref{eq:L_col},}
-  &= \sum_{i = 1}^N
-    \left (
-      \frac{\left ( \CM_{s_i, s_i}^{-1} \vec{e}_1 \right )^{\top}}
-        {\sqrt{\vec{e}_1^{\top} \CM_{s_i, s_i}^{-1} \vec{e}_1}}
-    \right )
-    \CM_{s_i, s_i}
-    \left (
-      \frac{\CM_{s_i, s_i}^{-1} \vec{e}_1}
-        {\sqrt{\vec{e}_1^{\top} \CM_{s_i, s_i}^{-1} \vec{e}_1}}
-    \right ) \\
-  &= \sum_{i = 1}^N
-    \frac{\vec{e}_1^{\top} \CM_{s_i, s_i}^{-1}
-          \CM_{s_i, s_i} \CM_{s_i, s_i}^{-1}
-          \vec{e}_1}{\vec{e}_1^{\top} \CM_{s_i, s_i}^{-1} \vec{e}_1} \\
-  &= \sum_{i = 1}^N 1 = N
-\end{align}
-\begin{align}
-  \shortintertext{Using \( N \) for \( \trace(L
-    L^{\top} \CM) \) in \cref{eq:kl_L},}
-  2 \KL*{\N(\vec{0}, \CM)}{\N(\vec{0}, (L L^{\top})^{-1})} &=
-    -\logdet(L L^{\top}) - \logdet(\CM)
-  \shortintertext{\( L^{\top} \) has the same log determinant
-    as \( L \), and because \( L \) is lower triangular, its
-    log determinant is the sum of its diagonal entries:}
-  &= -2 \sum_{i = 1}^N \left [ \log(L_{ii}) \right ] - \logdet(\CM)
-  \shortintertext{Plugging \cref{eq:L_col} for the diagonal entries,}
-  &= -\sum_{i = 1}^N
-    \left [ \log(\vec{e}_1^{\top} \CM_{s_i, s_i}^{-1} \vec{e}_1) \right ]
-    - \logdet(\CM)
-  \shortintertext{Bringing the negative inside,}
-  &= \sum_{i = 1}^N
-    \left [
-      \log
-      \left (
-        (\vec{e}_1^{\top} \CM_{s_i, s_i}^{-1} \vec{e}_1)^{-1}
-      \right )
-    \right ]
-    - \logdet(\CM)
-\end{align}
-So minimizing the KL divergence (given optimal \( L \)) corresponds
-to minimizing the sum of the inverse of the diagonal entries.
-We can give an intuitive view of this result by making
-use of \cref{eq:L_cond_var} and expanding the log
-determinant by the chain rule \cref{eq:det_chain}.
-\begin{align}
-  \sum_{i = 1}^N
-    \left [
-      \log
-      \left (
-        (\vec{e}_1^{\top} \CM_{s_i, s_i}^{-1} \vec{e}_1)^{-1}
-      \right )
-    \right ]
-    - \logdet(\CM)
-  &= \sum_{i = 1}^N
-    \left [
-      \log \left ( \CM_{i, i \mid s_i - \{ i \}} \right )
-    \right ]
-    - \logdet(\CM) \\
-  &= \sum_{i = 1}^N
-      \log \left ( \CM_{i, i \mid s_i - \{ i \}} \right ) -
-    \sum_{i = 1}^N
-      \log \left ( \CM_{i, i \mid i + 1:} \right ) \\
-  &= \sum_{i = 1}^N
-    \left [
-      \log \left ( \CM_{i, i \mid s_i - \{ i \}} \right ) -
-      \log \left ( \CM_{i, i \mid i + 1:} \right )
-    \right ]
-\end{align}
-This sum is the accumulated \emph{difference} in error for a series of
-independent prediction problems: to predict the \( i \)th variable given
-the variables after it in the ordering, \( i + 1, i + 2, \dotsc, N \).
-The left term \( \log \left ( \CM_{i, i \mid s_i - \{ i \}} \right ) \) is
-restricted to the variables in the sparsity pattern \( s_i \), while the right
-term \( \log \left ( \CM_{i, i \mid i + 1:} \right ) \) is unconstrained.
-As a result, the left term will necessarily be greater than the
-right, and the goal is to minimize the accumulated deviation.
-Thus, the KL divergence measures the maintenance of predictive accuracy after
-adding conditional independence (sparsity) to the original distribution.
-This independent regression problem interpretation of the KL
-divergence is also given in \cite{katzfuss2022scalable}, equation 5.
-
-The asymmetry of KL divergence implies the order of the matrices matters as
-well as whether both matrices have been inverted or not. This seems to imply
-that there are four possible ways to compare two covariance matrices. However,
-note that
-\begin{align}
-  \KL*{\N(\vec{0}, \CM_1)}{\N(\vec{0}, \CM_2)} &=
-    \KL*{\N(\vec{0}, \CM_2^{-1})}{\N(\vec{0}, \CM_1^{-1})}
-\end{align}
-from \cref{eq:kl} and the cyclic property of trace, so inverting both
-matrices implicitly reverses the order of the KL divergence.
-There are therefore only two possible ways to
-compare the two matrices, depending on their order.
-From a statistical perspective, the KL divergence can interpreted
-as the likelihood-ratio test, so the asymmetry in order corresponds
-to the asymmetry between the null and alternative hypotheses.
 
 \section{Algorithms}
 
