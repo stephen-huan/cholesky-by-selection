@@ -139,151 +139,157 @@ for embarrassingly parallel algorithms for Gaussian process regression
 \cite{katzfuss2021general}, Cholesky factorization \cite{schafer2021sparse},
 and transport map construction \cite{marzouk2016introduction}.
 
-\paragraph{Sparsity selection by geometry}
+\paragraph{Ordering and sparsity selection by geometry}
 
-\todo{Might want to add a quick common explaining the maximin ordering here?}
-Assuming that a suitable elimination ordering is chosen, it remains to
-be decided the sparsity set for each point. Indices are often chosen
-to be the closest points to the current point by Euclidean distance
-\cite{vecchia1988estimation, schafer2020compression, schafer2021sparse,
-katzfuss2022scalable}. This choice can be justified by noting that
-popular kernel functions like the Mat{\'e}rn family of kernel functions
-decay exponentially with increasing distance. For more general kernel
-functions, geostatisticians have long observed the ``screening effect'',
-or the observation that conditional on points close to the point
-of interest, far away points are nearly conditionally independent
+\todo{Might want to add a quick comment explaining the maximin ordering here?}
+The selected ordering and sparsity pattern have a
+significant effect on the quality of the resulting factor.
+Vecchia originally proposed ordering points lexicographically
+\cite{vecchia1988estimation}, but more recent work exploits space-covering
+orderings like the maximum-minimum ordering \cite{guinness2018permutation},
+which have become relatively popular \cite{schafer2020compression,
+schafer2021sparse, kang2021correlationbased}.
+Once the ordering is fixed, the sparsity set for a particular
+point can include any point prior to it in the ordering.
+Following Vecchia's recommendation, the points are often chosen to be
+the closest points by Euclidean distance \cite{vecchia1988estimation,
+schafer2020compression, schafer2021sparse, katzfuss2022scalable}.
+This choice is often justified by noting that popular kernel functions
+like the Mat{\'e}rn family decay exponentially with increasing distance.
+For more general kernel functions, geostatisticians have long observed the
+``screening effect'', or the observation that conditional on points close to
+the point of interest, far away points are nearly conditionally independent
 \cite{stein2002screening, stein20112010}.
-
-% not sure this is necessary
-% Possible manifestations of this effect include the observed linearity of the
-% marginal log-likelihood \cite{bartels2022adaptive}, approximate submodularity
-% of common information-theoretic criteria \cite{das2011submodular,
-% jagalur-mohan2021batch}, and exponential decay in error for Cholesky
-% factorization \cite{schafer2020compression, schafer2021sparse}.
-
-However, selecting by distance alone ignores the conditional effect of adding
-new points to the sparsity set. As an illustrative example, imagine the closest
-point to the point of interest has been duplicated multiple times. Once the
-duplicated point has been selected, conditional on the selected point, the
-duplicates provide no additional information. But they are still closest to
-the point of interest, so selecting by distance alone would still add these
-redundant points to the sparsity set. Instead, we propose greedily selecting
-based on conditional mutual information with the point of interest.
+However, selecting by distance alone ignores the conditional
+effect of adding new points to the sparsity set.
+As an illustrative example, imagine the closest point
+to the point of interest is duplicated multiple times.
+Conditional on the duplicated point, the
+duplicates provide no additional information.
+But they are still closest to the point of interest, so selecting by
+distance alone would still add these redundant points to the sparsity set.
 
 \paragraph{Conditional selection}
 
-\todo{We should start with something like "In this work we propose a conditional .." or so. That is, first make it clear that applying conditional selection is the main contribution of the pres4ent work and thenm relate it to all the other approaches / techniques.}
-The machine learning community has long developed algorithms that greedily
-select the next point to include by maximizing an information-theoretic
-objective \cite{smola2000sparse, herbrich2002fast, seeger2003fast}.
-Similar algorithms have been developed in the context of sensor placement
-\cite{krause2008nearoptimal, clark2018greedy} and experimental design
-\cite{mutny2022experimental} where it is assumed the target phenomena
-is modeled by a Gaussian process or is otherwise linearly dependent
-on the selected measurements. More recent work exploits the empirical
-observation that the marginal log-likelihood is approximately linear,
-giving a principled way to determine the number of selected points
-without viewing the whole dataset \cite{bartels2022adaptive}.
+\todo{We should start with something like ``In this work we propose
+a conditional...'' or so. That is, first make it clear that applying
+conditional selection is the main contribution of the present work
+and then relate it to all the other approaches / techniques.}
+Instead of adding points to the sparsity pattern by distance, we propose
+greedily selecting points that maximize mutual information with the
+point of interest, conditional on all points selected previously.
+The machine learning community has long developed similar algorithms that
+greedily optimize information-theoretic objectives in the context of Gaussian
+process inference \cite{smola2000sparse, herbrich2002fast, seeger2003fast}.
+Similar algorithms have also been developed in the context of
+sensor placement \cite{krause2008nearoptimal, clark2018greedy}
+and experimental design \cite{mutny2022experimental} where it is
+assumed the target phenomena is modeled by a Gaussian process or
+is otherwise linearly dependent on the selected measurements.
+However, these works often focus on obtaining a global approximation of
+the entire process, e.g. through sparse approximation of the likelihood
+or covariance matrix (see \cite{liu2020when, chalupka2012framework,
+quinonero-candela2005unifying} for a comprehensive overview).
+To the best of our knowledge \cite{wada2013gaussian} is the first to
+propose \emph{directed} inference for a point of interest, in which
+they use the kernel function itself as the objective like the later
+work \cite{kang2021correlationbased}.
+Seemingly independently of \cite{wada2013gaussian}, \cite{gramacy2014local}
+and the follow up work \cite{gramacy2015speeding} use the active learning Cohn
+(ALC) objective first described in \cite{cohn1996neural} for directed Gaussian
+process regression, yielding an algorithm equivalent to our proposed algorithm
+in the case of a single point of interest.
 
-Our proposed selection method can be viewed as the covariance equivalent of
-a popular algorithm in signal processing and compressive sensing, orthogonal
-matching pursuit (OMP) \cite{tropp2007signal, tropp2006algorithms}, which
-seeks to approximate a target vector as the sparse linear combination from a
-given collection of vectors. OMP is a workhorse algorithm used in as diverse
-contexts as signal recovery \cite{tropp2007signal, tropp2006algorithms},
-polynomial chaos expansion \cite{baptista2019greedy}, and the use of neural
-networks to solve partial differential equations \cite{hao2021efficient,
-siegel2022optimal}.
-
-Nearly all of these selection methods leverage numerical linear algebra
-for efficient computation, particularly the Cholesky factorization
-\cite{herbrich2002fast, seeger2003fast, bartels2022adaptive} or the
-closely related QR factorization \cite{clark2018greedy, tropp2007signal,
-baptista2019greedy}. We wish to emphasize that algorithms for Cholesky
-factorization translate naturally to Gaussian processes regression and
-vice-versa.
+Our proposed selection method can also be viewed as the covariance
+equivalent of orthogonal matching pursuit (OMP) \cite{tropp2007signal,
+tropp2006algorithms}, a workhorse algorithm popular in signal processing and
+compressive sensing which seeks to approximate in feature space a target vector
+as the sparse linear combination from a given collection of vectors.
 
 \paragraph{Main results}
 
-\todo{Want to start a one-dentence descrption of our contributions, something like" We propose ...". We shoudl first fully describe what we are doing (greedy selection, integration into the KL framework etc.) We want to start talking about technical things like the computational costs and the improvement only afterrward, once we have estaglished what it is that we are accelerating.}
-For a single point of interest, a direct computation of the conditional
-mutual information criterion would have a computational time complexity of \(
-\BigO(N k^4) \) to greedily select \( k \) points out of \( N \) total, but by
-maintaining a partial Cholesky factor, we are able to reduce this complexity
-to \( \BigO(N k^2) \). We extend this basic selection algorithm to maximize
-mutual information with \emph{multiple} points of interest, to naturally take
-advantage of the ``two birds with one stone'' effect. For \( m \) target points
-we achieve a time complexity of \( \BigO(N k^2 + N m^2 + m^3) \), which for
-\( m \approx k \) is essentially \( m \) times faster than the single-point
-algorithm. In the setting of aggregated (or supernodal) Cholesky factorization
-where the sparsity pattern for multiple columns is determined at once, a
-candidate entry may be between two columns --- above one, but below another.
-Adding this entry only conditions a \emph{partial} subset of the target points.
-By carefully applying rank-one downdating of Cholesky factors, we are able to
+\todo{Want to start a one-sentence descrption of our contributions, something
+like ``We propose...''. We should first fully describe what we are doing
+(greedy selection, integration into the KL framework etc.) We want to start
+talking about technical things like the computational costs and the improvement
+only afterward, once we have established what it is that we are accelerating.}
+Our main contribution is a selection algorithm that greedily maximizes
+conditional mutual information with a point of interest, which we use to select
+sparsity entries for sparse approximate Cholesky factors of precision matrices.
+We compute Cholesky factors through the KL-minimization framework
+of \cite{schafer2021sparse}, but use conditional selection
+to form the sparsity pattern instead of nearest neighbors.
+The final algorithm extends the kernel-based selection algorithms
+\cite{wada2013gaussian, kang2021correlationbased} to account for conditioning
+and extends directed Gaussian process regression \cite{gramacy2014local}
+to multiple points as well as global approximation.
+For a single point of interest, direct computation of the mutual information
+criterion would have time complexity \( \BigO(N k^4) \) to select \( k \)
+points out of \( N \), but by maintaining a partial Cholesky factor we reduce
+the complexity to \( \BigO(N k^2) \).
+We extend the algorithm to maximize mutual information
+with \emph{multiple} points of interest, naturally taking
+advantage of the ``two birds with one stone'' effect.
+For \( m \) target points we achieve a time complexity of \(
+\BigO(N k^2 + N m^2 + m^3) \), which for \( m \approx k \) is
+essentially \( m \) times faster than the single-point algorithm.
+In the setting of aggregated (or supernodal) Cholesky factorization where
+the sparsity patterns of multiple columns are determined together, a
+candidate entry may only condition a \emph{partial} subset of the targets.
+By carefully applying rank-one downdating of Cholesky factors, we
 capture this structure at the same time complexity for multiple points.
-
-Greedy selection \emph{locally} infers the posterior distribution for
-distinguished point(s) of interest. In order to get a \emph{global}
-approximation for the entire Gaussian process, we compute a sparse approximate
-Cholesky factor of the precision by minimizing the KL-divergence between the
-centered multivariate normal distributions with covariance matrices \( \CM \)
-and \( (L L^{\top})^{-1} \) subject to the constraint \( L \in \SpSet \) as
-in \cite{schafer2021sparse}. We show that the resulting optimization problem
-reduces to independent regression problems for each column. In applying our
-greedy selection method, we are able to get more accurate Cholesky factors
-for the same number of nonzeros compared to if the sparsity was selected with
-geometry. Finally, we show how to adaptively determine the number of nonzeros
-per column in order to reduce the global KL-divergence by maintaining a global
+When applying our greedy selection method for sparsity selection
+of Cholesky factors, we achieve more accurate factors for the same
+number of nonzeros compared to selection by nearest neighbors.
+Finally, we show how to adaptively determine the number of nonzeros per
+column in order to reduce the global KL divergence by maintaining a global
 priority queue shared between each local greedy selection algorithm.
 
 \paragraph{Outline}
 
 \Stodo{todo once more of the paper is solidified}
-
 The remainder of the paper is organized as follows.
 
-\Stodo{put images in the introduction?}
+% \begin{figure}[h]
+%   \centering
+%   \input{figures/screening/uncond.tex}%
+%   \input{figures/screening/cond.tex}
+%   \caption{An illustration of the screening effect with the Mat{\'e}rn kernel
+%     with length scale \( \ell = 1 \) and smoothness \( \nu = \frac{5}{2} \).
+%     The first figure shows the unconditional covariance with the point at (0,
+%     0). The second figure shows the conditional covariance after conditioning
+%     on the four points in orange.}
+%   \label{fig:screen}
+% \end{figure}
 
-\begin{figure}[h]
-  \centering
-  \input{figures/screening/uncond.tex}%
-  \input{figures/screening/cond.tex}
-  \caption{An illustration of the screening effect with the Mat{\'e}rn kernel
-    with length scale \( \ell = 1 \) and smoothness \( \nu = \frac{5}{2} \).
-    The first figure shows the unconditional covariance with the point at (0,
-    0). The second figure shows the conditional covariance after conditioning
-    on the four points in orange.}
-  \label{fig:screen}
-\end{figure}
+% \begin{figure}[h]
+%   \centering
+%   \input{figures/selection/knn.tex}%
+%   \input{figures/selection/cknn.tex}
+%   \caption{Here, the \textcolor{lightblue}{blue} points are the
+%     \textcolor{lightblue}{candidates}, or training points, the
+%     \textcolor{orange}{orange} point is the \textcolor{orange}{unknown} point,
+%     or the point to make a prediction at, and the \textcolor{seagreen}{green}
+%     points are the \( k \) \textcolor{seagreen}{selected} points. The
+%     \textcolor{rust}{red} line is the \textcolor{rust}{conditional mean}
+%     \( \mu \), conditional on the \( k \) selected points, and the \(
+%     \mu - 2 \std \) to \( \mu + 2 \std \) confidence interval is shaded
+%     for the conditional variance \( \var \).}
+%   \label{fig:select}
+% \end{figure}
 
-\begin{figure}[h]
-  \centering
-  \input{figures/selection/knn.tex}%
-  \input{figures/selection/cknn.tex}
-  \caption{Here, the \textcolor{lightblue}{blue} points are the
-    \textcolor{lightblue}{candidates}, or training points, the
-    \textcolor{orange}{orange} point is the \textcolor{orange}{unknown} point,
-    or the point to make a prediction at, and the \textcolor{seagreen}{green}
-    points are the \( k \) \textcolor{seagreen}{selected} points. The
-    \textcolor{rust}{red} line is the \textcolor{rust}{conditional mean}
-    \( \mu \), conditional on the \( k \) selected points, and the \(
-    \mu - 2 \std \) to \( \mu + 2 \std \) confidence interval is shaded
-    for the conditional variance \( \var \).}
-  \label{fig:select}
-\end{figure}
-
-\begin{figure}[h]
-  \centering
-  \input{figures/cholesky_factor.tex}%
-  % TODO: matching GP image with 13 candidates, 3 selected, 1 training point
-  \input{figures/selection/cknn.tex}
-  \caption{For a column in isolation, the \textcolor{orange}{unknown} point
-    is the diagonal entry, below it are \textcolor{lightblue}{candidates},
-    and the \textcolor{seagreen}{selected} entries are added to the sparsity
-    pattern \( s_i \). Thus, sparsity selection in Cholesky factorization
-    is analogous to point selection in Gaussian processes.}
-  \label{fig:select_chol}
-\end{figure}
+% \begin{figure}[h]
+%   \centering
+%   \input{figures/cholesky_factor.tex}%
+%   % TODO: matching GP image with 13 candidates, 3 selected, 1 training point
+%   \input{figures/selection/cknn.tex}
+%   \caption{For a column in isolation, the \textcolor{orange}{unknown} point
+%     is the diagonal entry, below it are \textcolor{lightblue}{candidates},
+%     and the \textcolor{seagreen}{selected} entries are added to the sparsity
+%     pattern \( s_i \). Thus, sparsity selection in Cholesky factorization
+%     is analogous to point selection in Gaussian processes.}
+%   \label{fig:select_chol}
+% \end{figure}
 
 \Ftodo{``specific'' and ``intuitively'' are fluff, meaning that they
 don't really add information. In order to achieve crisp, high-quality
@@ -548,6 +554,9 @@ For
 So minimizing the KL divergence of the sparse Cholesky factor \( L \) is
 equivalent to independently minimizing over each column the variance of the
 \( i \)th variable, conditional on the entries \( s_i \) (excluding itself).
+A decomposition of the KL divergence into
+independent regression problems was also observed in
+\cite{katzfuss2022scalable} for lower triangular transport maps.
 From a Gaussian process regression perspective, we wish to carefully select the
 most effective points \( s_i \) out of the possible candidates \( i + 1, i +
 2, \dotsc, N \) that most reduce predictive error at the point of interest \(
