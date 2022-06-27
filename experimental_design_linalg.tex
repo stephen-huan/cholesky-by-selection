@@ -936,20 +936,25 @@ of unknown data can be done directly according to \cref{eq:cond_mean} and
 \subsection{Supernodes and blocked selection}
 \label{subsec:mult_select}
 
-We now consider efficiently dealing with multiple prediction points. The
-first question is how to generalize the objective for a single point
-\cref{eq:obj_gp} to multiple points. Following the same mutual information
-justification in \cref{subsec:select_obj}, a natural criterion is to
-minimize the log determinant of the prediction points' covariance matrix
-after conditioning on the selected points, or \( \logdet(\CM_{\Pred, \Pred
-\mid I}) \). This objective, known as D-optimal design in the literature
-\cite{krause2008nearoptimal}, has many intuitive interpretations: for
-example, as the volume of the region of uncertainty or as the scaling
-factor in the probability density function for multivariate Gaussians.
+We now consider efficiently dealing with multiple prediction points.
+The first problem is generalizing the objective for
+a single point \cref{eq:obj_gp} to multiple points.
+Following the KL minimization reasoning in \cref{subsubsec:aggregated},
+the criterion should be to minimize the log determinant of the prediction
+points' covariance matrix after conditioning on the selected points, \(
+\logdet(\CM_{\Pred, \Pred \mid I}) \).
+This objective, known as D-optimal design in the literature
+\cite{krause2008nearoptimal}, has many intuitive interpretations, for
+example, as a volume of the region of uncertainty or as the scaling factor
+in the probability density function of multivariate Gaussians.
+In addition, it is equivalent to maximizing mutual information
+since the differential entropy of a Gaussian is monotonically
+increasing with its log determinant (see \cref{app:mutual_info}).
 
-We need to efficiently compute the effect of selecting an index \( k \)
-on the log determinant. From \cref{eq:cond_select}, selecting an index
-is a rank-one update on the covariance matrix of the prediction points.
+We want to quickly compute how selecting an
+index \( k \) affects the log determinant.
+From \cref{eq:cond_select}, selecting an index
+is a rank-one downdate on the covariance matrix:
 \begin{align}
   \label{eq:obj_gp_mult}
   \logdet \left ( \CM_{\Pred, \Pred \mid \I \cup \{ k \}} \right )
@@ -963,70 +968,79 @@ is a rank-one update on the covariance matrix of the prediction points.
   &= \logdet \left ( \CM_{\Pred, \Pred \mid \I} \right ) +
      \log \left ( \frac{\CM_{k, k \mid \I, \Pred}}{\CM_{k, k \mid \I}} \right )
 \end{align}
-Equation \cref{eq:greedy_mult} shows that to compute the updated log
-determinant, it suffices to only compute conditional variances of the
-candidate point. Intuitively this corresponds to \emph{backwards}
-regression, where we imagine measuring the values of the \emph{prediction
-points} instead of at the \emph{candidates}. We then infer the posterior
-variance at a candidate, and pick the candidate whose conditional variance
-decreases the most (relative to its starting value). These candidates
-are likely to give information about the prediction points, because the
-prediction points give information about the candidate.
+Equation \cref{eq:greedy_mult} shows that to compute
+the updated log determinant, it suffices to only
+compute conditional variances of the candidate point.
+Intuitively this corresponds to \emph{backwards}
+regression, where we imagine measuring the values of the
+\emph{prediction points} instead of at the \emph{candidates}.
+We then infer the posterior variance at a candidate, and pick the candidate
+whose conditional variance decreases the most (relative to its starting value).
+These candidates are likely to give information about the prediction
+points, because the prediction points give information about the candidate.
 
 \Stodo{image for ``backwards'' sensor placement}
 
-Re-writing the objective in this way motivates an efficient algorithm to
-compute the objective. We condition on a newly added point essentially
-the same as in \cref{subsec:greedy_select}, but now maintaining two data
-structures instead of one: one for the variance after conditioning on
-the previously selected points, and the other for the variance after
-also conditioning on the prediction points. By the quotient rule, the
-order of conditioning does not matter as long as the order is consistent.
-For the second data structure, we therefore condition on the prediction
-points \emph{first} before any points have been selected. We again have
-two strategies, one which explicitly maintains precisions and the other
-which relies on maintaining partial Cholesky factors.
+Re-writing the objective in this way motivates
+an efficient algorithm to compute the objective.
+We condition on a newly added point essentially the same as in
+\cref{subsec:greedy_select}, but now maintaining two data structures
+instead of one: one for the variance after conditioning on the
+previously selected points, and the other for the variance after
+also conditioning on the prediction points.
+By the quotient rule, the order of conditioning
+does not matter as long as the order is consistent.
+For the second data structure, we therefore condition on the
+prediction points \emph{first} before any points have been selected.
+We again have two strategies, one which explicitly maintains precisions
+and the other which relies on maintaining partial Cholesky factors.
 
 For the precision algorithm, using \cref{eq:cond_cov} directly, for \( m
 \) prediction points it costs \( \BigO(m^3) \) to compute \( \CM_{\Pred,
 \Pred}^{-1} \) and then \( \BigO(N m^2) \) to compute the initial conditional
-variances \( \CM_{k, k \mid \Pred} \) for the \( N \) candidates. For each of
-the \( s \) rounds of selecting candidates, it costs \( s^2 \) and \( m^2 \) to
-update the precisions \( \CM_{\I, \I}^{-1} \) and \( \CM_{\Pred, \Pred}^{-1}
-\) respectively, where the details of efficiently updating \( \CM_{\Pred,
-\Pred}^{-1} \) after the rank-one update in \cref{eq:obj_gp_mult} are given
-in \cref{app:prec_cond}. Given the precisions, \( \vec{u} = \frac{\CM_{:, k
-\mid \I}}{\sqrt{\CM_{k, k \mid \I}}} \) and \( \vec{u}_\Pred = \frac{\CM_{:,
-k \mid \I, \Pred}}{\sqrt{\CM_{k, k \mid \I, \Pred}}} \) are computed as usual
-according to \cref{eq:cond_cov} in time \( Ns \) and \( Nm \). Finally, for
-each candidate \( j \), the conditional variance \( \CM_{j, j \mid \I} \) is
-updated by subtracting \( u_j^2 \), the conditional covariance \( \CM_{\Pred,
-k \mid \I} \) is updated for each index \( c \) of a prediction point by
-subtracting \( u_j u_c \), and the conditional variance \( \CM_{j, j \mid
-I, \Pred} \) is updated by subtracting \( {u_\Pred}_j^2 \). The total time
-complexity after simplification is \( \BigO(N s^2 + N m^2 + m^3) \).
+variances \( \CM_{k, k \mid \Pred} \) for the \( N \) candidates.
+For each of the \( s \) rounds of selecting candidates, it costs \(
+\BigO(s^2) \) and \( \BigO(m^2) \) to update the precisions \( \CM_{\I,
+\I}^{-1} \) and \( \CM_{\Pred, \Pred}^{-1} \) respectively, where the details
+of efficiently updating \( \CM_{\Pred, \Pred}^{-1} \) after the rank-one
+update in \cref{eq:obj_gp_mult} are given in \cref{app:prec_cond}.
+Given the precisions, \( \vec{u} = \frac{\CM_{:, k \mid \I}}{\sqrt{\CM_{k,
+k \mid \I}}} \) and \( \vec{u}_\Pred = \frac{\CM_{:, k \mid \I,
+\Pred}}{\sqrt{\CM_{k, k \mid \I, \Pred}}} \) are computed as usual according
+to \cref{eq:cond_cov} in time \( \BigO(Ns) \) and \( \BigO(Nm) \).
+Finally, for each candidate \( j \), the conditional variance \( \CM_{j, j
+\mid \I} \) is updated by subtracting \( u_j^2 \), the conditional covariance
+\( \CM_{\Pred, k \mid \I} \) is updated for each index \( c \) of a prediction
+point by subtracting \( u_j u_c \), and the conditional variance \( \CM_{j, j
+\mid I, \Pred} \) is updated by subtracting \( {u_\Pred}_j^2 \).
+The total time complexity after simplification
+is \( \BigO(N s^2 + N m^2 + m^3) \).
 
-For the Cholesky algorithm, two partial Cholesky factors are stored. We
-first compute the Cholesky factorization after selecting each prediction
-point, for a cost of \( (N + m) m \) for each of the \( m \) columns. We then
-begin selecting candidates, which requires updating both Cholesky factors in
-time \( (N + m)(m + s) \) which is dominated by updating the preconditioned
-Cholesky factor. The columns of the Cholesky factors correspond precisely
-to \( \vec{u} \) and \( \vec{u}_\Pred \) and both conditional variances \(
-\CM_{j, j \mid I} \) and \( \CM_{j, j \mid I, \Pred} \) can be computed as
-above. The conditional covariances do not need to be computed. Over \( s \)
-rounds the total time complexity is \( \BigO((N + m) m^2 + s(N + m)(m + s))
-\) which simplifies to \( \BigO(N s^2 + N m^2 + m^3) \).
+For the Cholesky algorithm, two partial Cholesky factors are stored.
+We first compute the Cholesky factorization after selecting each prediction
+point, for a cost of \( \BigO((N + m) m) \) for each of the \( m \) columns.
+We then begin selecting candidates, which requires updating
+both Cholesky factors in time \( (N + m)(m + s) \) which is
+dominated by updating the preconditioned Cholesky factor.
+The columns of the Cholesky factors correspond precisely to \( \vec{u}
+\) and \( \vec{u}_\Pred \) and both conditional variances \( \CM_{j, j
+\mid I} \) and \( \CM_{j, j \mid I, \Pred} \) can be computed as above.
+The conditional covariances do not need to be computed.
+Over \( s \) rounds the total time complexity is \( \BigO((N + m) m^2 +
+s(N + m)(m + s)) \) which simplifies to \( \BigO(N s^2 + N m^2 + m^3) \).
 
-Like the single-point case, both approaches have the same time complexity but
-differ in space complexity. The precision algorithm requires \( \BigO(s^2 +
-m^2) \) memory to store both precisions, as well as \( \BigO(N m) \) memory
-to store the conditional covariances. The Cholesky algorithm requires \(
-\BigO((N + m)(m + s)) \) memory to store the first \( m + s \) columns of
-the Cholesky factor for the joint covariance matrix between training and
-prediction points, which simplifies to \( \BigO(N s + N m + m^2) \). The
-memory usages are identical except for \( s^2 \) versus \( N s \), so the
-Cholesky algorithm again uses more memory than the precision algorithm.
+Like the single-point case, both approaches have the
+same time complexity but differ in space complexity.
+The precision algorithm requires \( \BigO(s^2 + m^2) \)
+memory to store both precisions, as well as \( \BigO(N
+m) \) memory to store the conditional covariances.
+The Cholesky algorithm requires \( \BigO((N + m)(m + s)) \) memory
+to store the first \( m + s \) columns of the Cholesky factor for
+the joint covariance matrix between training and prediction points,
+which simplifies to \( \BigO(N s + N m + m^2) \).
+The memory usages are identical except for \( \BigO(s^2)
+\) versus \( \BigO(N s) \), so the Cholesky algorithm
+again uses more memory than the precision algorithm.
 
 \begin{figure}
   \centering
