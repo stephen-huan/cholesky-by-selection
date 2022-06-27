@@ -672,6 +672,7 @@ a triangular matrix is the product of its diagonal entries.
   \shortintertext{Comparing to the KL divergence \cref{eq:obj_chol}
     and recalling that \( k \) is added to \( s_i \) if \( i > j \),}
   \sum_{i = 1}^m \log \left ( \CM_{i, i \mid s_i \setminus \{ i \}} \right )
+  \label{eq:partial_kl}
   &= \underbrace{
       \log \left ( \CM_{1, 1 \mid s_1 \setminus \{ 1 \}} \right ) + \dotsb +
       \log \left ( \CM_{j, j \mid s_j \setminus \{ j \}} \right )
@@ -1020,7 +1021,7 @@ For the Cholesky algorithm, two partial Cholesky factors are stored.
 We first compute the Cholesky factorization after selecting each prediction
 point, for a cost of \( \BigO((N + m) m) \) for each of the \( m \) columns.
 We then begin selecting candidates, which requires updating
-both Cholesky factors in time \( (N + m)(m + s) \) which is
+both Cholesky factors in time \( \BigO((N + m)(m + s)) \)
 dominated by updating the preconditioned Cholesky factor.
 The columns of the Cholesky factors correspond precisely to \( \vec{u}
 \) and \( \vec{u}_\Pred \) and both conditional variances \( \CM_{j, j
@@ -1068,6 +1069,135 @@ again uses more memory than the precision algorithm.
   \caption{Algorithms for multiple-point selection.}
   \label{fig:alg_mult_select}
 \end{figure}
+
+\subsection{Partial selection}
+\label{subsec:partial_select}
+
+We can now generalize the multiple-point algorithm to track the log
+determinant of the target points' covariance matrix if a selected
+index \( k \) only conditions \emph{suffixes} of the target points,
+skipping the first \( j \) targets, say.
+
+The form of the Cholesky factor of the target covariance
+matrix \cref{eq:chol_partial} suggests to keep track of
+the \emph{insertion position} of the new index \( k \).
+To be precise, we maintain a partial Cholesky factor \( L \) of the joint
+covariance matrix between the target points and all training points, whose
+columns consist of the target points and previously selected points sorted
+in reverse order with respect to \( \prec \).
+Adding a new entry adds a column to \( L \).
+Inserting the index \( k \) into its proper
+spot in the Cholesky factor \( L \),
+\begin{align}
+  \label{eq:chol_partial_update}
+  L &\gets
+  \begin{pmatrix}
+    L_{:, :j} & \vec{u} & {L'}_{:, j + 1:}
+  \end{pmatrix} \\
+  \vec{u} &= \frac{\CM_{:, k \mid :j}}{\sqrt{\CM_{k, k \mid :j}}}
+  \shortintertext{where unlike \cref{eq:chol_partial}, we are using a
+    lower-triangular factor \( L^{\top} L = \CM \) for simplicity: if}
+  \label{eq:U_chol}
+  U &= P^{\Reverse} \chol(P^{\Reverse} \CM P^{\Reverse}) P^{\Reverse}
+\end{align}
+where \( P^{\Reverse} \) is the order-reversing permutation, then \( U \)
+is an upper-triangular factor satisfying \( U U^{\top} = \CM \) so \( L =
+U^{\top} \) is a lower-triangular factor satisfying \( L^{\top} L = \CM \).
+
+To account for this insertion, the first \( j \) columns \( L_{:, :j} \)
+are unchanged, the newly inserted column \( \vec{u} \) as a variance-scaled
+conditional covariance of the form \cref{eq:cond_cov_vec} can be computed
+as usual with left-looking (see \cref{alg:chol_update}) and the remaining
+columns \( {L'}_{:, j + 1:} \) are the Cholesky factor of the covariance
+matrix conditional on the point \( k \).
+
+\Stodo{reference psuedocode}
+From \cref{eq:cond_select} conditioning on an additional point is a rank-one
+downdate of the covariance matrix by the vector \( \vec{u} \), allowing the
+updated factor \( {L'}_{:, j + 1:} \) to be efficiently computed from the
+original factor \( L_{:, j + 1:} \).
+Specifically we use Lemma 1 of \cite{krause2015more}, adapted to make
+no assumption on the row ordering of the Cholesky factor, allowing the
+downdate to be implemented with in-place BLAS \texttt{daxpy} operations.
+For a Cholesky factor with \( R \) rows and \( C \) columns, the
+time complexity of the downdate is \( \BigO(R C) \) compared to
+\( \BigO(R C^2) \) if the factor was recomputed from scratch.
+
+In the context of the overall update for \( N \) training points,
+\( m \) target points, and a budget of \( s \) selected points, the
+Cholesky factor \( L \) is of size \( (N + m) \times (s + m) \).
+When adding a new index \( k \) that ignores the first \( j \) targets, the
+first \( j \) columns of \( L \) are ignored, the new column \( \vec{u} \)
+must be computed with left-looking in time \( \BigO((N + m) j) \), and the
+columns past \( j \) are computed with downdating in time \( \BigO((N + m)
+(s + m - j)) \).
+The cost for a single insertion is \( \BigO((N + m)(s + m)) \) for a total time
+complexity of \( \BigO(s(N + m)(s + m)) \) over \( s \) rounds of selection.
+Given the factor \( L \), we now discuss actually computing the log
+determinant objective \cref{eq:partial_logdet} after adding a candidate.
+
+We have a candidate index \( j \) and wish to compute
+its effect on the log determinant of the target points
+(or KL divergence) \cref{eq:partial_kl} if added.
+To do so, we will directly compute each individual target point's
+variance, conditional on \( j \) as well as previously selected
+points, and simply add these variances to get the overall objective.
+
+Recall from \cref{eq:chol} that the \( j \)th row of the \( i \)th column
+of a Cholesky factor \( L \) is \( L_{j, i} = \frac{\CM_{j, i \mid :i -
+1}}{\sqrt{\CM_{i, i \mid :i - 1}}} \), i.e. the covariance between the \( j
+\)th point and the \( i \)th point, conditional on all points prior to \(
+i \) in the \emph{columns} of \( L \) (not with respect to \( \prec \)).
+A special case is that the ``diagonal'' entry \( L_{i, i} = \sqrt{\CM_{i, i
+\mid :i - 1}} \) is the square root of the conditional variance of the \( i
+\)th point (the rows of \( L \) are not necessarily ordered with respect to \(
+\prec \), so \( L \) is not necessarily literally lower triangular in memory).
+
+If we have the variance of the \( j \)th point conditional on all points
+prior to the \( i \)th column, \( \CM_{j, j \mid :i - 1} \), then by reading
+off the conditional covariance \( L_{j, i} \) we can use conditioning
+\cref{eq:quotient_rule} to compute the desired effect on the \( i \)th point
+\( \CM_{i, i \mid :i - 1, j} \), and by using the conditional variance \(
+L_{i, i} \) we can condition the \( j \)th point \( \CM_{j, j \mid :i - 1,
+i} = \CM_{j, j \mid :i} \) to bring it to the next column.
+These series of updates imply an inductive algorithm starting with the
+first column, where \( \CM_{j, j \mid :i - 1} \) is just \( \CM_{j,
+j} = K(\vec{x}_j, \vec{x}_j) \), the variance of the \( j \)th point.
+For the \( i \)th column, the updates are as follows:
+\begin{align}
+  \CM_{i, i \mid :i - 1} &= L_{i, i}^2 \\
+  \CM_{j, i \mid :i - 1} &= L_{j, i} \cdot L_{i, i} \\
+  % \CM_{i, i \mid :i - 1, j} &= \CM_{i, i \mid :i - 1} -
+  %   \frac{\CM_{j, j \mid :i - 1}^2}{\CM_{j, j \mid :i - 1}} \\
+  \label{eq:obj_partial}
+  \CM_{i, i \mid :i - 1, j} &= \CM_{i, i \mid :i - 1} -
+    \CM_{j, i \mid :i - 1}^2/\CM_{j, j \mid :i - 1} \\
+  % \CM_{j, j \mid :i - 1, i} &= \CM_{j, j \mid :i - 1} -
+  %   \frac{\CM_{j, i \mid :i - 1}^2}{\CM_{i, i \mid :i - 1}} \\
+  \label{eq:partial_induct}
+  \CM_{j, j \mid :i - 1, i} &= \CM_{j, j \mid :i - 1} -
+    \CM_{j, i \mid :i - 1}^2/\CM_{i, i \mid :i - 1} \\
+                            &= \CM_{j, j \mid :i}
+\end{align}
+where \cref{eq:partial_induct} satisfies the conditions of the inductive
+hypothesis for the next column and \cref{eq:obj_partial} is the desired
+conditional variance when the \( i \)th point is a target (recall the
+columns of \( L \) include previously selected training points, whose
+variances are ignored in the objective but columns still processed to
+compute \cref{eq:partial_induct}).
+
+For each of the \( N \) candidates, it requires \( \BigO(1) \) work per column
+for \( s + m \) columns. Over \( s \) selections, the total time complexity
+is \( \BigO(s N (s + m)) \) which is dominated by the time to downdate the
+Cholesky factor, meaning the partial selection algorithm matches the asymptotic
+time complexity of the multiple-point algorithm.
+However, the downdate of the Cholesky factor is implemented with
+repeated BLAS level-one \texttt{daxpy} operations while the bulk of
+left-looking takes place in a BLAS level-two \texttt{dgemv} operation.
+Higher level operations often have better constant-factor
+performance for the same asymptotic time complexity.
+In addition, the objective for the partial selection algorithm is
+more complicated to compute than its multiple-point counterpart.
 
 \subsection{Near optimality by empirical submodularity}
 
@@ -1262,7 +1392,7 @@ factor for the precision, we can compute an \emph{upper} triangular factor
 the covariance whose inverse transpose will be a \emph{lower} triangular
 factor for the original matrix. In particular, we see that
 \begin{align}
-  \label{eq:U_chol}
+  % \label{eq:U_chol}
   U &= P^{\updownarrow} \chol(P^{\updownarrow} \CM_{s, s} P^{\updownarrow})
        P^{\updownarrow}
   \shortintertext{satisfies \( U U^{\top} = \CM_{s, s} \) where
@@ -2081,167 +2211,6 @@ to the same block structure:
 \end{align}
 These can be efficiently performed in-place by
 BLAS as level-one \texttt{daxpy} operations.
-
-\subsection{Updating Cholesky factor after insertion}
-\label{app:chol_insert}
-
-Suppose we have a cholesky factor \( L \) of \( \CM \) and we insert
-a new point into \( \CM \). We wish to update the Cholesky \( L \) to
-account for this insertion. Using the recursive conditioning interpretation
-of Cholesky factorization in \cref{eq:chol}, we see that the columns of \( L
-\) before the insertion will remain unchanged, the column at the insertion
-point is a new column given by the conditional covariance of the new point
-with the rest of the points, conditional on the points before it, which can
-be computed with standard left-looking, and the columns of \( L \) after the
-insertion correspond to the Cholesky factor of the conditional covariance,
-conditional on the newly inserted point in addition to the previous points.
-From \cref{eq:cond_select} we know that conditioning on an additional point is
-a rank-one update of the covariance, so we can use rank-one downdating from
-\cref{app:chol_downdate} to update \( L \) for the columns after the insertion
-point, where the vector in the rank-one downdate is the newly inserted column.
-This update touches every value in the Cholesky factor exactly once, so its
-complexity is \( \BigO(N^2) \) as opposed to the \( \BigO(N^3)
-\) cost of completely regenerating the Cholesky factor from scratch.
-
-\subsection{Algorithm for partial updates}
-\label{app:partial_alg}
-
-We now need an efficient algorithm to keep track of partial updates.
-The key idea is to implicitly maintain the prediction matrix with
-selected points inserted to maintain proper ordering, and keep track
-of the log determinant throughout selection. We first give how this
-different perspective affects the interpretation of the multiple
-point selection algorithm. In the example, let \( x \) and \( y \)
-be selected points and \( 1 \) and \( 2 \) be prediction points.
-\begin{align}
-  \CM &=
-  \begin{pmatrix}
-    \CM_{xx} & \CM_{xy} & \CM_{x1} & \CM_{x2} \\
-    \CM_{yx} & \CM_{yy} & \CM_{y1} & \CM_{y2} \\
-    \CM_{1x} & \CM_{1y} & \CM_{11} & \CM_{12} \\
-    \CM_{2x} & \CM_{2y} & \CM_{21} & \CM_{22}
-  \end{pmatrix}
-  \shortintertext{Computing the log determinant by chain rule,}
-  \logdet(\CM) &= \log(\CM_{xx}) + \log(\CM_{yy \mid x}) +
-    \log(\CM_{11 \mid x, y}) + \log(\CM_{22 \mid x, y, 1})
-  \shortintertext{Isolating the objective --- the variances of the
-    prediction points}
-  \log(\CM_{11 \mid x, y}) + \log(\CM_{22 \mid x, y, 1}) &=
-    \logdet(\CM) - \log(\CM_{xx}) - \log(\CM_{yy \mid x})
-  \shortintertext{Now consider how inserting \( y \) changed the objective
-    from when it was just \( x \).}
-  \log(\CM_{11 \mid x}) + \log(\CM_{22 \mid x, 1}) &=
-    \logdet(\CM_{-y, -y}) - \log(\CM_{xx}) \\
-  \Delta &=
-    \logdet(\CM) - \log(\CM_{yy \mid x}) - \logdet(\CM_{-y, -y})
-  \shortintertext{But from \cref{eq:greedy_mult} we know}
-  \Delta &= \log \left (
-      \frac{\CM_{yy \mid x, 1, 2}}{\CM_{yy \mid x}}
-    \right )
-  \shortintertext{Substituting,}
-  \log(\CM_{yy \mid x, 1, 2}) - \log(\CM_{yy \mid x}) &=
-    \logdet(\CM) - \log(\CM_{yy \mid x}) - \logdet(\CM_{-y, -y}) \\
-  \log(\CM_{yy \mid x, 1, 2}) &=
-    \logdet(\CM) - \logdet(\CM_{-y, -y})
-  \shortintertext{In general,}
-  \label{eq:logdet_diff}
-  \log(\CM_{kk \mid I, \Pred}) &=
-    \logdet(\CM) - \logdet(\CM_{-k, -k})
-\end{align}
-Another way to arrive at the same result is to note that if we inserted
-\( y \) at the \emph{end} of \( \CM_{-y, -y} \), to compute the log
-determinant of the new, bigger matrix \( \CM \) we would add the
-variance of \( y \) conditional on every entry in the matrix to the
-old determinant by chain rule. Since the determinant is invariant to
-symmetric permutation, the matrix inserting \( y \) at the end has the
-same determinant as inserting \( y \) where it should be.
-
-So we see that the conditional variance of a candidate point conditional
-on everything else in the matrix is the difference in log determinant
-between the matrix with the candidate inserted and the original matrix.
-The multiple prediction point algorithm can therefore be interpreted as
-we insert the candidate \emph{after} all the previously selected points
-(so it is conditional on all the previous points) and \emph{before}
-the prediction points (which conditions all of them). We then compute
-\( \log(\CM_{kk \mid I, \Pred}) \) for some candidate \( k \)
-which represents the difference in log determinant and then subtract \(
-\log(\CM_{kk \mid I}) \) which is the spurious variance introduced by
-inserting \( k \) into the matrix. We do not need to subtract the spurious
-variances from the previously selected points because \( k \) does not
-affect them, and we select candidates by \emph{relative} score.
-
-We now apply this result to partial selection. In the example,
-let \( 1 \) and \( 2 \) be prediction points while \( x \) and \(
-y \) are both a selected points below \( 2 \) but above \( 1 \), where
-\( x \) has already been selected and \( y \) is a candidate.
-\begin{align}
-  \CM &=
-  \begin{pmatrix}
-    \CM_{11} & \CM_{1y} & \CM_{1x} & \CM_{12} \\
-    \CM_{y1} & \CM_{yy} & \CM_{yx} & \CM_{y2} \\
-    \CM_{x1} & \CM_{xy} & \CM_{xx} & \CM_{x2} \\
-    \CM_{21} & \CM_{2y} & \CM_{2x} & \CM_{22}
-  \end{pmatrix}
-  \shortintertext{Computing the log determinant by chain rule,}
-  \logdet(\CM) &= \log(\CM_{11}) + \log(\CM_{yy  \mid 1}) +
-    \log(\CM_{xx \mid 1, y}) + \log(\CM_{22 \mid 1, y, x})
-  \shortintertext{We see that \( y \) conditions \( 2 \) but not \( 1 \),
-    precisely what we want to encode. However, we have introduced a spurious
-    term \( \log(\CM_{yy \mid 1}) \) and changed the variance of \( x \),
-    both of which must be subtracted out.}
-  \log(\CM_{11}) + \log(\CM_{22 \mid 1, y, x}) &=
-  \logdet(\CM) - \log(\CM_{yy \mid 1}) - \log(\CM_{xx \mid 1, y})
-  \shortintertext{We can substitute \( \log(\CM_{yy \mid 1, x, 2}) \)
-    for \( \logdet(\CM) \) by \cref{eq:logdet_diff}. Athough
-    it differs by a constant, this does not change the objective.}
-  &= \log(\CM_{yy \mid 1, x, 2}) -
-    \log(\CM_{yy \mid 1}) - \log(\CM_{xx \mid 1, y})
-\end{align}
-
-As long as we can compute conditional variances of our candidate on each
-\emph{prefix} of the current ordering of prediction points interspersed with
-selected points, we can use the conditional variances to compute the updated
-conditional variances of the selected points by using their conditional
-covariances with the candidate. We are then able to compute every term
-in the objective. To do so, we maintain a partial Cholesky factor whose
-ordering is given by the current ordering. When we select a new point, we
-insert it in its appropriate place in the Cholesky factor. To update the
-Cholesky factor after an insertion efficiently, we left-look to get the
-column of its insertion position, and then update all columns right of the
-column by a rank-one downdate as described in \cref{app:chol_insert} which
-touches every entry in the Cholesky factor, \( \BigO(N(m + s) \) per
-update for a total cost of \( \BigO(N(m + s)(s)) \) over \( s \)
-selections. In addition, the algorithm can be considerably simplified by
-simply adding the conditional variances of the prediction points, instead
-of starting with a proxy for the log determinant of the entire matrix and
-subtracting out the spurious interactions from the training points.
-
-By inspecting the Cholesky factor, we get the covariance of a selected point
-with a candidate, conditional on all the points prior to the selected point in
-the ordering. The conditional variance of the selected point is the diagonal
-entry. We can then compute the new conditional variance given the variance of
-the candidate, conditional on all points prior to the selected point. Suppose
-we are at index \( i \) and the candidate is index \( j \), the updates are as
-follows:
-\begin{align}
-  \CM_{ii \mid :i - 1} &= (L_{ii})^2 \\
-  \CM_{ij \mid :i - 1} &= L_{ij} \cdot L_{ii} \\
-  \CM_{ii \mid :i - 1, j} &= \CM_{ii \mid :i - 1} -
-    \frac{\CM_{ij \mid :i - 1}^2}{\CM_{jj \mid :i - 1}} \\
-  \CM_{jj \mid :i - 1, i} &= \CM_{jj \mid :i - 1} -
-    \frac{\CM_{ij \mid :i - 1}^2}{\CM_{ii \mid :i - 1}} \\
-                             &= \CM_{jj \mid :i}
-\end{align}
-Of course, the base case \( \CM_{jj} \) is simply \(
-K(\vec{x}_j, \vec{x}_j) \), the variance of the \( j \)th point.
-
-For each of the \( N \) candidates, it requires \( m + s \) operations from
-the above updates to compute the objective. Over \( s \) selections, the
-total time is the same as the cost to update the Cholesky factor, matching
-the complexity of the non-partial multiple point algorithm. However, the
-asymptotic work in the non-partial algorithm can be implemented as BLAS
-level-2 calls, while the partial algorithm relies heavily on vector (level-1)
-calls, affecting the constant-factor performance of the algorithm.
 
 \subsection{Global greedy selection}
 \label{app:global_greedy}
