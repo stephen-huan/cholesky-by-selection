@@ -818,8 +818,8 @@ For each of the \( s \) rounds of selection, it takes \( \BigO(s^2)
 \) to update the precision and \( \BigO(Ns) \) to compute \( \vec{u}
 \), costing \( \BigO(N s^2 + s^3) \equiv \BigO(N s^2) \) overall.
 
-The second strategy is to take advantage of
-the quotient rule of Schur complementation.
+The second strategy is to take advantage of the quotient
+rule of Schur complementation \cref{eq:quotient_rule}.
 From a statistical perspective, the quotient rule states
 that conditioning on \( \I \) and then conditioning on \(
 \J \) is the same as conditioning on \( \I \cup \J \).
@@ -884,7 +884,7 @@ From the iterative conditioning perspective, the \( k \)th column of the
 Cholesky factor corresponds precisely to the corresponding \( \vec{u} \) for
 \( k \) in \cref{eq:cond_cov_vec} since a iterative sequence of conditioning
 on \( i_1, i_2 \dotsc, i_{k - 1} \) is equivalent to conditioning on \( \I
-\) by the quotient rule.
+\) by the quotient rule \cref{eq:quotient_rule}.
 
 Adding a column to the current Cholesky factor can be efficiently
 computed without excess dependence on \( N \) with left-looking (see
@@ -988,8 +988,8 @@ We condition on a newly added point essentially the same as in
 instead of one: one for the variance after conditioning on the
 previously selected points, and the other for the variance after
 also conditioning on the prediction points.
-By the quotient rule, the order of conditioning
-does not matter as long as the order is consistent.
+By the quotient rule \cref{eq:quotient_rule}, the order of
+conditioning does not matter as long as the order is consistent.
 For the second data structure, we therefore condition on the
 prediction points \emph{first} before any points have been selected.
 We again have two strategies, one which explicitly maintains precisions
@@ -1978,7 +1978,8 @@ index \( k \) to \( \I \), that is, to compute \( \logdet(\CM_{\Pred, \Pred
              \CM_{\Pred, k \mid \I}
             }{\CM_{k, k \mid \I}}
      \right )
-  \shortintertext{By the quotient rule, we combine the conditioning.}
+  \shortintertext{By the quotient rule
+    \cref{eq:quotient_rule}, we combine the conditioning.}
   &= \logdet \left ( \CM_{\Pred, \Pred \mid \I} \right ) +
      \log \left ( \frac{\CM_{k, k \mid \I, \Pred}}{\CM_{k, k \mid \I}} \right )
 \end{align}
