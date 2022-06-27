@@ -512,18 +512,14 @@ Plugging the optimal \( L \) \cref{eq:L_col} back into the KL divergence
 \cref{eq:kl}, we obtain the objective as a function of the sparsity pattern.
 \begin{align}
   \label{eq:obj_chol}
-  2 \mathbb{D}_{\text{KL}}
-  \left (
-    \mathcal{N}(\vec{0}, \CM) \, \Big \| \,
-    \mathcal{N}(\vec{0}, (L L^{\top})^{-1})
-  \right )
-  &= \sum_{i = 1}^N
-    \left [
-      \log \left (
-        (\vec{e}_1^{\top} \CM_{s_i, s_i}^{-1} \vec{e}_1)^{-1}
-      \right )
-    \right ]
-    - \logdet(\CM)
+  2 \KL*{\N(\vec{0}, \CM)}{\N(\vec{0}, (L L^{\top})^{-1})} &=
+    \sum_{i = 1}^N
+      \left [
+        \log \left (
+          (\vec{e}_1^{\top} \CM_{s_i, s_i}^{-1} \vec{e}_1)^{-1}
+        \right )
+      \right ]
+      - \logdet(\CM)
 \end{align}
 See \cref{app:kl_L} for details. In particular, it is important
 which direction the KL divergence is taken or cancellation
@@ -551,7 +547,7 @@ For
     \cref{eq:inverse_cond},}
   \label{eq:L_cond_var}
   (\vec{e}_1^{\top} \CM_{s_i, s_i}^{-1} \vec{e}_1)^{-1}
-         &= \CM_{i, i \mid s_i - \{ i \}}
+         &= \CM_{i, i \mid s_i \setminus \{ i \}}
 \end{align}
 So minimizing the KL divergence of a sparse Cholesky factor is equivalent
 to independently minimizing over each column the variance of the \( i
@@ -559,6 +555,59 @@ to independently minimizing over each column the variance of the \( i
 Decomposition of the KL divergence into independent
 regression problems was also observed in
 \cite{katzfuss2022scalable} for lower triangular transport maps.
+
+\subsubsection{Aggregated sparsity pattern}
+\label{subsubsec:aggregated}
+
+We can derive a similar decomposition of the KL divergence
+if the same sparsity pattern is reused for multiple columns,
+known as aggregated or supernodal Cholesky factorization.
+Aggregation can lead to substantial asymptotic
+time and space savings \cite{schafer2021sparse}.
+Throughout the following discussion we will focus on a single group
+\( \tilde{i} = \{i_1, \dots, i_m \} \) composed from aggregating
+the column indices \( i_1 \prec i_2 \prec \dotsb \prec i_m \).
+Let \( \tilde{i} \) have aggregated sparsity pattern \(
+s_{\tilde{i}} \) satisfying \( s_{\tilde{i}} \supseteq \tilde{i}
+\) to guarantee that the Cholesky factor has full rank.
+Let \( \tilde{s} \defeq s_{\tilde{i}} \setminus \tilde{i} \) be the aggregated
+sparsity pattern excluding the diagonal entries of the columns in the group.
+The sparsity pattern of the \( k \)th column in the group is then
+the aggregated sparsity pattern excluding the entries that violate lower
+triangularity, \( s_k \defeq \{ j \in s_{\tilde{i}} : j \succeq k \} \).
+Assuming every entry of \( \tilde{s} \) is after every index in \( \tilde{i}
+\), then \( s_k = \tilde{s} \cup \{ j \in \tilde{i} : j \succeq k \} \).
+This condition is guaranteed if the aggregated
+columns are adjacent in the ordering, for example.
+We defer handling the non-adjacent case to \cref{subsubsec:partial}.
+We now simplify the KL minimization objective on aggregated
+indices with the conditional chain rule of log determinants.
+Using the same blocking as \cref{eq:inverse_cond},
+\begin{align}
+  \label{eq:det_chain}
+  \logdet(\CM) &= \logdet(\CM_{1, 1}) + \logdet(\CM_{2, 2 \mid 1})
+\end{align}
+The KL divergence objective \cref{eq:obj_chol} restricted
+to the contribution from the group \( \tilde{i} \) is
+\begin{align}
+  \nonumber
+  \sum_{i \in \tilde{i}} \log(\CM_{i \mid s_i \setminus \{ i \} }) &=
+    \log(\CM_{i_m \mid \tilde{s}}) +
+    \log(\CM_{i_{m - 1} \mid \tilde{s} \cup \{ i_m \}}) + \dotsb +
+    \log(\CM_{i_1 \mid \tilde{s} \cup \tilde{i}}) \\
+  \shortintertext{where we write \( \CM_j \defeq \CM_{j, j} \).
+    Combining the first two terms by the chain rule \cref{eq:det_chain},}
+  &= \logdet(\CM_{\{ i_m, i_{m - 1} \} \mid \tilde{s}}) +
+     \log(\CM_{i_{m - 2} \mid \tilde{s} \cup \{ i_m, i_{m - 1} \}}) + \dotsb +
+     \log(\CM_{i_1 \mid \tilde{s} \cup \tilde{i}}) \\
+  \shortintertext{Proceeding by induction, we are
+    able to reduce the entire sum to the single term}
+  \label{eq:obj_mult}
+  &= \logdet(\CM_{\tilde{i}, \tilde{i} \mid \tilde{s}})
+\end{align}
+So the suitable generalization of the conditional variance in
+\cref{eq:obj_chol} to aggregated columns is the log determinant of the
+covariance matrix of the columns, conditional on the selected entries.
 
 From a Gaussian process regression perspective, we wish to carefully select the
 most effective points \( s_i \) out of the possible candidates \( i + 1, i +
@@ -1423,7 +1472,7 @@ factor \( L \) computed according to \cref{eq:L_col}. From \cref{eq:kl},
   \shortintertext{\( L^{\top} \) has the same log determinant
     as \( L \), and because \( L \) is lower triangular, its
     log determinant is the sum of its diagonal entries:}
-  &= -2 \sum_{i = 1}^N \left [ \log(L_{ii}) \right ] - \logdet(\CM)
+  &= -2 \sum_{i = 1}^N \left [ \log(L_{i, i}) \right ] - \logdet(\CM)
   \shortintertext{Plugging \cref{eq:L_col} for the diagonal entries,}
   &= -\sum_{i = 1}^N
     \left [ \log(\vec{e}_1^{\top} \CM_{s_i, s_i}^{-1} \vec{e}_1) \right ]
