@@ -431,7 +431,7 @@ sparse if the ordering and sparsity pattern are chosen carefully.
 
 Although in this work we focus on constructing sparsity
 patterns, a good ordering is critical since the sparsity for
-a point can only include points before it in the ordering.
+a point can only include points after it in the ordering.
 Vecchia originally proposed ordering points lexicographically, which is
 most natural in a one-dimensional setting \cite{vecchia1988estimation}.
 More recent work finds that in higher dimensions, exploiting
@@ -494,9 +494,9 @@ has a closed-form expression given by
 \end{align}
 where \( \CM_1, \CM_2 \in \Reals^{N \times
 N} \) (see \cref{app:kl_obj} for details).
-Writing \cref{eq:L_obj} in the form of \cref{eq:kl} and optimizing for \(
-L \) yields the following closed-form expression for the \( i \)th column
-of \( L \) with sparsity pattern \( s_i \), reproduced from Theorem 2.1 of
+Using this expression for the KL divergence and optimizing for \( L \)
+yields the following closed-form expression for the \( i \)th column of
+\( L \) with sparsity pattern \( s_i \), reproduced from Theorem 2.1 of
 \cite{schafer2021sparse}:
 \begin{align}
   \label{eq:L_col}
@@ -604,17 +604,106 @@ to the contribution from the group \( \tilde{i} \) is
   \label{eq:obj_mult}
   &= \logdet(\CM_{\tilde{i}, \tilde{i} \mid \tilde{s}})
 \end{align}
-So the suitable generalization of the conditional variance in
-\cref{eq:obj_chol} to aggregated columns is the log determinant of the
-covariance matrix of the columns, conditional on the selected entries.
+So the suitable generalization of the conditional variance
+in \cref{eq:obj_chol} to aggregated columns is the log
+determinant of the covariance matrix of the columns,
+conditional on (well-behaved) selected entries.
+We briefly discuss what happens in the general case.
 
-From a Gaussian process regression perspective, we wish to carefully select the
-most effective points \( s_i \) out of the possible candidates \( i + 1, i +
-2, \dotsc, N \) that most reduce predictive error at the point of interest \(
-\vec{x}_i \).
-In the next section, we develop such a greedy selection
+\subsubsection{Non-adjacent or partial aggregation}
+\label{subsubsec:partial}
+
+\begin{figure}[t]
+  \centering
+  \input{figures/partial_factor.tex}
+  \caption{Illustration of the Cholesky factorization of a partially
+    conditioned covariance matrix. Here \textcolor{darksilver}{grey}
+    denotes fully unconditional, \textcolor{darklightblue}{blue} denotes
+    fully conditional, and the \textcolor{silver!50!lightblue}{mixed
+    color} denotes interaction between the two. Surprisingly, such a
+    matrix factors into a ``pure'' Cholesky factor.}
+  \label{fig:partial_factor}
+\end{figure}
+
+Let the random variables corresponding to the indices \( i_1, \dotsc, i_m
+\) be collected in a vector \( \vec{y} = [y_1, \dotsc, y_m]^{\top} \) with
+joint density multivariate Gaussian with covariance matrix \( \CM \).
+We select an index \( k \) that conditions the variables, but ignores the first
+\( j \) variables (recall that the indices are sorted in decreasing order,
+so if \( k \) conditions a variable, it conditions everything afterwards).
+After this partial conditioning the variables become \( \vec{y}_{\parallel
+k} \defeq y_1, \dotsc, y_j, y_{j + 1 \mid k}, \dotsc, y_{m \mid k} \)
+and the covariance matrix \( \Cov[\vec{y}_{\parallel k}] \) becomes
+\begin{align}
+  \label{eq:chol_partial}
+  \CM_{\tilde{i}, \tilde{i} \parallel k} &=
+  \begin{pmatrix}
+    L_{:j} L_{:j}^{\top} &
+    L_{:j} {L'}_{j + 1:}^{\top} \\
+    {L'}_{j + 1:} L_{:j}^{\top} &
+    {L'}_{j + 1:} {L'}_{j + 1:}^{\top}
+  \end{pmatrix} =
+  \begin{pmatrix}
+    L_{:j} \\
+    {L'}_{j + 1:}
+  \end{pmatrix}
+  \begin{pmatrix}
+    L_{:j} \\
+    {L'}_{j + 1:}
+  \end{pmatrix}^{\top}
+\end{align}
+where \( L = \chol(\CM) \) and \( L' = \chol(\CM_{\mid
+k}) \) (see \cref{app:partial} for details).
+As depicted in \cref{fig:partial_factor}, the Cholesky factor of \(
+\CM_{\parallel k} \) is composed of ``gluing'' the prefix of the unconditional
+factor \( L \) with the suffix of the conditional factor \( L' \).
+Armed with this representation, we show the equivalence between minimizing \(
+\logdet(\CM_{\parallel k}) \) and minimizing KL divergence \cref{eq:obj_chol}.
+We compute \( \logdet(\CM_{\parallel k}) \) by its Cholesky
+factor \cref{eq:chol_partial} and recall the determinant of
+a triangular matrix is the product of its diagonal entries.
+\begin{align}
+  \label{eq:partial_logdet}
+  \frac{1}{2} \logdet(\CM_{\tilde{i}, \tilde{i} \parallel k}) &=
+  \underbrace{\log(L_{1, 1}) + \dotsb + \log(L_{j, j})}_{\text{the same}} +
+  \underbrace{
+    \log({L'}_{j + 1, j + 1}) + \dotsb + \log({L'}_{m, m})
+  }_{\text{conditioned}}
+  \shortintertext{Comparing to the KL divergence \cref{eq:obj_chol}
+    and recalling that \( k \) is added to \( s_i \) if \( i > j \),}
+  \sum_{i = 1}^m \log \left ( \CM_{i, i \mid s_i \setminus \{ i \}} \right )
+  &= \underbrace{
+      \log \left ( \CM_{1, 1 \mid s_1 \setminus \{ 1 \}} \right ) + \dotsb +
+      \log \left ( \CM_{j, j \mid s_j \setminus \{ j \}} \right )
+     }_\text{the same} + \\
+  \nonumber
+  % disgusting hack, do properly later --- looks good enough to me, though
+  & \hphantom{=} \: \,
+  \underbrace{
+    \log \left (
+      \CM_{j + 1, j + 1 \mid s_{j + 1} \setminus \{ j + 1 \}}
+    \right ) + \dotsb +
+    \log \left ( \CM_{m, m \mid s_m \setminus \{ m \}} \right )
+  }_\text{conditioned}
+  \shortintertext{Since \( L_{i, i} \) (and \( {L'}_{i, i} \)) is the
+    square root of the conditional variance of the \( i \)th variable from
+    the staistical perspective in \cref{eq:chol}, we have \( 2 \log(L_{i,
+    i}) = \log(\CM_{i, i \mid s_i \setminus \{ i \}}) \) and so}
+  \nonumber
+  \logdet(\CM_{\tilde{i}, \tilde{i} \parallel k}) &=
+    \sum_{i = 1}^m \log \left ( \CM_{i, i \mid s_i \setminus \{ i \}} \right )
+\end{align}
+Like the aggregated case in \cref{subsubsec:aggregated},
+minimizing the log determinant of the \emph{partially} conditioned
+covariance matrix is the same as minimizing the KL divergence.
+
+In every case we have considered, picking the right sparsity pattern
+to minimize KL divergence reduces to selecting the points \( s_i \)
+out of the possible candidates \( i + 1, \dotsc, N \) that most reduce
+predictive error at point(s) of interest.
+In the next section, we develop such a selection
 algorithm for directed inference in Gaussian processes.
-We will apply this algorithm for sparsity selection
+We apply this algorithm for sparsity selection
 of Cholesky factors in \cref{sec:chol_select}.
 
 \section{Greedy selection for directed inference}
@@ -1366,6 +1455,7 @@ We want to show that the KL divergence between \(
 \N(\vec{0}, \CM_1) \) and \( \N(\vec{0}, \CM_2) \) for \(
 \CM_1, \CM_2 \in \Reals^{N \times N} \) can be written
 \begin{align}
+  \nonumber
   2 \KL*{\N(\vec{0}, \CM_1)}{\N(\vec{0}, \CM_2)} &=
     \trace(\CM_2^{-1} \CM_1) + \logdet(\CM_2) - \logdet(\CM_1) - N
   \shortintertext{Recall that the log density \( \log
@@ -1543,6 +1633,71 @@ compare the two matrices, depending on their order.
 From a statistical perspective, the KL divergence can interpreted
 as the likelihood-ratio test, so the asymmetry in order corresponds
 to the asymmetry between the null and alternative hypotheses.
+
+\subsection{Partial updates in the selection algorithm}
+\label{app:partial}
+
+We have the collection of Gaussian random variables \( \vec{y} = [y_1, \dotsc,
+y_m]^{\top} \) corresponding to the ordered column indices \( i_1 \succ
+\dotsb \succ i_m \) in the context of aggregated Cholesky factorization.
+We then select an index \( k \) that conditions the variables, but ignores
+the first \( j \) variables (the indices are sorted in decreasing order,
+so if \( k \) conditions a variable, it conditions everything afterwards).
+After this partial conditioning we denote the updated variables as
+\( \vec{y}_{\parallel k} \defeq y_1, \dotsc, y_j, y_{j + 1 \mid k},
+\dotsc, y_{m \mid k} \) and wish to compute the covariance matrix \(
+\Cov[\vec{y}_{\parallel k}] \).
+We know the original variables \( \vec{y} \) have joint density multivariate
+Gaussian according to some covariance matrix \( \CM \), \( \vec{y} \sim
+\N(\vec{0}, \CM) \), and the fully conditional variables \( \vec{y}_{\mid k}
+\) have closed-form posterior distribution according to \cref{eq:cond_cov},
+\( \vec{y}_{\mid k} \sim \N(\vec{\mean}, \CM - \CM_{:, k} \CM_{k, k}^{-1}
+\CM_{k, :}) \) for some posterior mean \( \vec{\mean} \).
+For unconditioned \( y_i \) and \( y_j \),
+their covariance is simply \( \CM_{i, j} \).
+Similarly, for conditioned \( y_{i \mid k} \) and \( y_{j
+\mid k} \), their covariance is \( \CM_{i, j \mid k} \).
+The only unknown is the covariance between unconditioned
+\( y_i \) and conditioned \( y_{j \mid k} \).
+Taking the Cholesky factorization of both covariance matrices,
+let \( L = \chol(\CM) \) and \( L' = \chol(\CM_{:, : \mid k}) \).
+We can then view \( \vec{y} \) as \( L \vec{z} \), where \( \vec{z}
+\) is distributed according to standard normal, \( \N(\vec{0}, \Id) \).
+Similarly, \( \vec{y}_{\mid k} = L' \vec{z} + \vec{\mean} \).
+By definition,
+\begin{align}
+  \Cov[y_i, y_{j \mid k}] &=
+    \E[(y_i - \E[y_i])(y_{j \mid k} - \E[y_{j \mid k}])] \\
+  &= \E[(L_i \vec{z}) ({L'}_j \vec{z} + \mu_j - \mu_j)] \\
+  &= \E[(L_{i, 1} z_1 + \dotsb + L_{i, m} z_m)
+        ({L'}_{j, 1} z_1 + \dotsb + {L'}_{j, m} z_m)]
+  \shortintertext{For \( i \neq j \), \( \E[z_i z_j] = \E[z_i] \E[z_j]
+    = 0 \) since \( z_i \) is independent of \( z_j \) and has mean 0.}
+  &= \E[L_{i, 1} {L'}_{j, 1} z_1^2 + \dotsb +
+        L_{i, m} {L'}_{j, m} z_m^2] \\
+  &= L_{i, 1} {L'}_{j, 1} \E[z_1^2] + \dotsb +
+     L_{i, m} {L'}_{j, m} \E[z_m^2]
+  \shortintertext{For any \( i \), \( \E[z_i^2]
+    = \Var[z_i] + \E[z_i]^2 = 1 + 0 = 1 \)}
+  &= L_{i, 1} {L'}_{j, 1} + \dotsb + L_{i, m} {L'}_{j, m} \\
+  &= L_i \cdot {L'}_j
+  \shortintertext{Thus, the new covariance matrix can be written as}
+  \Cov[\vec{y}_{\parallel k}] &=
+  \begin{pmatrix}
+    L_{:j} L_{:j}^{\top} &
+    L_{:j} {L'}_{j + 1:}^{\top} \\
+    {L'}_{j + 1:} L_{:j}^{\top} &
+    {L'}_{j + 1:} {L'}_{j + 1:}^{\top}
+  \end{pmatrix} =
+  \begin{pmatrix}
+    L_{:j} \\
+    {L'}_{j + 1:}
+  \end{pmatrix}
+  \begin{pmatrix}
+    L_{:j} \\
+    {L'}_{j + 1:}
+  \end{pmatrix}^{\top}
+\end{align}
 
 \section{Computation in sparse Gaussian process selection}
 
@@ -1932,122 +2087,6 @@ point, where the vector in the rank-one downdate is the newly inserted column.
 This update touches every value in the Cholesky factor exactly once, so its
 complexity is \( \BigO(N^2) \) as opposed to the \( \BigO(N^3)
 \) cost of completely regenerating the Cholesky factor from scratch.
-
-\subsection{Partial updates in the selection algorithm}
-\label{app:partial}
-
-We have the collection of Gaussian random variables \( \vec{y} = [y_1, \dotsc,
-y_m]^{\top} \) corresponding to the ordered column indices \( i_1 \succ
-\dotsb \succ i_m \) in the context of aggregated Cholesky factorization.
-We then select an index \( k \) that conditions the variables, but ignores
-the first \( j \) variables (the indices are sorted in decreasing order,
-so if \( k \) conditions a variable, it conditions everything afterwards).
-After this partial conditioning we denote the updated variables as
-\( \vec{y}_{\parallel k} \defeq y_1, \dotsc, y_j, y_{j + 1 \mid k},
-\dotsc, y_{m \mid k} \) and wish to compute the covariance matrix \(
-\Cov[\vec{y}_{\parallel k}] \).
-We know the original variables \( \vec{y} \) have joint density multivariate
-Gaussian according to some covariance matrix \( \CM \), \( \vec{y} \sim
-\N(\vec{0}, \CM) \), and the fully conditional variables \( \vec{y}_{\mid k}
-\) have closed-form posterior distribution according to \cref{eq:cond_cov},
-\( \vec{y}_{\mid k} \sim \N(\vec{\mean}, \CM - \CM_{:, k} \CM_{k, k}^{-1}
-\CM_{k, :}) \) for some posterior mean \( \vec{\mean} \).
-For unconditioned \( y_i \) and \( y_j \),
-their covariance is simply \( \CM_{i, j} \).
-Similarly, for conditioned \( y_{i \mid k} \) and \( y_{j
-\mid k} \), their covariance is \( \CM_{i, j \mid k} \).
-The only unknown is the covariance between unconditioned
-\( y_i \) and conditioned \( y_{j \mid k} \).
-Taking the Cholesky factorization of both covariance matrices,
-let \( L = \chol(\CM) \) and \( L' = \chol(\CM_{:, : \mid k}) \).
-We can then view \( \vec{y} \) as \( L \vec{z} \), where \( \vec{z}
-\) is distributed according to standard normal, \( \N(\vec{0}, \Id) \).
-Similarly, \( \vec{y}_{\mid k} = L' \vec{z} + \vec{\mean} \).
-By definition,
-\begin{align}
-  \Cov[y_i, y_{j \mid k}] &=
-    \E[(y_i - \E[y_i])(y_{j \mid k} - \E[y_{j \mid k}])] \\
-  &= \E[(L_i \vec{z}) ({L'}_j \vec{z} + \mu_j - \mu_j)] \\
-  &= \E[(L_{i, 1} z_1 + \dotsb + L_{i, m} z_m)
-        ({L'}_{j, 1} z_1 + \dotsb + {L'}_{j, m} z_m)]
-  \shortintertext{For \( i \neq j \), \( \E[z_i z_j] = \E[z_i] \E[z_j]
-    = 0 \) since \( z_i \) is independent of \( z_j \) and has mean 0.}
-  &= \E[L_{i, 1} {L'}_{j, 1} z_1^2 + \dotsb +
-        L_{i, m} {L'}_{j, m} z_m^2] \\
-  &= L_{i, 1} {L'}_{j, 1} \E[z_1^2] + \dotsb +
-     L_{i, m} {L'}_{j, m} \E[z_m^2]
-  \shortintertext{For any \( i \), \( \E[z_i^2]
-    = \Var[z_i] + \E[z_i]^2 = 1 + 0 = 1 \)}
-  &= L_{i, 1} {L'}_{j, 1} + \dotsb + L_{i, m} {L'}_{j, m} \\
-  &= L_i \cdot {L'}_j
-  \shortintertext{Thus, the new covariance matrix can be written as}
-  \Cov[\vec{y}_{\parallel k}] &=
-  \begin{pmatrix}
-    L_{:j} L_{:j}^{\top} &
-    L_{:j} {L'}_{j + 1:}^{\top} \\
-    {L'}_{j + 1:} L_{:j}^{\top} &
-    {L'}_{j + 1:} {L'}_{j + 1:}^{\top}
-  \end{pmatrix} =
-  \begin{pmatrix}
-    L_{:j} \\
-    {L'}_{j + 1:}
-  \end{pmatrix}
-  \begin{pmatrix}
-    L_{:j} \\
-    {L'}_{j + 1:}
-  \end{pmatrix}^{\top}
-\end{align}
-
-\begin{figure}[h]
-  \centering
-  \input{figures/partial_factor.tex}
-  \caption{Illustration of the Cholesky
-    factorization of a partially conditioned matrix.}
-\end{figure}
-
-We can now connect minimization of the log determinant of the partially updated
-covariance matrix to the KL divergence objective of Cholesky factorization.
-Computing the log determinant of the partially updated covariance
-matrix, we make use of \cref{eq:chol_partial} and make use of the fact
-that the determinant of a  triangular matrix is the product of its
-diagonal entries:
-\begin{align}
-  \label{eq:partial_logdet}
-  \frac{1}{2} \logdet(\CM_{:, : \shortmid k}) &=
-  \underbrace{\log(L_{11}) + \dotsb + \log(L_{jj})}_{\text{the same}} +
-  \underbrace{
-    \log(L_{j + 1, j + 1 \mid k}) + \dotsb + \log(L_{M, M \mid k})
-  }_{\text{conditioned}}
-  \shortintertext{Comparing to the KL divergence \cref{eq:obj_chol},
-    \( \mathbb{D}_{\text{KL}}
-      \left (
-        \mathcal{N}(\vec{0}, \CM) \, \Big \| \,
-        \mathcal{N}(\vec{0}, (L L^{\top})^{-1})
-      \right )
-    \) which is equivalent to maximizing}
-  &= \sum_{i = 1}^M
-      \log \left (
-        \CM_{ii \mid s_i - \{ i \}}
-      \right )
-  \shortintertext{Recalling that \( k \) is added partially to some \( s_i \),
-    only those \( i > j \)}
-  &= \underbrace{
-      \log \left ( \CM_{11 \mid s_1 - \{ 1 \}} \right ) + \dotsb +
-      \log \left ( \CM_{jj \mid s_j - \{ j \}} \right )
-     }_\text{the same} + \\
-  \nonumber
-  &  \underbrace{
-      \log \left ( \CM_{j + 1, j + 1 \mid s_{j + 1} - \{ j + 1 \}} \right )
-      + \dotsb + \log \left ( \CM_{MM \mid s_M - \{ M \}} \right )
-     }_\text{conditioned}
-  \shortintertext{Since \( L_{ii} \) is the square root
-    of the variance of the \( i \)th variable conditional
-    on each entry before it in the ordering, we have}
-  2 \log(L_{ii}) &= \log(\CM_{ii \mid s_i - \{ i \}})
-\end{align}
-So minimizing the log determinant of the partially
-conditioned covariance matrix \cref{eq:partial_logdet} is
-the same as minimizing the KL divergence \cref{eq:obj_chol}.
 
 \subsection{Algorithm for partial updates}
 \label{app:partial_alg}
