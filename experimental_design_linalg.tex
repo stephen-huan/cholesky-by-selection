@@ -566,7 +566,7 @@ Aggregation can lead to substantial asymptotic
 time and space savings \cite{schafer2021sparse}.
 Throughout the following discussion we will focus on a single group
 \( \tilde{i} = \{i_1, \dots, i_m \} \) composed from aggregating
-the column indices \( i_1 \prec i_2 \prec \dotsb \prec i_m \).
+the column indices \( i_1 \succ i_2 \succ \dotsb \succ i_m \).
 Let \( \tilde{i} \) have aggregated sparsity pattern \(
 s_{\tilde{i}} \) satisfying \( s_{\tilde{i}} \supseteq \tilde{i}
 \) to guarantee that the Cholesky factor has full rank.
@@ -590,16 +590,15 @@ Using the same blocking as \cref{eq:inverse_cond},
 The KL divergence objective \cref{eq:obj_chol} restricted
 to the contribution from the group \( \tilde{i} \) is
 \begin{align}
-  \nonumber
   \sum_{i \in \tilde{i}} \log(\CM_{i \mid s_i \setminus \{ i \} }) &=
-    \log(\CM_{i_m \mid \tilde{s}}) +
-    \log(\CM_{i_{m - 1} \mid \tilde{s} \cup \{ i_m \}}) + \dotsb +
-    \log(\CM_{i_1 \mid \tilde{s} \cup \tilde{i}}) \\
+    \log(\CM_{i_1 \mid \tilde{s}}) +
+    \log(\CM_{i_2 \mid \tilde{s} \cup \{ i_1 \}}) + \dotsb +
+    \log(\CM_{i_m \mid \tilde{s} \cup \tilde{i}}) \\
   \shortintertext{where we write \( \CM_j \defeq \CM_{j, j} \).
     Combining the first two terms by the chain rule \cref{eq:det_chain},}
-  &= \logdet(\CM_{\{ i_m, i_{m - 1} \} \mid \tilde{s}}) +
-     \log(\CM_{i_{m - 2} \mid \tilde{s} \cup \{ i_m, i_{m - 1} \}}) + \dotsb +
-     \log(\CM_{i_1 \mid \tilde{s} \cup \tilde{i}}) \\
+  &= \logdet(\CM_{\{ i_1, i_2 \} \mid \tilde{s}}) +
+     \log(\CM_{i_3 \mid \tilde{s} \cup \{ i_1, i_2 \}}) + \dotsb +
+     \log(\CM_{i_m \mid \tilde{s} \cup \tilde{i}}) \\
   \shortintertext{Proceeding by induction, we are
     able to reduce the entire sum to the single term}
   \label{eq:obj_mult}
@@ -1937,65 +1936,66 @@ complexity is \( \BigO(N^2) \) as opposed to the \( \BigO(N^3)
 \subsection{Partial updates in the selection algorithm}
 \label{app:partial}
 
-In the context of the selection algorithm, we have \( M \) prediction points
-and wish to minimize the log determinant of the resulting covariance matrix
-of the prediction points, conditional on the points we've selected from the
-training data. In the specific context of Cholesky factorization, it is
-possible to add a training point and have it apply \emph{partially} on the
-prediction points. If nonadjacent columns indices are aggregated, a entry
-selected between two indices can be higher than one column, but lower than
-another. Adding the entry to the sparsity pattern would therefore only add
-to some, but not all, columns in the aggregation. We will model this as
-partially conditioning the variables of interest. In particular, if we have
-prediction variables \( y_1, y_2, \dotsc, y_M \), a partial condition ignoring
-the first \( j \) variables on the selected index \( k \) would result in
-\( y_1 , y_2, \dotsc, y_{j}, y_{j + 1 \mid k}, \dotsc, y_{M \mid k} \).
-
-The first question is to compute the resulting covariance matrix. We know \(
-\vec{y} \sim \mathcal{N}(\vec{0}, \CM) \) and \( \vec{y}_{\mid k} \) has
-conditional distribution according to \cref{eq:cond_cov}, \( \vec{y}_{\mid k}
-\sim \mathcal{N}(\mu, \CM - \CM_{:, k} \CM_{k, k}^{-1} \CM_{k,
-:}) \). Taking the Cholesky factorization of both covariance matrices, let \(
-L = \chol(\CM) \) and \( L_{\mid k} = \chol(\CM_{\mid k}) \). We can
-then view \( \vec{y} \) as \( L \vec{z} \), where \( \vec{z} \) is distributed
-according to \( \mathcal{N}(\vec{0}, I) \). Similarly, \( \vec{y}_{\mid k} =
-L_{\mid k} \vec{z} + \vec{\mu} \). For unconditioned \( y_i \) and \( y_j \), the
-covariance between them is defined to be \( \CM_{ij} \). Similarly, for
-conditioned \( y_i \) and \( y_j \), the covariance is \( \CM_{ij \mid k}
-\). The only question is what the covariance between unconditioned \( y_i \)
-and conditioned \( y_j \) is. By definition,
+We have the collection of Gaussian random variables \( \vec{y} = [y_1, \dotsc,
+y_m]^{\top} \) corresponding to the ordered column indices \( i_1 \succ
+\dotsb \succ i_m \) in the context of aggregated Cholesky factorization.
+We then select an index \( k \) that conditions the variables, but ignores
+the first \( j \) variables (the indices are sorted in decreasing order,
+so if \( k \) conditions a variable, it conditions everything afterwards).
+After this partial conditioning we denote the updated variables as
+\( \vec{y}_{\parallel k} \defeq y_1, \dotsc, y_j, y_{j + 1 \mid k},
+\dotsc, y_{m \mid k} \) and wish to compute the covariance matrix \(
+\Cov[\vec{y}_{\parallel k}] \).
+We know the original variables \( \vec{y} \) have joint density multivariate
+Gaussian according to some covariance matrix \( \CM \), \( \vec{y} \sim
+\N(\vec{0}, \CM) \), and the fully conditional variables \( \vec{y}_{\mid k}
+\) have closed-form posterior distribution according to \cref{eq:cond_cov},
+\( \vec{y}_{\mid k} \sim \N(\vec{\mean}, \CM - \CM_{:, k} \CM_{k, k}^{-1}
+\CM_{k, :}) \) for some posterior mean \( \vec{\mean} \).
+For unconditioned \( y_i \) and \( y_j \),
+their covariance is simply \( \CM_{i, j} \).
+Similarly, for conditioned \( y_{i \mid k} \) and \( y_{j
+\mid k} \), their covariance is \( \CM_{i, j \mid k} \).
+The only unknown is the covariance between unconditioned
+\( y_i \) and conditioned \( y_{j \mid k} \).
+Taking the Cholesky factorization of both covariance matrices,
+let \( L = \chol(\CM) \) and \( L' = \chol(\CM_{:, : \mid k}) \).
+We can then view \( \vec{y} \) as \( L \vec{z} \), where \( \vec{z}
+\) is distributed according to standard normal, \( \N(\vec{0}, \Id) \).
+Similarly, \( \vec{y}_{\mid k} = L' \vec{z} + \vec{\mean} \).
+By definition,
 \begin{align}
-  \Cov[y_i, y_j] &= \E[(y_i - \E[y_i])(y_j - \E[y_j])] \\
-                 &= \E[(L_i \vec{z}) (L_{i \mid k} \vec{z})] \\
-                 &= \E[(L_{1, i} z_1 + \dotsb + L_{N, i} z_N)
-                       (L_{1, j \mid k} z_1 + \dotsb + L_{N, j \mid k} z_N)]
-  \shortintertext{For \( i \neq j \), \( E[z_i z_j] = \E[z_i] \E[z_j] = 0\)
-    since \( z_i \) is independent of \( z_j \) and has mean 0.}
-                 &= \E[L_{1, i} L_{1, j \mid k} z_1^2 + \dotsb +
-                       L_{N, i} L_{N, j \mid k} z_N^2] \\
-                 &= L_{1, i} L_{1, j \mid k}  \E[z_1^2] + \dotsb +
-                    L_{N, i} L_{N, j \mid k} \E[z_N^2]
+  \Cov[y_i, y_{j \mid k}] &=
+    \E[(y_i - \E[y_i])(y_{j \mid k} - \E[y_{j \mid k}])] \\
+  &= \E[(L_i \vec{z}) ({L'}_j \vec{z} + \mu_j - \mu_j)] \\
+  &= \E[(L_{i, 1} z_1 + \dotsb + L_{i, m} z_m)
+        ({L'}_{j, 1} z_1 + \dotsb + {L'}_{j, m} z_m)]
+  \shortintertext{For \( i \neq j \), \( \E[z_i z_j] = \E[z_i] \E[z_j]
+    = 0 \) since \( z_i \) is independent of \( z_j \) and has mean 0.}
+  &= \E[L_{i, 1} {L'}_{j, 1} z_1^2 + \dotsb +
+        L_{i, m} {L'}_{j, m} z_m^2] \\
+  &= L_{i, 1} {L'}_{j, 1} \E[z_1^2] + \dotsb +
+     L_{i, m} {L'}_{j, m} \E[z_m^2]
   \shortintertext{For any \( i \), \( \E[z_i^2]
     = \Var[z_i] + \E[z_i]^2 = 1 + 0 = 1 \)}
-                 &= L_{1, i} L_{1, j \mid k} + \dotsb +
-                    L_{N, i} L_{N, j \mid k} \\
-                 &= L_i \cdot L_{j \mid k}
-  \shortintertext{Thus, the new covariance matrix can be written as:}
-  \label{eq:chol_partial}
+  &= L_{i, 1} {L'}_{j, 1} + \dotsb + L_{i, m} {L'}_{j, m} \\
+  &= L_i \cdot {L'}_j
+  \shortintertext{Thus, the new covariance matrix can be written as}
+  \Cov[\vec{y}_{\parallel k}] &=
   \begin{pmatrix}
-    L_{:j} L_{:j}^{\top} & L_{:j} L_{j: \mid k}^{\top} \\
-    L_{j: \mid k} L_{:j}^{\top} & L_{j: \mid k} L_{j: \mid k}^{\top}
-  \end{pmatrix} &=
+    L_{:j} L_{:j}^{\top} &
+    L_{:j} {L'}_{j + 1:}^{\top} \\
+    {L'}_{j + 1:} L_{:j}^{\top} &
+    {L'}_{j + 1:} {L'}_{j + 1:}^{\top}
+  \end{pmatrix} =
   \begin{pmatrix}
     L_{:j} \\
-    L_{j: \mid k}
+    {L'}_{j + 1:}
   \end{pmatrix}
   \begin{pmatrix}
     L_{:j} \\
-    L_{j: \mid k}
+    {L'}_{j + 1:}
   \end{pmatrix}^{\top}
-  \shortintertext{We will denote a partially conditioned matrix as}
-  \CM_{:, :, \shortmid k}
 \end{align}
 
 \begin{figure}[h]
