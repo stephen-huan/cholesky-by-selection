@@ -882,29 +882,6 @@ to compute the next column of the Cholesky factorization, for a total
 time complexity of \( \BigO(N s^2) \), matching the time complexity of
 the explicit precision approach.
 
-\Stodo{should the algorithms be moved to the appendix?}
-
-\begin{figure}[t]
-  \centering
-  \begin{minipage}[t]{0.49\textwidth}
-  \begin{algorithm}[H]
-    \caption{Point selection by \\ explicit precision}
-    \label{alg:select_prec}
-    \input{figures/algorithms/select_prec.tex}
-  \end{algorithm}
-  \end{minipage}
-  \hfill
-  \begin{minipage}[t]{0.49\textwidth}
-  \begin{algorithm}[H]
-    \caption{Point selection by \\ Cholesky factorization}
-    \label{alg:select_chol}
-    \input{figures/algorithms/select_chol.tex}
-  \end{algorithm}
-  \end{minipage}
-  \caption{Algorithms for single-point selection.}
-  \label{fig:alg_select}
-\end{figure}
-
 However, the precision algorithm uses \( \BigO(s^2) \) space to store the
 precision \( \Theta_{\I, \I}^{-1} \) while the Cholesky algorithm uses \(
 \BigO(N s) \) space to store the first \( s \) columns of the Cholesky factor
@@ -2412,7 +2389,36 @@ every pair of points. Intuitively, this corresponds to the screening
 effect observed in spatial statistics literature --- conditioning on
 a nearby point decreases the correlation for far away points.
 
+\newpage
+
 \section{Algorithms}
+
+\begin{figure}[th!]
+  \centering
+  \begin{minipage}[t]{0.49\textwidth}
+  \begin{algorithm}[H]
+    \caption{Point selection by \\ explicit precision}
+    \label{alg:select_prec}
+    \input{figures/algorithms/select_prec.tex}
+  \end{algorithm}
+  \end{minipage}
+  \hfill
+  \begin{minipage}[t]{0.49\textwidth}
+  \begin{algorithm}[H]
+    \caption{Point selection by \\ Cholesky factorization}
+    \label{alg:select_chol}
+    \input{figures/algorithms/select_chol.tex}
+  \end{algorithm}
+  \end{minipage}
+  \caption{Algorithms for single-point selection.}
+  \label{fig:alg_select}
+\end{figure}
+
+\begin{algorithm}[H]
+  \caption{Direct sparse Gaussian process regression by selection}
+  \label{alg:infer_select}
+  \input{figures/algorithms/infer_select.tex}
+\end{algorithm}
 
 \begin{figure}[th!]
   \centering
@@ -2440,12 +2446,6 @@ a nearby point decreases the correlation for far away points.
   \caption{Algorithms for multiple-point selection.}
   \label{fig:alg_mult_select}
 \end{figure}
-
-\begin{algorithm}
-  \caption{Direct sparse Gaussian process regression by selection}
-  \label{alg:infer_select}
-  \input{figures/algorithms/infer_select.tex}
-\end{algorithm}
 
 \begin{figure}[th!]
   \centering
