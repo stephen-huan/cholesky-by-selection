@@ -893,10 +893,10 @@ than the Cholesky algorithm, the Cholesky algorithm is
 preferred for better performance and ease of implementation.
 
 \Stodo{this is a bit useless}
-Once the indices have been computed according to \cref{alg:select_prec}
-or \cref{alg:select_chol}, inferring the conditional mean and covariance
-of unknown data can be done directly according to \cref{eq:cond_mean} and
-\cref{eq:cond_cov} in time \( \BigO(s^3) \) using \cref{alg:infer_select}.
+Once the indices have been computed by \cref{alg:select_prec} or
+\cref{alg:select_chol}, inferring the conditional mean and covariance
+of unknown data can be done directly according to \cref{eq:cond_mean}
+and \cref{eq:cond_cov} in time \( \BigO(s^3) \) using \cref{alg:infer_select}.
 
 \subsection{Supernodes and blocked selection}
 \label{subsec:mult_select}
@@ -1793,6 +1793,66 @@ By definition,
   \end{pmatrix}^{\top}
 \end{align}
 
+\subsection{Aggregated computation of sparsity entries}
+\label{app:L_mult}
+
+We wish to compute the entries of the sparse Cholesky factor
+\( L_{s_i, i} \) according to \cref{eq:L_col} in the aggregated
+sparsity setting of \cref{subsubsec:aggregated}.
+Recall that we have aggregated the column indices \( i_1 \succ
+\dots \succ i_m \) into \( \tilde{i} = \{ i_1, \dotsc, i_m \} \)
+and \( s_\tilde{i} \) denotes the aggregated sparsity pattern.
+The sparsity pattern for the \( i \)th column of the group is all
+those entries that satisfy lower-triangularity, \( s_i \defeq \{
+j \in s_{\tilde{i}} : j \succeq i \} \subseteq s_{\tilde{i}} \).
+Because each column's sparsity pattern is a subset of the
+overall sparsity pattern, it is possible to compute an outer
+approximation and specialize to each column efficiently.
+Assuming the sparsity entries \( s_{\tilde{i}} \) are sorted according to
+\( \prec \), let \( Q \defeq \CM_{s_{\tilde{i}}, s_{\tilde{i}}}^{-1} \) be
+the precision of the aggregated sparsity pattern and let \( k \) be the \(
+i \)th column's index in \( s_{\tilde{i}} \).
+Because \( s_{\tilde{i}} \) is sorted according to \(
+\prec \), the sparsity pattern for the \( i \)th column
+\( s_i \) is exactly the entries \( k \) and after.
+\begin{align}
+  L_{s_i, i} &= \frac{\CM_{s_i, s_i}^{-1} \vec{e}_1}
+                     {\sqrt{\vec{e}_1^{\top} \CM_{s_i, s_i}^{-1} \vec{e}_1}} \\
+  \shortintertext{Since \( Q^{-1} = \CM_{s_{\tilde{i}}, s_{\tilde{i}}} \)
+    and \( s_i \) is the \( k \)th index of \( s_{\tilde{i}} \) and after,}
+  &= \frac{\left (Q^{-1} \right )_{k:, k:}^{-1} \vec{e}_1}
+    {\sqrt{\vec{e}_1^{\top} \left (Q^{-1} \right )_{k:, k:} \vec{e}_1}} \\
+  \shortintertext{By \cref{eq:inverse_cond}, we can turn
+    marginalization in precision into conditioning in covariance.}
+  \label{eq:L_precision}
+             &= \frac{Q_{k:, k: \mid :k - 1} \vec{e}_1}
+                     {\sqrt{\vec{e}_1^{\top} Q_{k:, k: \mid :k - 1} \vec{e}_1}}
+\end{align}
+So we want the \( k \)th column of \( Q
+\), conditional on all columns before it.
+From \cref{eq:chol}, this can be directly read off the \(
+k \)th column of the Cholesky factor \( L = \chol(Q) \) to
+compute \cref{eq:L_col} for each \( i \in \tilde{i} \).
+However, computing \( Q = \CM_{s_{\tilde{i}}, s_{\tilde{i}}}^{-1} \) by
+inverting \( \CM_{s_{\tilde{i}}, s_{\tilde{i}}} \) and then additionally
+computing its Cholesky factor \( L = \chol(Q) \) is a bit wasteful.
+
+Instead of computing a lower-triangular factor for the precision, we can
+compute an \emph{upper}-triangular factor for the covariance whose inverse
+transpose will be a \emph{lower}-triangular factor for the precision.
+Using the same flipping trick as \cref{eq:U_chol}, let \( U = P^{\Reverse}
+\chol(P^{\Reverse} \CM_{s_{\tilde{i}}, s_{\tilde{i}}} P^{\Reverse})
+P^{\Reverse} \) where \( P^{\Reverse} \) is the order-reversing permutation;
+\( U \) is upper-triangular and satisfies \( U U^{\top} = \CM_{s_{\tilde{i}},
+s_{\tilde{i}}} \) so \( U^{-\top} U^{-1} = \CM_{s_{\tilde{i}},
+s_{\tilde{i}}}^{-1} = Q \) and we see that \( L = U^{-\top} \) is a
+lower-triangular Cholesky factor satisfying \( L L^{\top} = Q \).
+Thus we can compute \( U \) as a Cholesky factor of the covariance and
+dynamically form its inverse transpose by solving the triangular system
+\( L_{:, k} = U^{-T} \vec{e}_k \) for the desired column \( k \) of \(
+L \) (like \cref{eq:obj_chol}, \( \vec{e}_k \) is the vector with \( k
+\)th entry one and rest zero).
+
 \section{Computation in sparse Gaussian process selection}
 
 \subsection{Mutual information objective}
@@ -2424,7 +2484,7 @@ a nearby point decreases the correlation for far away points.
   \centering
   \begin{minipage}[t]{0.49\textwidth}
   \begin{algorithm}[H]
-    \caption{Multiple prediction point selection by explicit precision}
+    \caption{Multiple-point selection by explicit precision}
     \label{alg:select_mult_prec}
     \input{figures/algorithms/select_mult_prec.tex}
   \end{algorithm}
@@ -2432,7 +2492,7 @@ a nearby point decreases the correlation for far away points.
   \hfill
   \begin{minipage}[t]{0.49\textwidth}
   \begin{algorithm}[H]
-    \caption{Multiple prediction point selection by Cholesky factorization}
+    \caption{Multiple-point selection by Cholesky factorization}
     \label{alg:select_mult_chol}
     \input{figures/algorithms/select_mult_chol.tex}
   \end{algorithm}
