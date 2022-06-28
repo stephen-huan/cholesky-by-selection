@@ -1164,228 +1164,91 @@ kernel function seems to be submodular, but not for any higher dimension.
   \label{fig:select_chol}
 \end{figure}
 
-We can therefore use algorithm \cref{alg:select_chol} directly on each
-column, where the prediction point is the \( i \) variable and the number
-of points selected is the number of nonzero entries per column. The only
-difference is that the candidates is limited to indices lower than \( i
-\), that is, candidate indices \( k \) such that \( k > i \) to maintain
-the lower triangularity of \( L \). Once \( s_i \) has been computed for
-each \( i \), \( L \) can be constructed according to \cref{eq:L_col}. Each
-column costs \( \BigO(s^3) \) to compute \( \CM_{s_i, s_i}^{-1} \) for a
-total cost of \( \BigO(N s^3) \) for the \( N \) columns of \( L \).
+It is remarkably straightforward to apply the suite of selection
+algorithms we developed to sparse Cholesky factorization.
+As depicted in \cref{fig:select_chol}, for computing
+the \( i \)th column of the Cholesky factor, we use the
+\( i \)th point in the ordering as the target point.
+For the training points, we use all the points satisfying
+lower-triangularity, those after the target in the ordering.
+Running the selection algorithm for the desired number of nonzeros
+picks out indices which we add to the sparsity set \( s_i \).
+Finally, once the sparsity pattern is determined, we compute the
+entries of the factor column-by-column according to \cref{eq:L_col}.
+For \( s \) nonzero entries per column, each column costs \( \BigO(s^3)
+\) to compute \( \CM_{s_i, s_i}^{-1} \) for a total time complexity
+cost of \( \BigO(N s^3) \) for the \( N \) columns of \( L \).
+Using the single-point selection algorithm in \cref{subsec:greedy_select}
+costs \( \BigO(C s^2) \) for selecting \( s \) points out of \(
+C \) candidates, so \( \BigO(N C s^2) \) over \( N \) columns.
+If \( C \) is chosen to be a constant factor bigger than \( s \),
+then selection has the same complexity as computing the entries of
+\( L \), suggesting the need to limit the candidates considered.
+In practice we pick the candidate set as the nearest neighbors
+to the point of interest and use the selection algorithm to
+subsample within these candidates as \cite{gramacy2014local} does.
+Specifically we use the framework of \cite{schafer2021sparse} which selects all
+points within a radius of \( \rho \ell_i \) to the \( i \)th point, where \(
+\rho \) is a tuning parameter and \( \ell_i \) is a length scale systematically
+decreasing with decreasing position in the ordering.
 
 \subsection{Aggregated sparsity pattern}
 
-We can also use the Gaussian process regression viewpoint to efficiently
-aggregate multiple columns, that is, to use the same sparsity pattern for
-multiple columns. We denote aggregating the column indices \( i_1, \dotsc, i_m
-\) into the same group as \( \tilde{i} = \{i_1, i_2, \dots i_m \} \), letting
-\( s_{\tilde{i}} = \bigcup_{i \in \tilde{i}} s_i \) be the aggregated sparsity
-pattern, and letting \( \tilde{s} = s_{\tilde{i}} - \tilde{i} \) be the set
-of selected entries excluding the diagonal entries. Each \( s_i = \tilde{s}
-\cup \, \{ j \in \tilde{i} \mid j \geq i \} \), that is, the sparsity pattern
-of the \( i \) column is the selected entries plus all the diagonal entries
-lower than it. We will enforce that all the selected entries, excluding the
-indices of the diagonals of the columns themselves, are below the lowest index
-so that indices are not selected ``partially'' --- that is, an index could be
-above some indices in the aggregated columns, and therefore invalid to add to
-their column, but below others. That is, we restrict the candidate indices \(
-k > \max \tilde{i} \) so that the selected index can be added to each column
-in \( \tilde{i} \) without violating the lower triangularity of \( L \). It
-is in fact possible to properly account for these partial updates, but the
-reasoning and eventual algorithm becomes more complicated. We defer a detailed
-discussion of the partial update case to \cref{app:partial}.
+For an aggregated sparsity pattern as discussed in \cref{subsubsec:aggregated},
+the target points become all the points in the group \( \tilde{i} \).
+We use the framework of \cite{schafer2021sparse} which
+determines the groups by aggregating the points that are
+both close geometrically as well as close in the ordering.
+The aggregated sparsity pattern is then the union of
+the nearest neighbors for each point in the group.
+If all the points in the group are adjacent in the ordering or only candidate
+indices \( k \) that satisfy \( k \succ \max{\tilde{i}} \) are considered, then
+each candidate conditions every point in the group and so the multiple-point
+algorithm \cref{subsec:mult_select} can be directly applied.
+However, we observe forcing these conditions irreparably damages the
+approximation quality of the resulting factor: forcing groups to be
+contiguous in the ordering removes the guarantee that points in the
+group are geometrically close, and removing candidates between target
+points filters a large number of candidates, obviating the benefit of
+aggregation in the first place.
+If these conditions are not met, then candidates
+can condition partial subsets of the group.
+Of course, the multiple-point algorithm can still be applied, but it
+systematically overestimates the effect of selecting candidate points.
+In practice, we also observe a significant decrease in approximation quality,
+to the extent that it becomes worse than non-aggregated factorization.
+The partial selection algorithm is necessary to be able to use the original
+grouping and candidate sets while maintaining approximation quality.
 
-We now show that the KL-minimization objective on the aggregated indices
-corresponds precisely to \cref{eq:obj_gp_mult}, the objective multiple
-point Gaussian regression with the chain rule of log determinant through
-conditioning.
-\begin{align}
-  \label{eq:det_chain}
-  \logdet(\CM) &= \logdet(\CM_{1, 1 \mid 2}) + \logdet(\CM_{2, 2})
-  \shortintertext{where \( \CM \) is blocked according to
-    TODO. The KL divergence objective for \( \tilde{i} \) is:}
-  \nonumber
-  \sum_{i \in \tilde{i}} \log(\CM_{ii \mid s_i - \{ i \} })
-  &= \log(\CM_{i_m i_m \mid \tilde{s}}) +
-     \log(\CM_{i_{m - 1} i_{m - 1} \mid \tilde{s} \cup \{ i_m \}})
-     + \dotsb \\
-  \nonumber
-  &= \logdet(\CM_{\{ i_m, i_{m - 1} \}, \{ i_m, i_{m - 1} \}
-             \mid \tilde{s}}) +
-    \log(\CM_{i_{m - 2} i_{m - 2} \mid \tilde{s} \cup \{ i_m, i_{m - 1} \}})
-    + \dotsb \\
-  \label{eq:obj_mult}
-  &= \logdet(\CM_{\tilde{i}, \tilde{i} \mid \tilde{s}})
-\end{align}
+Once the sparsity pattern has been determined, we again need to
+compute each column of \( L \) according to \cref{eq:L_col}.
+Because the sparsity pattern for a column is a subset of its group's
+aggregated sparsity pattern, we can efficiently compute the group's
+entries together in the time for a single column, \( \BigO(s^3) \).
+See Algorithm 3.2 in \cite{schafer2021sparse} or
+\cref{app:L_mult} for a statistical explanation.
+If the average group size is \( m \) points, for both the multiple-point
+or partial selection algorithms the time complexity of selecting \( s \)
+points out of \( C \) candidates is \( \BigO(C s^2 + C m^2 + m^3) \).
+Over \( \frac{N}{m} \) groups the total time complexity to do both sparsity
+selection and entry computation is \( \BigO(\frac{N}{m} (C s^2 + C m^2 + m^3 +
+s^3)) \) which simplifies to \( \BigO(\frac{N C s^2}{m}) \) assuming \( s > m
+\), resulting in a \( m \) times improvement over non-aggregated factorization.
+This allows the aggregated factorization to produce denser factors in the same
+time as the non-aggregated factorization, often leading to better accuracy.
+However the resulting factor will be less efficient at reducing the KL
+divergence per sparsity entry, since the algorithm is forced to select
+the same entry for nearly \emph{all} columns in the group rather than
+tailoring the sparsity pattern to a particular column.
 
-We see that the objective \cref{eq:obj_mult} is equivalent to the
-objective \cref{eq:obj_gp_mult}, that is, to minimize the log
-determinant of the conditional covariance matrix corresponding to a
-set of prediction points, conditional on the selected entries. We can
-therefore directly use \cref{alg:select_mult_chol} on the aggregated
-columns, where the prediction points correspond to indices in the
-aggregation and where we restrict the candidates \( k \) to those
-below each column in the aggregation, \( k > \max \tilde{i} \).
+\subsection{Allocating nonzeros by global greedy selection}
+\label{subsec:global_greedy}
 
-Hence the sparse Cholesky factorization motivated by KL divergence can be
-viewed as sparse Gaussian process selection over each column, where entries are
-selected to maximize mutual information with the entry on the diagonal of the
-current column. In the aggregated case, the multiple columns in the aggregated
-group correspond directly to predicting for multiple prediction points, where
-entries are again selected to maximize mutual information with each diagonal
-entry in the aggregation. This viewpoint leads directly to \cref{alg:chol}.
+\subsubsection{Single column selection}
+\label{subsubsec:single_column}
 
-\begin{algorithm}
-  \caption{Cholesky factorization by selection}
-  \label{alg:chol}
-  \begin{algorithmic}[1]
-    \REQUIRE \( \vec{x}, K(\cdot, \cdot), s,
-      g = \{ \tilde{i}_1, \dotsc, \tilde{i}_{N/m} \} \)
-    \ENSURE \( L \) such that
-      \( (L L^{\top})^{-1} \approx K(\vec{x}, \vec{x}) \)
-
-    \STATE \( n \gets \lvert \vec{x} \rvert \)
-    \FOR{ \( \tilde{i} \in g \)}
-      \STATE \( J \gets
-        \{ \max(\tilde{i}) + 1, \max(\tilde{i}) + 2, \dotsc, n \}
-      \)
-      \STATE Compute \( I \) using
-        \cref{alg:select_mult_prec} or \cref{alg:select_mult_chol} \\ where
-        \( \vec{x}_\Train = \vec{x}[J],
-           \vec{x}_\Pred = \vec{x}[\tilde{i}],
-           s = s - \lvert \tilde{i} \rvert
-        \)
-      \STATE \( \tilde{s} \gets J[I] \)
-      \FOR{\( i \in \text{reversed}(\text{sorted}(\tilde{i})) \)}
-        \STATE \( \tilde{s} \gets \tilde{s} \cup \{ i \} \)
-        \STATE \( s_i \gets \text{reversed}(\tilde{s}) \)
-      \ENDFOR
-    \ENDFOR
-    \RETURN \( L \) computed with \cref{alg:L_mult}
-  \end{algorithmic}
-\end{algorithm}
-
-\noindent
-\begin{minipage}[t]{0.49\textwidth}
-\begin{algorithm}[H]
-  \caption{Computing \( L \) \\ without aggregation}
-  \label{alg:L}
-  \begin{algorithmic}[1]
-    \REQUIRE \( \vec{x}, K(\cdot, \cdot), s_i \)
-    \ENSURE \( L_{s_i, i} \)
-
-    \STATE \( \CM_{s_i, s_i}^{-1} \gets
-      K(\vec{x}[s_i], \vec{x}[s_i])^{-1}
-    \)
-    \STATE \( L_{s_i, i} \gets \frac{\CM_{s_i, s_i}^{-1} \vec{e}_1}
-      {\sqrt{\vec{e}_1^{\top} \CM_{s_i, s_i}^{-1} \vec{e}_1}}
-    \)
-    \RETURN \( L_{s_i, i} \)
-  \end{algorithmic}
-\end{algorithm}
-\end{minipage}
-\hfill
-\begin{minipage}[t]{0.49\textwidth}
-\begin{algorithm}[H]
-  \caption{Computing \( L \) \\ with aggregation}
-  \label{alg:L_mult}
-  \begin{algorithmic}[1]
-    \REQUIRE \( \vec{x}, K(\cdot, \cdot), \tilde{s}, \tilde{i} \)
-    \ENSURE \( L_{s_i, i} \) for all \( i \in \tilde{i} \)
-
-    \STATE \( s \gets \tilde{i} \cup \tilde{s} \)
-    \STATE \( U \gets P^{\updownarrow}
-      \chol(P^{\updownarrow} \CM_{s, s} P^{\updownarrow}) P^{\updownarrow}
-    \)
-    \FOR{\( i \in \tilde{i} \)}
-      \STATE \( k \gets \) index of \( i \) in \( \tilde{i} \)
-      \STATE \( L_{s_i, i} \gets U^{-\top} \vec{e}_k \)
-    \ENDFOR
-    \RETURN L
-  \end{algorithmic}
-\end{algorithm}
-\end{minipage}
-
-Once the sparsity pattern has been determined, we need to compute each column
-of \( L \) according to \cref{thm:L}. Because the sparsity pattern for each
-column in the same group are subsets of each other, we can efficiently compute
-all their columns at once. The observation is that the smallest index in the
-group (corresponding to the entry highest in the matrix) will have the largest
-sparsity pattern, the next index will have one less entry (lacking the entry
-above it, which would violate lower triangularity), and so on. We need to
-compute \( \CM_{s_i, s_i}^{-1} \vec{e}_1 \) for each \( i \in \tilde{i} \),
-or the precision of the marginalized covariance corresponding to the selected
-entries. By \cref{eq:inverse_cond}, we can turn marginalization in covariance
-into conditioning in precision:
-\begin{align}
-  \nonumber
-  \label{eq:L_precision}
-  L_{s_i, i} &= \frac{\CM_{s_i, s_i}^{-1} \vec{e}_1}
-    {\sqrt{\vec{e}_1^{\top} \CM_{s_i, s_i}^{-1} \vec{e}_1}} \\
-             &= \frac{(\CM_{s, s})^{-1}_{k:, k: \mid :k - 1} \vec{e}_1}
-             {\sqrt{\vec{e}_1^{\top} (\CM_{s, s})^{-1}_{k:, k: \mid :k - 1}
-                    \vec{e}_1}}
-\end{align}
-where \( s = \tilde{i} \cup \tilde{s} \) and \( k \) is \( i \)'s
-index in \( \tilde{i} \). So we want the \( k \)th column of
-the precision of the marginalized covariance, conditional on all the
-entries before it. From \cref{eq:chol}, this can be directly read
-off the Cholesky factorization. Thus, we can simply compute:
-\begin{align}
-  \label{eq:L_chol}
-  L &= \chol \left ( \CM_{s, s}^{-1} \right )
-\end{align}
-and read off the \( k \)th column to compute \cref{eq:L_precision} for each
-\( i \in \tilde{i} \). However, instead of computing a lower triangular
-factor for the precision, we can compute an \emph{upper} triangular factor
-the covariance whose inverse transpose will be a \emph{lower} triangular
-factor for the original matrix. In particular, we see that
-\begin{align}
-  % \label{eq:U_chol}
-  U &= P^{\updownarrow} \chol(P^{\updownarrow} \CM_{s, s} P^{\updownarrow})
-       P^{\updownarrow}
-  \shortintertext{satisfies \( U U^{\top} = \CM_{s, s} \) where
-  \( P^{\updownarrow} \) is the order-reversing permutation. Thus,}
-  \nonumber
-  \CM_{s, s}^{-1} &= U^{-\top} U^{-1}
-\end{align}
-where \( U^{-\top} \) is an \emph{lower} triangular factor for \( \CM_{s,
-s}^{-1} \) equal to \cref{eq:L_col} because the Cholesky factorization is
-unique. Computing \( U^{-\top} \) leads directly to \cref{alg:L_mult}.
-
-Recall that the complexity of selecting \( s \) out of \( N \) total training
-points for \( m \) prediction points using \cref{alg:select_mult_prec} or
-\cref{alg:select_mult_chol} was \( \BigO(N s^2 + N m^2 + m^3) \). In the
-context of Cholesky factorization, \( N \) is the size of the matrix, \( m \)
-is the number of columns to aggregate, and \( s \) is the number of nonzero
-entries in each column of \( L \). We therefore need to do \( \frac{N}{m} \)
-selections, one for each aggregated group, where we only need to select \( s
-- m \) entries (since the \( m \) prediction points are automatically added).
-We then need to actually construct each column of \( L \) after determining
-the sparsity pattern, with \cref{alg:L_mult}. This costs \( \BigO(s^3) \)
-for each aggregated group to compute the Cholesky factor of the submatrix,
-which dominates the time to compute each column of \( L \) for the \( m \)
-columns in the group, \( \BigO(m s^2) \) (\( N > s > m \)). Thus, the overall
-complexity is \( \BigO(\frac{N}{m} (N (s - m)^2 + N m^2 + m^3 + s^3)) \),
-which simplifies to \( \BigO(\frac{N^2 s^2}{m}) \) by making use of the bound
-that \( (s - m)^2 = \BigO(s^2 + m^2) \).
-
-Note that the non-aggregated factorization is equivalent to \( m = 1 \),
-which yields \( \BigO(N^2 s^2) \) (using the non-aggregated algorithms
-\cref{alg:select_chol,alg:L}, but one can also use the aggregated versions
-\cref{alg:select_mult_chol,alg:L_mult} with \( m = 1 \) and achieve
-equivalent complexity). Thus, we see that the aggregated version is \( m
-\) times faster than its non-aggregated counterpart, at the cost that the
-resulting sparsity pattern will be lower quality (since the algorithm is
-forced to select the same entry for \emph{all} columns in the group).
-
-Unlike the geometric algorithms of \cite{schafer2021sparse,
-schafer2020compression} which rely on the pairwise distance between points,
-and whose covariance matrix is implicitly determined by a list of points and
-kernel function, this algorithm relies only on the entries of the covariance
-matrix \( \CM \). Thus, it can factor arbitrary symmetric positive-definite
-matrices without access to points or an explicit kernel function.
+\subsubsection{Aggregated selection}
+\label{subsubsec:mult_column}
 
 \section{Numerical experiments}
 
