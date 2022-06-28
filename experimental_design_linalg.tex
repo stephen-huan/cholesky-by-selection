@@ -262,19 +262,6 @@ The remainder of the paper is organized as follows.
   \label{fig:screening}
 \end{figure}
 
-% \begin{figure}[h]
-%   \centering
-%   \input{figures/cholesky_factor.tex}%
-%   % TODO: matching GP image with 13 candidates, 3 selected, 1 training point
-%   \input{figures/selection/cknn.tex}
-%   \caption{For a column in isolation, the \textcolor{orange}{unknown} point
-%     is the diagonal entry, below it are \textcolor{lightblue}{candidates},
-%     and the \textcolor{seagreen}{selected} entries are added to the sparsity
-%     pattern \( s_i \). Thus, sparsity selection in Cholesky factorization
-%     is analogous to point selection in Gaussian processes.}
-%   \label{fig:select_chol}
-% \end{figure}
-
 \Ftodo{``specific'' and ``intuitively'' are fluff, meaning that they
 don't really add information. In order to achieve crisp, high-quality
 academic writing, it is important to try to those fluff words as much
@@ -1043,33 +1030,6 @@ The memory usages are identical except for \( \BigO(s^2)
 \) versus \( \BigO(N s) \), so the Cholesky algorithm
 again uses more memory than the precision algorithm.
 
-\begin{figure}
-  \centering
-  \begin{minipage}[t]{0.49\textwidth}
-  \begin{algorithm}[H]
-    \caption{Multiple prediction point selection by explicit precision}
-    \label{alg:select_mult_prec}
-    \input{figures/algorithms/select_mult_prec.tex}
-  \end{algorithm}
-  \end{minipage}
-  \hfill
-  \begin{minipage}[t]{0.49\textwidth}
-  \begin{algorithm}[H]
-    \caption{Multiple prediction point selection by Cholesky factorization}
-    \label{alg:select_mult_chol}
-    \input{figures/algorithms/select_mult_chol.tex}
-  \end{algorithm}
-
-  \begin{algorithm}[H]
-    \caption{Update Cholesky factor}
-    \label{alg:chol_update}
-    \input{figures/algorithms/chol_update.tex}
-  \end{algorithm}
-  \end{minipage}
-  \caption{Algorithms for multiple-point selection.}
-  \label{fig:alg_mult_select}
-\end{figure}
-
 \subsection{Partial selection}
 \label{subsec:partial_select}
 
@@ -1199,37 +1159,6 @@ performance for the same asymptotic time complexity.
 In addition, the objective for the partial selection algorithm is
 more complicated to compute than its multiple-point counterpart.
 
-\begin{figure}[h!]
-  \centering
-  \begin{minipage}[t]{0.49\textwidth}
-  \begin{algorithm}[H]
-    \caption{Partial point selection}
-    \label{alg:select_partial}
-    \input{figures/algorithms/select_partial.tex}
-  \end{algorithm}
-  \begin{algorithm}[H]
-    \caption{Find \( j \)'s index in \( \Order \)}
-    \label{alg:insert_index}
-    \input{figures/algorithms/insert_index.tex}
-  \end{algorithm}
-  \end{minipage}
-  \hfill
-  \begin{minipage}[t]{0.49\textwidth}
-  \begin{algorithm}[H]
-    \caption{Compute \( j \)'s objective}
-    \label{alg:partial_score}
-    \input{figures/algorithms/partial_score.tex}
-  \end{algorithm}
-  \begin{algorithm}[H]
-    \caption{Update \( L \) after insertion}
-    \label{alg:chol_insert}
-    \input{figures/algorithms/chol_insert.tex}
-  \end{algorithm}
-  \end{minipage}
-  \caption{Algorithms for partial selection.}
-  \label{fig:alg_partial_select}
-\end{figure}
-
 \subsection{Near optimality by empirical submodularity}
 
 If the objective satisfies the property of submodularity, then it is guaranteed
@@ -1244,6 +1173,19 @@ kernel function seems to be submodular, but not for any higher dimension.
 
 \section{Greedy selection for \emph{global} approximation by KL-minimization}
 \label{sec:chol_select}
+
+\begin{figure}[t]
+  \centering
+  \input{figures/cholesky_factor.tex}%
+  % TODO: matching GP image with 13 candidates, 3 selected, 1 training point
+  \input{figures/selection/cknn.tex}
+  \caption{For a column in isolation, the \textcolor{orange}{unknown} point
+    is the diagonal entry, below it are \textcolor{lightblue}{candidates},
+    and the \textcolor{seagreen}{selected} entries are added to the sparsity
+    pattern \( s_i \). Thus, sparsity selection in Cholesky factorization
+    is analogous to point selection in Gaussian processes.}
+  \label{fig:select_chol}
+\end{figure}
 
 We can therefore use algorithm \cref{alg:select_chol} directly on each
 column, where the prediction point is the \( i \) variable and the number
@@ -2472,10 +2414,68 @@ a nearby point decreases the correlation for far away points.
 
 \section{Algorithms}
 
+\begin{figure}[th!]
+  \centering
+  \begin{minipage}[t]{0.49\textwidth}
+  \begin{algorithm}[H]
+    \caption{Multiple prediction point selection by explicit precision}
+    \label{alg:select_mult_prec}
+    \input{figures/algorithms/select_mult_prec.tex}
+  \end{algorithm}
+  \end{minipage}
+  \hfill
+  \begin{minipage}[t]{0.49\textwidth}
+  \begin{algorithm}[H]
+    \caption{Multiple prediction point selection by Cholesky factorization}
+    \label{alg:select_mult_chol}
+    \input{figures/algorithms/select_mult_chol.tex}
+  \end{algorithm}
+
+  \begin{algorithm}[H]
+    \caption{Update Cholesky factor}
+    \label{alg:chol_update}
+    \input{figures/algorithms/chol_update.tex}
+  \end{algorithm}
+  \end{minipage}
+  \caption{Algorithms for multiple-point selection.}
+  \label{fig:alg_mult_select}
+\end{figure}
+
 \begin{algorithm}
   \caption{Direct sparse Gaussian process regression by selection}
   \label{alg:infer_select}
   \input{figures/algorithms/infer_select.tex}
 \end{algorithm}
+
+\begin{figure}[th!]
+  \centering
+  \begin{minipage}[t]{0.49\textwidth}
+  \begin{algorithm}[H]
+    \caption{Partial point selection}
+    \label{alg:select_partial}
+    \input{figures/algorithms/select_partial.tex}
+  \end{algorithm}
+  \begin{algorithm}[H]
+    \caption{Find \( j \)'s index in \( \Order \)}
+    \label{alg:insert_index}
+    \input{figures/algorithms/insert_index.tex}
+  \end{algorithm}
+  \end{minipage}
+  \hfill
+  \begin{minipage}[t]{0.49\textwidth}
+  \begin{algorithm}[H]
+    \caption{Compute \( j \)'s objective}
+    \label{alg:partial_score}
+    \input{figures/algorithms/partial_score.tex}
+  \end{algorithm}
+  \begin{algorithm}[H]
+    \caption{Update \( L \) after insertion}
+    \label{alg:chol_insert}
+    \input{figures/algorithms/chol_insert.tex}
+  \end{algorithm}
+  \end{minipage}
+  \caption{Algorithms for partial selection.}
+  \label{fig:alg_partial_select}
+\end{figure}
 
 \end{document}
