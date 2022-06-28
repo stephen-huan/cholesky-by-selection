@@ -1,0 +1,37 @@
+\begin{algorithmic}[1]
+  \REQUIRE \( X_\Train, X_\Pred, \prec, \K(\cdot, \cdot), s \)
+  \ENSURE \( \I \)
+
+  \STATE \( N \gets \card{X_\Train} \)
+  \STATE \( m \gets \card{X_\Pred} \)
+  \STATE \(
+    X \gets
+    \begin{pmatrix}
+      X_\Train \\
+      X_\Pred
+    \end{pmatrix}
+  \)
+  \STATE \( \I \gets \emptyset \)
+  \STATE \( -\I \gets \{ 1, \dotsc, N \} \)
+  \STATE \( \Order \gets \emptyset \)
+  \STATE \( L \gets \vec{0}^{(N + m) \times (s + m)} \)
+  \FOR{\( i \in \{ 1, \dotsc, m \} \)}
+    \STATE Update \( L \) and \( \Order \) with
+      \( k = N + i \) \\ by \cref{alg:chol_insert}.
+  \ENDFOR
+  \WHILE{\( \card{-\I} > 0 \) and \( \card{\I} < s \)}
+    \STATE \( i \gets \card{\I} + m \)
+    \STATE best \( \gets \infty \)
+    \FOR{\( j \in -I \)}
+      \STATE Find score of \( j \) by \cref{alg:partial_score}
+      \IF{score \( < \) best}
+        \STATE best \( \gets \) score
+        \STATE \( k \gets j \)
+      \ENDIF
+    \ENDFOR
+    \STATE \( \I \gets \I \cup \{ k \} \)
+    \STATE \( -\I \gets -\I \setminus \{ k \} \)
+    \STATE Update \( L \) and \( \Order \) by \cref{alg:chol_insert}.
+  \ENDWHILE
+  \RETURN \( \I \)
+\end{algorithmic}

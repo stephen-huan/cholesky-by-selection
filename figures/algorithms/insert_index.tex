@@ -1,0 +1,11 @@
+\begin{algorithmic}[1]
+  \REQUIRE \( \Order, \prec, i, j \)
+  \ENSURE \( p \)
+
+  \FOR{\( p \in \{ 1, \dotsc, i \} \)}
+    \IF{\( j \succeq \Order_p \)}
+      \RETURN  \( p \)
+    \ENDIF
+  \ENDFOR
+  \RETURN \( i + 1 \)
+\end{algorithmic}

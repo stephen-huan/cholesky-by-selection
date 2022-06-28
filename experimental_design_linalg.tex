@@ -1199,6 +1199,37 @@ performance for the same asymptotic time complexity.
 In addition, the objective for the partial selection algorithm is
 more complicated to compute than its multiple-point counterpart.
 
+\begin{figure}[h!]
+  \centering
+  \begin{minipage}[t]{0.49\textwidth}
+  \begin{algorithm}[H]
+    \caption{Partial point selection}
+    \label{alg:select_partial}
+    \input{figures/algorithms/select_partial.tex}
+  \end{algorithm}
+  \begin{algorithm}[H]
+    \caption{Find \( j \)'s index in \( \Order \)}
+    \label{alg:insert_index}
+    \input{figures/algorithms/insert_index.tex}
+  \end{algorithm}
+  \end{minipage}
+  \hfill
+  \begin{minipage}[t]{0.49\textwidth}
+  \begin{algorithm}[H]
+    \caption{Compute \( j \)'s objective}
+    \label{alg:partial_score}
+    \input{figures/algorithms/partial_score.tex}
+  \end{algorithm}
+  \begin{algorithm}[H]
+    \caption{Update \( L \) after insertion}
+    \label{alg:chol_insert}
+    \input{figures/algorithms/chol_insert.tex}
+  \end{algorithm}
+  \end{minipage}
+  \caption{Algorithms for partial selection.}
+  \label{fig:alg_partial_select}
+\end{figure}
+
 \subsection{Near optimality by empirical submodularity}
 
 If the objective satisfies the property of submodularity, then it is guaranteed

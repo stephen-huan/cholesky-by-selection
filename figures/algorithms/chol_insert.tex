@@ -1,0 +1,28 @@
+\begin{algorithmic}[1]
+  \REQUIRE \( \Order, \prec, i, k, L, X, \K(\cdot, \cdot) \)
+  \ENSURE \( L, \Order \)
+
+  \STATE Find \( p \) by \cref{alg:insert_index} for \( j = k \)
+  \STATE \( \Order \gets \{ \Order_{:p - 1}, j, \Order_{p:} \} \)
+  \STATE \( \vec{u} \gets \K(X, X_k) - L_{:, :i - 1} L_{k, :i - 1}^{\top} \)
+  \STATE \( \vec{u} \gets \vec{u}/\sqrt{L_{k, i}} \)
+  \STATE \( \vec{v} \gets \vec{u} \)
+  \FOR{\( c \in \{ p, \dotsc, i \} \)}
+    \STATE \( \mathcal{C} \gets \Order_c \)
+    \STATE \( \gamma \gets
+      \sqrt{L_{\mathcal{C}, c}^2 - \vec{v}_{\mathcal{C}}^2}
+    \)
+    \STATE \( \alpha \gets  L_{\mathcal{C}, c}/\gamma \)
+    \STATE \( \beta \gets \vec{v}_{\mathcal{C}}/\gamma \)
+    \STATE \( L_{:, c} \gets \alpha L_{:, c} - \beta \vec{v} \)
+    \STATE \( \vec{v} \gets
+      \frac{1}{\alpha} \vec{v} - \frac{\beta}{\alpha} L_{:, c}
+    \)
+  \ENDFOR
+  \STATE \( L \gets
+    \begin{pmatrix}
+      L_{:, :p - 1} & \vec{u} & L_{:, p:}
+    \end{pmatrix}
+  \)
+  \RETURN \( L, \Order \)
+\end{algorithmic}

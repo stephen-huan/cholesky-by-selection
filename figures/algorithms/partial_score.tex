@@ -1,0 +1,32 @@
+\begin{algorithmic}[1]
+  \REQUIRE \( \Order, \prec, i, j, L, X, N, \K(\cdot, \cdot) \)
+  \ENSURE score
+
+  \STATE Compute \( p \) by \cref{alg:insert_index}
+  \STATE score \( \gets 0 \)
+  \STATE \( \CM_{j, j} = \K(X_j, X_j) \)
+  \FOR{\( c \in \{ 1, \dotsc, i \} \)}
+    \STATE \( \mathcal{C} \gets \Order_c \)
+    \STATE \( \CM_{\mathcal{C}, \mathcal{C} \mid :c - 1}
+      \gets L_{\mathcal{C}, c}^2
+    \)
+    \STATE \( \CM_{j, \mathcal{C} \mid :c - 1}
+      \gets L_{j, c} \cdot \CM_{\mathcal{C}, \mathcal{C} \mid :c - 1}
+    \)
+    \IF{\( \mathcal{C} \geq N \)}
+      \STATE \( \var \gets \CM_{\mathcal{C}, \mathcal{C} \mid :c - 1} \)
+      \IF{\( c \geq p \)}
+        \STATE \( \var \gets
+          \CM_{\mathcal{C}, \mathcal{C} \mid :c - 1} -
+          \frac{\CM_{j, \mathcal{C} \mid :c - 1}^2}{\CM_{j, j \mid :c - 1}}
+        \)
+      \ENDIF
+      \STATE score \( \gets \text{score} + \log(\var) \)
+    \ENDIF
+    \STATE \( \CM_{j, j \mid :c} \gets \CM_{j, j \mid :c - 1} -
+      \frac{\CM_{j, \mathcal{C} \mid :c - 1}^2}
+           {\CM_{\mathcal{C}, \mathcal{C} \mid :c - 1}}
+    \)
+  \ENDFOR
+  \RETURN score
+\end{algorithmic}

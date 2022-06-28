@@ -37,8 +37,8 @@
     \STATE \( i \gets \card{\I} \)
     \STATE Update \( L \) and \( \diag(\CM_{\Train, \Train
       \mid \I}) \) \\ by \cref{alg:chol_update}.
-    \STATE Update \( L_\Pred \) and \( \diag(\CM_{\Train, \Train
-      \mid \I, \Pred}) \) with \( i = i + m \) by \cref{alg:chol_update}.
+    \STATE Update \( L_\Pred \) and \( \diag(\CM_{\Train, \Train \mid \I,
+      \Pred}) \) with \( i = \card{\I} + m \) by \cref{alg:chol_update}.
   \ENDWHILE
   \RETURN \( \I \)
 \end{algorithmic}
