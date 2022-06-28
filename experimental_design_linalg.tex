@@ -629,27 +629,27 @@ Let the random variables corresponding to the indices \( i_1, \dotsc, i_m
 \) be collected in a vector \( \vec{y} = [y_1, \dotsc, y_m]^{\top} \) with
 joint density multivariate Gaussian with covariance matrix \( \CM \).
 We select an index \( k \) that conditions the variables, but ignores the first
-\( j \) variables (recall that the indices are sorted in decreasing order,
+\( p \) variables (recall that the indices are sorted in decreasing order,
 so if \( k \) conditions a variable, it conditions everything afterwards).
 After this partial conditioning the variables become \( \vec{y}_{\parallel
-k} \defeq y_1, \dotsc, y_j, y_{j + 1 \mid k}, \dotsc, y_{m \mid k} \)
+k} \defeq y_1, \dotsc, y_p, y_{p + 1 \mid k}, \dotsc, y_{m \mid k} \)
 and the covariance matrix \( \Cov[\vec{y}_{\parallel k}] \) becomes
 \begin{align}
   \label{eq:chol_partial}
   \CM_{\tilde{i}, \tilde{i} \parallel k} &=
   \begin{pmatrix}
-    L_{:j} L_{:j}^{\top} &
-    L_{:j} {L'}_{j + 1:}^{\top} \\
-    {L'}_{j + 1:} L_{:j}^{\top} &
-    {L'}_{j + 1:} {L'}_{j + 1:}^{\top}
+    L_{:p} L_{:p}^{\top} &
+    L_{:p} {L'}_{p + 1:}^{\top} \\
+    {L'}_{p + 1:} L_{:p}^{\top} &
+    {L'}_{p + 1:} {L'}_{p + 1:}^{\top}
   \end{pmatrix} =
   \begin{pmatrix}
-    L_{:j} \\
-    {L'}_{j + 1:}
+    L_{:p} \\
+    {L'}_{p + 1:}
   \end{pmatrix}
   \begin{pmatrix}
-    L_{:j} \\
-    {L'}_{j + 1:}
+    L_{:p} \\
+    {L'}_{p + 1:}
   \end{pmatrix}^{\top}
 \end{align}
 where \( L = \chol(\CM) \) and \( L' = \chol(\CM_{\mid
@@ -665,24 +665,24 @@ a triangular matrix is the product of its diagonal entries.
 \begin{align}
   \label{eq:partial_logdet}
   \frac{1}{2} \logdet(\CM_{\tilde{i}, \tilde{i} \parallel k}) &=
-  \underbrace{\log(L_{1, 1}) + \dotsb + \log(L_{j, j})}_{\text{the same}} +
+  \underbrace{\log(L_{1, 1}) + \dotsb + \log(L_{p, p})}_{\text{the same}} +
   \underbrace{
-    \log({L'}_{j + 1, j + 1}) + \dotsb + \log({L'}_{m, m})
+    \log({L'}_{p + 1, p + 1}) + \dotsb + \log({L'}_{m, m})
   }_{\text{conditioned}}
   \shortintertext{Comparing to the KL divergence \cref{eq:obj_chol}
-    and recalling that \( k \) is added to \( s_i \) if \( i > j \),}
+    and recalling that \( k \) is added to \( s_i \) if \( i > p \),}
   \sum_{i = 1}^m \log \left ( \CM_{i, i \mid s_i \setminus \{ i \}} \right )
   \label{eq:partial_kl}
   &= \underbrace{
       \log \left ( \CM_{1, 1 \mid s_1 \setminus \{ 1 \}} \right ) + \dotsb +
-      \log \left ( \CM_{j, j \mid s_j \setminus \{ j \}} \right )
+      \log \left ( \CM_{p, p \mid s_p \setminus \{ p \}} \right )
      }_\text{the same} + \\
   \nonumber
   % disgusting hack, do properly later --- looks good enough to me, though
   & \hphantom{=} \: \,
   \underbrace{
     \log \left (
-      \CM_{j + 1, j + 1 \mid s_{j + 1} \setminus \{ j + 1 \}}
+      \CM_{p + 1, p + 1 \mid s_{p + 1} \setminus \{ p + 1 \}}
     \right ) + \dotsb +
     \log \left ( \CM_{m, m \mid s_m \setminus \{ m \}} \right )
   }_\text{conditioned}
@@ -1076,7 +1076,7 @@ again uses more memory than the precision algorithm.
 We can now generalize the multiple-point algorithm to track the log
 determinant of the target points' covariance matrix if a selected
 index \( k \) only conditions \emph{suffixes} of the target points,
-skipping the first \( j \) targets, say.
+skipping the first \( p \) targets, say.
 
 The form of the Cholesky factor of the target covariance
 matrix \cref{eq:chol_partial} suggests to keep track of
@@ -1785,10 +1785,10 @@ We have the collection of Gaussian random variables \( \vec{y} = [y_1, \dotsc,
 y_m]^{\top} \) corresponding to the ordered column indices \( i_1 \succ
 \dotsb \succ i_m \) in the context of aggregated Cholesky factorization.
 We then select an index \( k \) that conditions the variables, but ignores
-the first \( j \) variables (the indices are sorted in decreasing order,
+the first \( p \) variables (the indices are sorted in decreasing order,
 so if \( k \) conditions a variable, it conditions everything afterwards).
 After this partial conditioning we denote the updated variables as
-\( \vec{y}_{\parallel k} \defeq y_1, \dotsc, y_j, y_{j + 1 \mid k},
+\( \vec{y}_{\parallel k} \defeq y_1, \dotsc, y_p, y_{p + 1 \mid k},
 \dotsc, y_{m \mid k} \) and wish to compute the covariance matrix \(
 \Cov[\vec{y}_{\parallel k}] \).
 We know the original variables \( \vec{y} \) have joint density multivariate
@@ -1828,18 +1828,18 @@ By definition,
   \shortintertext{Thus, the new covariance matrix can be written as}
   \Cov[\vec{y}_{\parallel k}] &=
   \begin{pmatrix}
-    L_{:j} L_{:j}^{\top} &
-    L_{:j} {L'}_{j + 1:}^{\top} \\
-    {L'}_{j + 1:} L_{:j}^{\top} &
-    {L'}_{j + 1:} {L'}_{j + 1:}^{\top}
+    L_{:p} L_{:p}^{\top} &
+    L_{:p} {L'}_{p + 1:}^{\top} \\
+    {L'}_{p + 1:} L_{:p}^{\top} &
+    {L'}_{p + 1:} {L'}_{p + 1:}^{\top}
   \end{pmatrix} =
   \begin{pmatrix}
-    L_{:j} \\
-    {L'}_{j + 1:}
+    L_{:p} \\
+    {L'}_{p + 1:}
   \end{pmatrix}
   \begin{pmatrix}
-    L_{:j} \\
-    {L'}_{j + 1:}
+    L_{:p} \\
+    {L'}_{p + 1:}
   \end{pmatrix}^{\top}
 \end{align}
 
