@@ -1048,14 +1048,14 @@ as usual with left-looking (see \cref{alg:chol_update}) and the remaining
 columns \( {L'}_{:, j + 1:} \) are the Cholesky factor of the covariance
 matrix conditional on the point \( k \).
 
-\Stodo{reference psuedocode}
 From \cref{eq:cond_select} conditioning on an additional point is a rank-one
 downdate of the covariance matrix by the vector \( \vec{u} \), allowing the
 updated factor \( {L'}_{:, j + 1:} \) to be efficiently computed from the
 original factor \( L_{:, j + 1:} \).
-Specifically we use Lemma 1 of \cite{krause2015more}, adapted to make
-no assumption on the row ordering of the Cholesky factor, allowing the
-downdate to be implemented with in-place BLAS \texttt{daxpy} operations.
+Specifically we adapt Lemma 1 of \cite{krause2015more} to make no
+assumption on the row ordering of the Cholesky factor, allowing
+the downdate to be implemented with in-place BLAS \texttt{daxpy}
+operations (see \cref{alg:chol_insert}).
 For a Cholesky factor with \( R \) rows and \( C \) columns, the
 time complexity of the downdate is \( \BigO(R C) \) compared to
 \( \BigO(R C^2) \) if the factor was recomputed from scratch.
@@ -1102,6 +1102,7 @@ first column, where \( \CM_{j, j \mid :i - 1} \) is just \( \CM_{j,
 j} = K(\vec{x}_j, \vec{x}_j) \), the variance of the \( j \)th point.
 For the \( i \)th column, the updates are as follows:
 \begin{align}
+  \label{eq:partial_diag}
   \CM_{i, i \mid :i - 1} &= L_{i, i}^2 \\
   \CM_{j, i \mid :i - 1} &= L_{j, i} \cdot L_{i, i} \\
   % \CM_{i, i \mid :i - 1, j} &= \CM_{i, i \mid :i - 1} -
@@ -1120,8 +1121,8 @@ where \cref{eq:partial_induct} satisfies the conditions of the inductive
 hypothesis for the next column and \cref{eq:obj_partial} is the desired
 conditional variance when the \( i \)th point is a target (recall the
 columns of \( L \) include previously selected training points, whose
-variances are ignored in the objective but columns still processed to
-compute \cref{eq:partial_induct}).
+variances are ignored in the objective but whose columns still need to
+be processed to compute \cref{eq:partial_induct}).
 
 For each of the \( N \) candidates, it requires \( \BigO(1) \) work per column
 for \( s + m \) columns. Over \( s \) selections, the total time complexity
@@ -1664,7 +1665,7 @@ We wish to compute the entries of the sparse Cholesky factor
 sparsity setting of \cref{subsubsec:aggregated}.
 Recall that we have aggregated the column indices \( i_1 \succ
 \dots \succ i_m \) into \( \tilde{i} = \{ i_1, \dotsc, i_m \} \)
-and \( s_\tilde{i} \) denotes the aggregated sparsity pattern.
+and \( s_{\tilde{i}} \) denotes the aggregated sparsity pattern.
 The sparsity pattern for the \( i \)th column of the group is all
 those entries that satisfy lower-triangularity, \( s_i \defeq \{
 j \in s_{\tilde{i}} : j \succeq i \} \subseteq s_{\tilde{i}} \).
@@ -2392,7 +2393,7 @@ a nearby point decreases the correlation for far away points.
     \input{figures/algorithms/partial_score.tex}
   \end{algorithm}
   \begin{algorithm}[H]
-    \caption{Update \( L \) after insertion}
+    \caption{Insert \( k \) into \( L \)}
     \label{alg:chol_insert}
     \input{figures/algorithms/chol_insert.tex}
   \end{algorithm}
