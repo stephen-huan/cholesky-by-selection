@@ -1245,11 +1245,110 @@ tailoring the sparsity pattern to a particular column.
 \subsection{Allocating nonzeros by global greedy selection}
 \label{subsec:global_greedy}
 
+Although columns are essentially independent from the perspective of
+KL minimization, if there is a prescribed budget on the total number
+of nonzeros, then one must distribute the nonzeros over the columns,
+tying the fate of one column to another.
+\cite{schafer2021sparse} implicitly determines both the total number of
+zeros as well as their distribution over columns by selecting points
+within a radius that monotonically decreases earlier in the ordering.
+We observe in our numerical experiments as \cite{kang2021correlationbased}
+does that this approach of \cite{schafer2021sparse} leads to significantly
+worse results than simply allocating the same number of nonzeros per column.
+Distributing nonzeros as evenly as possible also maximizes
+computational efficiency since computing the entries for a
+column scales cubically with the number of nonzeros, denser
+columns have an outsized impact on computational time.
+In addition, it is simple to implement and adds almost
+no overhead, so we recommend allocating the number of
+nonzeros divided by the number of columns for each column.
+
+However, one principled way of distributing nonzeros might be to minimize KL
+divergence in an end-to-end manner like we did for sparsity pattern selection.
+The local greedy selection algorithms select the sparsity entry for a column
+or group of columns that minimizes prediction error at those columns.
+We generalize this to \emph{global} greedy selection by picking from
+\emph{any} of the columns the candidate entry that minimizes the
+overall KL divergence \cref{eq:obj_chol} when added to the sparsity.
+We maintain a global priority queue over all columns that determines both the
+next column to select from as well as the particular entry within the column
+to add as a nonzero, keyed by the effect of the entry on the KL divergence.
+This priority queue data structure must support popping off the largest
+element currently in the queue as well as updating the value for an
+element in the queue, given a unique identifier for the element.
+Both operations can be done in \( \BigO(\log n) \) for \( n \) elements in the
+queue if efficiently implemented as an array-backed binary heap, for example.
+
+The greedy selection algorithms already compute the effect of an
+entry on the KL divergence, at least up to monotonically increasing
+transformation (which preserves the relative ranking of candidates).
+But from the global perspective, if different columns
+use different transformations, then the relative
+ranking of candidates between columns is skewed.
+Thus, we now describe the modifications necessary to compute exactly the
+difference in KL divergence without any monotone transformations.
+
 \subsubsection{Single column selection}
 \label{subsubsec:single_column}
 
+Selecting an entry \( k \) for a single target point
+only affects its conditional variance, so exactly one
+term in the KL divergence \cref{eq:obj_chol} changes.
+Subtracting the updated variance and original variance,
+\begin{align}
+  \min \left [
+    \log(\CM_{\Pred, \Pred \mid \I, k}) - \log(\CM_{\Pred, \Pred \mid \I})
+  \right ]  &=
+    \min \frac{\CM_{\Pred, \Pred \mid \I, k}}
+              {\CM_{\Pred, \Pred \mid \I}} \\
+  \shortintertext{From the original objective and update \cref{eq:obj_gp},}
+            &= \min \frac{\CM_{\Pred, \Pred \mid \I}
+                          - \CM_{k, \Pred \mid \I}^2/\CM_{k, k \mid \I}}
+                         {\CM_{\Pred, \Pred \mid \I}} \\
+            &= \min \left [ 1 -
+              \frac{\CM_{k, \Pred \mid \I}^2}
+                   {\CM_{k, k \mid \I} \CM_{\Pred, \Pred \mid \I}}
+               \right ] \\
+  \label{eq:global_obj}
+            &= \max
+              \frac{\CM_{k, \Pred \mid \I}^2}
+                   {\CM_{k, k \mid \I} \CM_{\Pred, \Pred \mid \I}}
+\end{align}
+where the new objective \cref{eq:global_obj} can be interpreted
+as the percentage of variance the decrease in variance takes up.
+The new objective is easily computed as the original objective
+\cref{eq:obj_gp} divided by the target point's conditional variance.
+
 \subsubsection{Aggregated selection}
 \label{subsubsec:mult_column}
+
+Since the multiple-point algorithm already computes the difference in log
+determinant after selecting the candidate, no modification needs to be made.
+The partial selection algorithm computes exactly the log determinant after
+selecting the candidate, not the difference, so the log determinant before
+the selection needs to be subtracted, which is easily computed as the sum of
+the squared ``diagonal'' entries of \( L \) corresponding to target points
+in \cref{eq:partial_diag}.
+
+One heuristical improvement is to account for ``bang-for-buck'', that is, to
+consider that different candidates cost a different number of nonzero entries.
+The number of nonzeros selecting a candidate can add is
+between one and the number of columns in its aggregated
+group, depending on its position in the ordering.
+The KL divergence is a purely additive measure of a candidate's effect
+on every point in its group, so candidates with larger groups tend to
+decrease the KL divergence more, even if they are not as efficient per
+target point as candidates with smaller groups.
+In practice it is better to use the objective \( \frac{\Delta}{n} \) where
+\( \Delta \) is the change in KL divergence from selecting the candidate
+and \( n \) is the number of nonzero entries selecting the candidate adds.
+
+For the multiple-point algorithm this modification makes no difference
+within a group since every candidate conditions every target point, but can
+make a difference in the global setting if groups have different sizes.
+This modification can make a difference both within a column and
+globally for the partial algorithm since different candidates
+within the same group can condition a different number of targets.
 
 \section{Numerical experiments}
 
