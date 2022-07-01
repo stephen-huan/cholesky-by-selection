@@ -1139,13 +1139,16 @@ more complicated to compute than its multiple-point counterpart.
 
 \subsection{Near optimality by empirical submodularity}
 
-If the objective satisfies the property of submodularity, then it is guaranteed
-that the greedy algorithm produces an objective within a a \( 1 - \frac{1}{e}
-\) of the optimal objective. Unfortunately the information gain objective is
-not submodular in general, see \cref{app:submodular}. However, it is possible
-to empirically observe for a particular point set and choice of kernel function
-whether it is submodular. We note that one-dimensional points with a Mat{\'e}rn
-kernel function seems to be submodular, but not for any higher dimension.
+\Stodo{todo}
+If the objective satisfies the property of submodularity, then
+it is guaranteed that the greedy algorithm produces an objective
+within a \( 1 - \frac{1}{e} \) factor of the optimal objective.
+Unfortunately the information gain objective is not
+submodular in general, see \cref{app:submodular}.
+However, it is possible to empirically observe for a particular
+point set and choice of kernel function whether it is submodular.
+We note that one-dimensional points with a Mat{\'e}rn kernel
+function seems to be submodular, but not for any higher dimension.
 
 \cite{das2011submodular, jagalur-mohan2021batch}
 
@@ -1351,12 +1354,19 @@ globally for the partial algorithm since different candidates
 within the same group can condition a different number of targets.
 
 \section{Numerical experiments}
+\label{sec:experiments}
 
-All experiments were run on the Partnership for an Advanced Computing
-Environment (PACE) Phoenix cluster at the Georgia Institute of
-Technology, with 8 cores of a Intel(R) Xeon(R) Gold 6226 CPU @ 2.70GHz
-and 22 GB of RAM per core. Python code for all numerical experiments
-can be found at \href{https://github.com/stephen-huan/conditional-knn}
+All experiments were run on the Partnership for an Advanced
+Computing Environment (PACE) Phoenix cluster at the Georgia
+Institute of Technology, with 8 cores of a Intel Xeon
+Gold 6226 CPU @ 2.70GHz and 22 GB of RAM per core.
+The code is written in Python (using standard scientific
+libraries like numpy, scipy, scikit-learn, matplotlib) as well
+as Cython which provides transpilation of Python code into C.
+Cython allows Python code to access native C
+interfaces to the BLAS and Intel MKL libraries.
+Code for all numerical experiments can be found at
+\href{https://github.com/stephen-huan/conditional-knn}
 {https://github.com/stephen-huan/conditional-knn}.
 
 \Stodo{cite python libraries that want citations (e.g. scikit-learn)}
@@ -1371,7 +1381,7 @@ experiment. We randomly select 1000 images to form the training set and 100
 to form the testing set. For each image in the testing set, we select the
 \( k \) ``closest'' training points with either KNN or CKNN. For KNN we use
 the standard Euclidean distance and for CKNN we use Mat{\'e}rn kernel with
-smoothness \( \nu = 1.5 \) and length scale \( l = 2^{10} \). Finally, we
+smoothness \( \nu = \frac{3}{2} \) and length scale \( \ell = 2^{10} \). Finally, we
 predict the label of the test point by taking the most frequently occurring
 label in the \( k \) selected points.
 
@@ -1453,7 +1463,7 @@ maintains much higher accuracy than the rest of the strategies.
 \end{figure}
 
 Finally, we experiment with the addition of noise. Noise sampled i.i.d
-from \( \mathcal{N}(0, \sigma^2) \) is added to each entry of \( \CM
+from \( \N(0, \var) \) is added to each entry of \( \CM
 \) symmetrically (i.e. \( \CM_{ij} \) receives the same noise as \(
 \CM_{ji} \)) to preserve the symmetry of \( \CM \). As expected,
 accuracy degrades with increasing noise, but the algorithm is fairly robust
@@ -1472,17 +1482,73 @@ positive-definiteness and dense cholesky factors}
 \subsection{Preconditioning for conjugate gradient}
 
 \subsection{Comparison to other methods}
+\label{subsec:compare}
 
-against greedy gp information theoretic: most are trying to
-get some approximation for the entire process, \emph{directed}
-greedy selection (towards a single point or group of points)
-(never mind, smola \cite{smola2000sparse} is directed)
+\paragraph{Sparse Gaussian process regression}
 
-engineering for multiple points / nonadjacent case (conditioning structure)
+\paragraph{Local approximate Gaussian process (laGP)}
 
-omp: feature space versus covariance
+\paragraph{Orthogonal matching pursuit (OMP)}
 
-previous Cholesky papers: conditional selection versus geometry
+\cite{bartels2022adaptive}
+
+In the context of Gaussian process regression, this selection scheme falls
+into the categories of subset of data (SoD) \cite{chalupka2012framework,
+quinonero-candela2005unifying}, transductive naive-local-expert (NLE)
+\cite{liu2020when}, and active set selection, particularly greedy
+selection that maximizes an information-theoretic quantity of interest
+\cite{smola2000sparse, herbrich2002fast, seeger2003fast}.
+
+Our objective for point selection was first described in
+\cite{cohn1996neural} for optimal experimental design.
+
+% covariance matrix approximation / likelihood
+% approximation / local methods / active set
+% naive-local-expert
+%
+% \cite{herbrich2002fast} algorithm 1 similar
+%
+% against greedy gp information theoretic: most are trying to
+% get some approximation for the entire process, \emph{directed}
+% greedy selection (towards a single point or group of points)
+% (never mind, smola \cite{smola2000sparse} is directed --- or maybe not)
+%
+% \Stodo{search for directed inference Gaussian process regression}
+%
+% omp: feature space versus covariance
+%
+% engineering for multiple points / nonadjacent case (conditioning structure)
+%
+% summary papers liu2020when, chalupka2012framework,
+% quinonero-candela2005unifying,
+%
+% wada2013gaussian
+%
+% cohn1996neural
+% gramacy2014local follow up work gramacy2015speeding
+% equation 5 (conditional variance), equation 8 (objective)
+% (SM\S4 SM.22)
+% partition inverse equations (SM\S1)
+% section 3.3
+%
+% section 4 naive way to do multiple points without multiple point selection /
+% near linear joint Gaussian process
+% but embarrassingly parallel like columns in cholesky factor
+%
+% subsampling within nn candidate set in follow up work
+
+\Stodo{elaborate more on OMP in the literature}
+
+This algorithm is in fact the covariance equivalent of the
+signal recovery algorithm orthogonal matching pursuit (OMP)
+\cite{tropp2007signal}, a connection elaborated in \cref{app:omp}.
+
+\paragraph{Sparse Cholesky factorization}
+
+% previous Cholesky papers: conditional selection versus geometry
+%
+% Reduction to Katzfuss/sparse chol by kl if kth nearest neighbors
+% / directed active set used instead of greedy selection
 
 \section{Conclusions}
 
@@ -2184,75 +2250,6 @@ to the same block structure:
 \end{align}
 These can be efficiently performed in-place by
 BLAS as level-one \texttt{daxpy} operations.
-
-\subsection{Global greedy selection}
-\label{app:global_greedy}
-
-Although each column is essentially independent from the perspective of
-selection, if there is a prescribed budget for the number of nonzeros then
-there is the problem of distributing the nonzeros over the columns. A
-natural method is to distribute as evenly as possible, this is efficient and
-practically useful. However, one principled way of allocating nonzeros is
-to maintain a \emph{global} priority queue over all columns, and selecting
-from this queue determines not only which entry out of the candidate set is
-added as a nonzero, but also which column to select from. This allows the
-algorithm to greedily select the next entry which will decrease the global
-objective \cref{eq:obj_chol} as much as possible. The main change is that
-within a column, any monotonic transformation of the objective will preserve
-the relative ranking of candidates, for example adding a constant, multiplying
-by a constant, taking the log, etc. However, from the global perspective, if
-one column adds a different constant to their objectives than another column,
-the relative ranking of candidates between columns is skewed. Thus, each
-column must maintain an objective that corresponds directly to minimizing the
-global objective \cref{eq:obj_chol}. Here we describe the modifications that
-must be made to the selection algorithms to support global comparison.
-
-\subsubsection{Single column selection}
-
-For a single prediction point, the objective is \( \frac{\CM_{k, \Pred
-\mid I}^2}{\CM_{kk \mid I}} \) \cref{eq:obj_gp} which is exactly the amount
-the variance of the prediction point is decreased if the \( k \)th candidate is
-selected, that is, \( \CM_{\Pred, \Pred \mid I} - \CM_{\Pred,
-\Pred \mid I, k} = \frac{\CM_{k, \Pred \mid I}^2}{\CM_{kk \mid
-I}} \). From the global perspective, all other prediction points are untouched,
-so the amount the sum of the log variances of all the prediction points changes
-is
-\begin{align}
-  \min \Delta &= \min \left [
-    \log(\CM_{\Pred, \Pred \mid I, k}) -
-  \log(\CM_{\Pred, \Pred \mid I}) \right ] \\
-              &= \min \frac{\CM_{\Pred, \Pred \mid I, k}}
-                           {\CM_{\Pred, \Pred \mid I}} \\
-              &= \min \frac{\CM_{\Pred, \Pred \mid I}
-              - \frac{\CM_{k, \Pred \mid I}^2}{\CM_{kk \mid I}}}
-                           {\CM_{\Pred, \Pred \mid I}} \\
-              &= \min \left [ 1 -
-                \frac{\CM_{k, \Pred \mid I}^2}
-                     {\CM_{kk \mid I} \CM_{\Pred, \Pred \mid I}}
-                 \right ] \\
-  \label{eq:global_obj}
-              &= \max
-                \frac{\CM_{k, \Pred \mid I}^2}
-                     {\CM_{kk \mid I} \CM_{\Pred, \Pred \mid I}}
-\end{align}
-where \cref{eq:global_obj} can be interpreted as the
-\emph{percentage} of the decrease in variance from selecting
-the \( k \)th point to the variance before selecting the point.
-
-\subsubsection{Aggregated selection}
-
-Since the nonadjacent algorithm directly computes the sum of the log of
-the conditional variances of the prediction points, few modifications
-have to be made. One heuristical improvement is to take into account
-for ``bang-for-buck'', that is, to account for the fact that different
-candidates cost a different amount of nonzero entries. Selecting a
-candidate can add between 1 and the number of columns in its aggregated
-group, depending on its relative index. Thus, candidates with larger
-groups will appear to decrease the global variance more, even if they
-are not as efficient as a candidate with a single group. In practice, it
-is better to use the objective \( \frac{\Delta}{n} \) where \( \Delta
-\) is the change in variance after selecting the candidate and \( n \)
-is the number of nonzero entries selecting the candidate adds.
 
 \subsection{Equivalence of Cholesky and QR factorization}
 \label{app:qr}
