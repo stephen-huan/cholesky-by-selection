@@ -62,22 +62,6 @@
   file = {/home/stephenhuan/Zotero/storage/JDJDIJ7F/Cohn - 1996 - Neural Network Exploration Using Optimal Experimen.pdf}
 }
 
-@article{das2011submodular,
-  title = {Submodular Meets {{Spectral}}: {{Greedy Algorithms}} for {{Subset Selection}}, {{Sparse Approximation}} and {{Dictionary Selection}}},
-  shorttitle = {Submodular Meets {{Spectral}}},
-  author = {Das, Abhimanyu and Kempe, David},
-  year = {2011},
-  month = feb,
-  journal = {arXiv:1102.3975 [cs, stat]},
-  eprint = {1102.3975},
-  eprinttype = {arxiv},
-  primaryclass = {cs, stat},
-  abstract = {We study the problem of selecting a subset of k random variables from a large set, in order to obtain the best linear prediction of another variable of interest. This problem can be viewed in the context of both feature selection and sparse approximation. We analyze the performance of widely used greedy heuristics, using insights from the maximization of submodular functions and spectral analysis. We introduce the submodularity ratio as a key quantity to help understand why greedy algorithms perform well even when the variables are highly correlated. Using our techniques, we obtain the strongest known approximation guarantees for this problem, both in terms of the submodularity ratio and the smallest k-sparse eigenvalue of the covariance matrix. We further demonstrate the wide applicability of our techniques by analyzing greedy algorithms for the dictionary selection problem, and significantly improve the previously known guarantees. Our theoretical analysis is complemented by experiments on real-world and synthetic data sets; the experiments show that the submodularity ratio is a stronger predictor of the performance of greedy algorithms than other spectral parameters.},
-  archiveprefix = {arXiv},
-  keywords = {Computer Science - Data Structures and Algorithms,Statistics - Machine Learning},
-  file = {/home/stephenhuan/Zotero/storage/JIW3JBQ3/Das and Kempe - 2011 - Submodular meets Spectral Greedy Algorithms for S.pdf;/home/stephenhuan/Zotero/storage/SNYPRETM/1102.html}
-}
-
 @misc{gramacy2014local,
   title = {Local {{Gaussian}} Process Approximation for Large Computer Experiments},
   author = {Gramacy, Robert B. and Apley, Daniel W.},
@@ -141,22 +125,6 @@
   volume = {15},
   publisher = {{MIT Press}},
   file = {/home/stephenhuan/Zotero/storage/BMFNUXUY/Herbrich et al. - 2002 - Fast Sparse Gaussian Process Methods The Informat.pdf}
-}
-
-@article{jagalur-mohan2021batch,
-  title = {Batch Greedy Maximization of Non-Submodular Functions: {{Guarantees}} and Applications to Experimental Design},
-  shorttitle = {Batch Greedy Maximization of Non-Submodular Functions},
-  author = {{Jagalur-Mohan}, Jayanth and Marzouk, Youssef},
-  year = {2021},
-  month = aug,
-  journal = {arXiv:2006.04554 [cs, math]},
-  eprint = {2006.04554},
-  eprinttype = {arxiv},
-  primaryclass = {cs, math},
-  abstract = {We propose and analyze batch greedy heuristics for cardinality constrained maximization of non-submodular non-decreasing set functions. We consider the standard greedy paradigm, along with its distributed greedy and stochastic greedy variants. Our theoretical guarantees are characterized by the combination of submodularity and supermodularity ratios. We argue how these parameters define tight modular bounds based on incremental gains, and provide a novel reinterpretation of the classical greedy algorithm using the minorize-maximize (MM) principle. Based on that analogy, we propose a new class of methods exploiting any plausible modular bound. In the context of optimal experimental design for linear Bayesian inverse problems, we bound the submodularity and supermodularity ratios when the underlying objective is based on mutual information. We also develop novel modular bounds for the mutual information in this setting, and describe certain connections to polyhedral combinatorics. We discuss how algorithms using these modular bounds relate to established statistical notions such as leverage scores and to more recent efforts such as volume sampling. We demonstrate our theoretical findings on synthetic problems and on a real-world climate monitoring example.},
-  archiveprefix = {arXiv},
-  keywords = {Computer Science - Data Structures and Algorithms,Computer Science - Discrete Mathematics,Computer Science - Machine Learning,Mathematics - Optimization and Control},
-  file = {/home/stephenhuan/Zotero/storage/7M2IDN9K/Jagalur-Mohan and Marzouk - 2021 - Batch greedy maximization of non-submodular functi.pdf;/home/stephenhuan/Zotero/storage/IGLFEWWA/2006.html}
 }
 
 @misc{kang2021correlationbased,
@@ -229,21 +197,6 @@
   issn = {1532-4435},
   abstract = {When monitoring spatial phenomena, which can often be modeled as Gaussian processes (GPs), choosing sensor locations is a fundamental task. There are several common strategies to address this task, for example, geometry or disk models, placing sensors at the points of highest entropy (variance) in the GP model, and A-, D-, or E-optimal design. In this paper, we tackle the combinatorial optimization problem of maximizing the mutual information between the chosen locations and the locations which are not selected. We prove that the problem of finding the configuration that maximizes mutual information is NP-complete. To address this issue, we describe a polynomial-time approximation that is within (1-1/e) of the optimum by exploiting the submodularity of mutual information. We also show how submodularity can be used to obtain online bounds, and design branch and bound search procedures. We then extend our algorithm to exploit lazy evaluations and local structure in the GP, yielding significant speedups. We also extend our approach to find placements which are robust against node failures and uncertainties in the model. These extensions are again associated with rigorous theoretical approximation guarantees, exploiting the submodularity of the objective function. We demonstrate the advantages of our approach towards optimizing mutual information in a very extensive empirical study on two real-world data sets.},
   file = {/home/stephenhuan/Zotero/storage/V2QNNH9L/Krause et al. - 2008 - Near-Optimal Sensor Placements in Gaussian Process.pdf}
-}
-
-@incollection{krause2013submodular,
-  title = {Submodular {{Function Maximization}}},
-  booktitle = {Tractability},
-  author = {Krause, Andreas and Golovin, Daniel},
-  editor = {Bordeaux, Lucas and Hamadi, Youssef and Kohli, Pushmeet and Mateescu, Robert},
-  year = {2013},
-  pages = {71--104},
-  publisher = {{Cambridge University Press}},
-  address = {{Cambridge}},
-  doi = {10.1017/CBO9781139177801.004},
-  isbn = {978-1-139-17780-1},
-  langid = {english},
-  file = {/home/stephenhuan/Zotero/storage/8UL9IH6B/Krause and Golovin - 2013 - Submodular Function Maximization.pdf}
 }
 
 @inproceedings{krause2015more,

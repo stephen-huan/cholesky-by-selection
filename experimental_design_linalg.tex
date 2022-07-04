@@ -1137,21 +1137,6 @@ performance for the same asymptotic time complexity.
 In addition, the objective for the partial selection algorithm is
 more complicated to compute than its multiple-point counterpart.
 
-\subsection{Near optimality by empirical submodularity}
-
-\Stodo{todo}
-If the objective satisfies the property of submodularity, then
-it is guaranteed that the greedy algorithm produces an objective
-within a \( 1 - \frac{1}{e} \) factor of the optimal objective.
-Unfortunately the information gain objective is not
-submodular in general, see \cref{app:submodular}.
-However, it is possible to empirically observe for a particular
-point set and choice of kernel function whether it is submodular.
-We note that one-dimensional points with a Mat{\'e}rn kernel
-function seems to be submodular, but not for any higher dimension.
-
-\cite{das2011submodular, jagalur-mohan2021batch}
-
 \section{Greedy selection for \emph{global} approximation by KL-minimization}
 \label{sec:chol_select}
 
@@ -2344,70 +2329,6 @@ that Cholesky factorization is Gram-Schmitt in feature space.
 which is precisely the squared covariance of the candidate with the
 prediction over the variance of the candidate, as in \cref{eq:obj_gp}.
 This shows the equivalence as the objective is the same.
-
-\subsection{Checking submodularity}
-\label{app:submodular}
-
-Our objective is the mutual information between the prediction and training
-points \cref{eq:info}. A natural question is whether this objective is
-submodular with respect to the training set. The answer is no in general,
-see \cite{krause2008nearoptimal}, section 8.3 for a simple counterexample.
-However, we can empirically check submodularity for particular geometries
-and choices of kernel function. If \( \Pred \) is the set of prediction
-points, \( I \) is a set of indexes, and \( x_1, x_2 \) are additional
-indices not in \( I \), then the set function is submodular if and only if
-\begin{align*}
-  \MI(\Pred, I \cup \{ x_2 \}) - \MI(I) &\overset{?}{\geq}
-    \MI(\Pred, I \cup \{ x_1, x_2 \}) - \MI(\Pred, I \cup \{ x_1 \})
-  \shortintertext{Expanding from the definition
-    of mutual information \cref{eq:info},}
-  \entropy[\Pred \mid I] - \entropy[\Pred \mid I \cup \{ x_2 \}]
-    &\overset{?}{\geq}
-    \entropy[\Pred \mid I \cup \{ x_1 \}] -
-    \entropy[\Pred \mid I \cup \{ x_1, x_2 \}]
-  \shortintertext{Since this is the objective \cref{eq:obj_gp_mult}
-    (with additional log),}
-  \frac{\CM_{x_2, x_2 \mid I}}{\CM_{x_2, x_2 \mid I, \Pred}}
-    &\overset{?}{\geq}
-    \frac{\CM_{x_2, x_2 \mid I} -
-          \frac{\CM_{x_1, x_2 \mid I}^2}{\CM_{x_1, x_1 \mid I}}}
-         {\CM_{x_2, x_2 \mid I, \Pred} -
-         \frac{\CM_{x_1, x_2 \mid I, \Pred}^2}
-              {\CM_{x_1, x_1 \mid I, \Pred}}}
-    \shortintertext{From the fact that \(
-    \frac{a}{b} \geq \frac{a - c}{b - d} \) if and only if
-     \( \frac{a}{b} \leq \frac{c}{d} \),}
-  \frac{\CM_{x_2, x_2 \mid I}}{\CM_{x_2, x_2 \mid I, \Pred}}
-    &\overset{?}{\leq}
-    \frac{\frac{\CM_{x_1, x_2 \mid I}^2}{\CM_{x_1, x_1 \mid I}}}
-         {\frac{\CM_{x_1, x_2 \mid I, \Pred}^2}
-               {\CM_{x_1, x_1 \mid I, \Pred}}}
-  \shortintertext{Multiplying by \( \frac{\CM_{x_1, x_1 \mid
-    I}}{\CM_{x_1, x_1 \mid I, \Pred}} \) on both sides,}
-  \frac{\CM_{x_1, x_1 \mid I} \CM_{x_2, x_2 \mid I}}
-       {\CM_{x_1, x_1 \mid I, \Pred}
-        \CM_{x_2, x_2 \mid I, \Pred}}
-    &\overset{?}{\leq}
-    \frac{\CM_{x_1, x_2 \mid I}^2}
-         {\CM_{x_1, x_2 \mid I, \Pred}^2}
-  \shortintertext{Multiplying by \( \frac{\CM_{x_1,
-    x_2 \mid I, \Pred}^2}{\CM_{x_1, x_1 \mid
-    I} \CM_{x_2, x_2 \mid I}} \) on both sides,}
-  \frac{\CM_{x_1, x_2 \mid I, \Pred}^2}
-       {\CM_{x_1, x_1 \mid I, \Pred}
-        \CM_{x_2, x_2 \mid I, \Pred}}
-    &\overset{?}{\leq}
-    \frac{\CM_{x_1, x_2 \mid I}^2}
-         {\CM_{x_1, x_1 \mid I} \CM_{x_2, x_2 \mid I}}
-  \shortintertext{By definition, this is}
-  \Corr[x_1, x_2 \mid I, \Pred] &\overset{?}{\leq}
-    \Corr[x_1, x_2 \mid I]
-\end{align*}
-so the mutual information objective is submodular if and only if
-conditioning on additional point(s) decreases the correlation between
-every pair of points. Intuitively, this corresponds to the screening
-effect observed in spatial statistics literature --- conditioning on
-a nearby point decreases the correlation for far away points.
 
 \newpage
 
