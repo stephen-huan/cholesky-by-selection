@@ -1344,16 +1344,16 @@ All experiments were run on the Partnership for an Advanced
 Computing Environment (PACE) Phoenix cluster at the Georgia
 Institute of Technology, with 8 cores of a Intel Xeon
 Gold 6226 CPU @ 2.70GHz and 22 GB of RAM per core.
-The code is written in Python (using standard scientific
-libraries like numpy, scipy, scikit-learn, matplotlib) as well
-as Cython which provides transpilation of Python code into C.
-Cython allows Python code to access native C
-interfaces to the BLAS and Intel MKL libraries.
+The code is written in Python using standard scientific libraries
+\texttt{numpy} \cite{harris2020array}, \texttt{scipy} \cite{virtanen2020scipy},
+\texttt{scikit-learn} \cite{pedregosa2011scikitlearn}, \texttt{matplotlib}
+\cite{hunter2007matplotlib} as well as Cython \cite{behnel2011cython} which
+provides direct transpilation of Python code into C.
+Cython also allows Python code to access native C interfaces
+to the \texttt{BLAS} and Intel \texttt{oneMKL} libraries.
 Code for all numerical experiments can be found at
 \href{https://github.com/stephen-huan/conditional-knn}
 {https://github.com/stephen-huan/conditional-knn}.
-
-\Stodo{cite python libraries that want citations (e.g. scikit-learn)}
 
 \subsection{\textit{k}th-nearest neighbors selection}
 
