@@ -109,20 +109,21 @@ TODO
 \todo{I would make this one integrated section on
 Vecchia, FSAI, KL-Cholesky, and transport maps}
 As \cite{katzfuss2021general} points out, many sparse
-factorizations of covariance matrices can be viewed as special
-cases of the Vecchia approximation \cite{vecchia1988estimation}.
+factorizations of covariance matrices can be viewed through the
+lens of the Vecchia approximation \cite{vecchia1988estimation}.
 The Vecchia approximation decomposes the joint distribution
 into the product of univariate densities, each density
 conditional on only a subset of those prior in the ordering.
-If an ordering and sparsity pattern are determined, then
-an approximate Cholesky factor obeying the sparsity
-can be computed by optimizing a chosen objective.
-Within the context of factorized sparse approximate inverse (FSAI)
-preconditioners, the Kaporin condition number \cite{kaporin1990alternative}
-and the Frobenius norm with an additional Jacobi scaling constraint
-\cite{yeremin2000factorized} have been proposed as objectives, and
-from a statistical perspective the Kullback-Leibler (KL) divergence
-\cite{schafer2021sparse} has been proposed.
+If an ordering and sparsity pattern are determined, then an approximate
+Cholesky factor obeying the sparsity can be computed by optimizing a
+chosen objective, for example, minimizing the Kullback-Leibler (KL)
+divergence \cite{schafer2021sparse} is a natural objective for Gaussian
+process regression.
+Independently of the Vecchia approximation, within the context of factorized
+sparse approximate inverse (FSAI) preconditioners, the Kaporin condition number
+\cite{kaporin1990alternative} and the Frobenius norm with an additional Jacobi
+scaling constraint \cite{yeremin2000factorized} have also been proposed as
+objectives.
 These three objectives actually converge to the same closed-form expression
 for the entries of the resulting Cholesky factor \cite{schafer2021sparse},
 and this expression is equivalent to the formula used to compute the Vecchia
