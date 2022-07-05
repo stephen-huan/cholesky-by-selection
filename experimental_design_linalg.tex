@@ -191,15 +191,14 @@ However, these works often focus on obtaining a global approximation of
 the entire process, e.g. through sparse approximation of the likelihood
 or covariance matrix (see \cite{liu2020when, chalupka2012framework,
 quinonero-candela2005unifying} for a comprehensive overview).
-To the best of our knowledge \cite{wada2013gaussian} is the first to
-propose \emph{directed} inference for a point of interest, in which
-they use the kernel function itself as the objective like the later
-work \cite{kang2021correlationbased}.
-Seemingly independently of \cite{wada2013gaussian}, \cite{gramacy2014local}
-and the follow up work \cite{gramacy2015speeding} use the active learning Cohn
-(ALC) objective first described in \cite{cohn1996neural} for directed Gaussian
-process regression, yielding an algorithm equivalent to our proposed algorithm
-in the case of a single point of interest.
+In contrast \cite{wada2013gaussian} use \emph{directed} inference for
+a point of interest, in which they use the kernel function itself as
+the objective like the later work \cite{kang2021correlationbased}.
+\cite{gramacy2014local} and the follow up work \cite{gramacy2015speeding}
+use the active learning Cohn (ALC) objective first described in
+\cite{cohn1996neural} for directed Gaussian process regression,
+yielding an algorithm equivalent to our proposed algorithm in the
+case of a single point of interest.
 
 Our proposed selection method can also be viewed as the covariance
 equivalent of orthogonal matching pursuit (OMP) \cite{tropp2007signal,
@@ -780,10 +779,8 @@ selecting \( k \) is given by \( u_\Pred^2 \), or
 \begin{align}
   \label{eq:obj_gp}
   u_\Pred^2 = \frac{\CM_{\Pred, k \mid \I}^2}{\CM_{k, k \mid \I}}
-  = \frac{\Cov[y_\Pred, \vec{y}_{\Train}[k] \mid \I]^2}
-         {\Var[\vec{y}_{\Train}[k] \mid \I]}
-  = \Var[y_\Pred \mid \I]
-    \Corr[y_\Pred, \vec{y}_\Train[k] \mid \I]^2
+  = \frac{\Cov[y_\Pred, y_k \mid \I]^2}{\Var[y_k \mid \I]}
+  = \Var[y_\Pred \mid \I] \Corr[y_\Pred, y_k \mid \I]^2
 \end{align}
 After adding the index \( k \), we need to keep track of each
 candidate \( j \)'s updated variance and covariance with the
@@ -1341,10 +1338,9 @@ within the same group can condition a different number of targets.
 \section{Numerical experiments}
 \label{sec:experiments}
 
-All experiments were run on the Partnership for an Advanced
-Computing Environment (PACE) Phoenix cluster at the Georgia
-Institute of Technology, with 8 cores of a Intel Xeon
-Gold 6226 CPU @ 2.70GHz and 22 GB of RAM per core.
+All experiments ran on the Partnership for an Advanced Computing Environment
+(PACE) Phoenix cluster at the Georgia Institute of Technology, with 8
+cores of a Intel Xeon Gold 6226 CPU @ 2.70GHz and 22 GB of RAM per core.
 The code is written in Python using standard scientific libraries
 \texttt{numpy} \cite{harris2020array}, \texttt{scipy} \cite{virtanen2020scipy},
 \texttt{scikit-learn} \cite{pedregosa2011scikitlearn}, \texttt{matplotlib}
@@ -1469,71 +1465,62 @@ positive-definiteness and dense cholesky factors}
 \subsection{Comparison to other methods}
 \label{subsec:compare}
 
-\paragraph{Sparse Gaussian process regression}
+In this section we compare our selection algorithm and
+resulting Cholesky factorization procedure to existing work.
 
 \paragraph{Local approximate Gaussian process (laGP)}
 
+Our conditional variance objective for point selection \cref{eq:obj_gp} was
+first described in \cite{cohn1996neural} for optimal experimental design,
+which has subsequently been named the active learning Cohn (ALC) objective.
+\cite{gramacy2014local} and the follow up work \cite{gramacy2015speeding}
+apply the ALC objective to directed Gaussian process regression, yielding
+an algorithm equivalent to ours in the case of a single point of interest.
+We note that their definition of conditional variance in equation 5 is
+analogous to our equation \cref{eq:cond_cov}, equating their conditional
+variance objective in equation 8 to our equation \cref{eq:obj_gp} (the
+connection is explicitly stated in SM\S4's equation SM.22).
+We also note that they update the precision after a new
+point is selected through the blocked equations in SM\S1
+like our \cref{app:prec_insert} and \cref{alg:select_prec}.
+
+For inference at multiple points of interest, \cite{gramacy2014local}
+seems to only consider direct parallelization of the
+single-point algorithm to each of the target points.
+They mention that the \texttt{laGP} function in their \texttt{R}
+package jointly considers target points if multiple input values
+are provided, although without providing details on this procedure.
+We generalize the ALC objective to multiple prediction points through
+the log determinant of the covariance matrix \cref{eq:greedy_mult}
+and provide an explicit algorithm \cref{alg:select_mult_chol}.
+In addition, integration of the selection algorithm into
+Cholesky factorization provides a global decomposition
+of the joint training and prediction covariance matrix.
+
 \paragraph{Orthogonal matching pursuit (OMP)}
 
-\cite{bartels2022adaptive}
-
-In the context of Gaussian process regression, this selection scheme falls
-into the categories of subset of data (SoD) \cite{chalupka2012framework,
-quinonero-candela2005unifying}, transductive naive-local-expert (NLE)
-\cite{liu2020when}, and active set selection, particularly greedy
-selection that maximizes an information-theoretic quantity of interest
-\cite{smola2000sparse, herbrich2002fast, seeger2003fast}.
-
-Our objective for point selection was first described in
-\cite{cohn1996neural} for optimal experimental design.
-
-% covariance matrix approximation / likelihood
-% approximation / local methods / active set
-% naive-local-expert
-%
-% \cite{herbrich2002fast} algorithm 1 similar
-%
-% against greedy gp information theoretic: most are trying to
-% get some approximation for the entire process, \emph{directed}
-% greedy selection (towards a single point or group of points)
-% (never mind, smola \cite{smola2000sparse} is directed --- or maybe not)
-%
-% \Stodo{search for directed inference Gaussian process regression}
-%
-% omp: feature space versus covariance
-%
-% engineering for multiple points / nonadjacent case (conditioning structure)
-%
-% summary papers liu2020when, chalupka2012framework,
-% quinonero-candela2005unifying,
-%
-% wada2013gaussian
-%
-% cohn1996neural
-% gramacy2014local follow up work gramacy2015speeding
-% equation 5 (conditional variance), equation 8 (objective)
-% (SM\S4 SM.22)
-% partition inverse equations (SM\S1)
-% section 3.3
-%
-% section 4 naive way to do multiple points without multiple point selection /
-% near linear joint Gaussian process
-% but embarrassingly parallel like columns in cholesky factor
-%
-% subsampling within nn candidate set in follow up work
-
-\Stodo{elaborate more on OMP in the literature}
-
-This algorithm is in fact the covariance equivalent of the
-signal recovery algorithm orthogonal matching pursuit (OMP)
-\cite{tropp2007signal}, a connection elaborated in \cref{app:omp}.
+Our selection algorithm can be viewed as the covariance equivalent
+of the sparse signal recovery algorithm orthogonal matching
+pursuit (OMP) \cite{tropp2007signal, tropp2006algorithms}.
+OMP measures the approximation of a target signal by its residual after
+orthogonal projection onto the subspace of chosen training signals,
+which is efficiently calculated by maintaining a QR factorization.
+In contrast, our selection algorithm uses a kernel function to evaluate inner
+products, so orthogonalization becomes conditioning, the residual norm
+becomes variance, and the QR factorization becomes a Cholesky factorization.
+A major difference from OMP is that the computational time of conditioning
+dominates that of evaluating the kernel function since the feature space
+is relatively low-dimensional (often 2 or 3 in spatial statistics).
 
 \paragraph{Sparse Cholesky factorization}
 
-% previous Cholesky papers: conditional selection versus geometry
-%
-% Reduction to Katzfuss/sparse chol by kl if kth nearest neighbors
-% / directed active set used instead of greedy selection
+Our proposed sparse Cholesky factorization algorithm is most similar
+to \cite{schafer2021sparse} and \cite{kang2021correlationbased}.
+We note using \( k \)-nearest neighbors to select the sparsity set
+instead of our proposed conditional selection algorithm essentially
+reduces to \cite{schafer2021sparse} and that using the correlation
+objective \cref{eq:obj_gp} but without conditioning on previously
+selected points reduces to \cite{kang2021correlationbased}.
 
 \section{Conclusions}
 
