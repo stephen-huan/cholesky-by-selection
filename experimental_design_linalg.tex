@@ -1413,7 +1413,7 @@ are given the covariance. Accuracy is measured by taking the cardinality of
 the intersection of the recovered sparsity set with the ground truth sparsity
 set over the cardinality of their union, intersection over union (IOU).
 
-\begin{figure}[h!]
+\begin{figure}[ht]
   \centering
   \input{figures/recover/accuracy_n.tex}
   \caption{Accuracy with increasing \( N \)}
@@ -1424,7 +1424,7 @@ and columns is increased, the ```cknn'' retains high accuracy near perfect
 recovery, and the rest of the methods quickly degrade and asymptote to their
 final accuracies.
 
-\begin{figure}[h!]
+\begin{figure}[ht]
   \centering
   \input{figures/recover/accuracy_s.tex}
   \caption{Accuracy with increasing \( s \)}
@@ -1437,7 +1437,7 @@ increases until the Cholesky factor becomes fully dense, in which case perfect
 recovery is trivial. The ``cknn'' strategy exhibits the same behavior, but
 maintains much higher accuracy than the rest of the strategies.
 
-\begin{figure}[h!]
+\begin{figure}[ht]
   \centering
   \input{figures/recover/accuracy_noise.tex}
   \caption{Accuracy with increasing \( s \)}
@@ -1458,9 +1458,93 @@ positive-definiteness and dense cholesky factors}
 
 \subsection{Cholesky factorization}
 
+\begin{figure}[ht]
+  \centering
+  \input{figures/cholesky/n_kl_div.tex}
+  \caption{KL divergence with increasing \( N \)}
+\end{figure}
+
+\begin{figure}[ht]
+  \centering
+  \input{figures/cholesky/n_time.tex}
+  \caption{Time with increasing \( N \)}
+\end{figure}
+
+\begin{figure}[ht]
+  \centering
+  \input{figures/cholesky/rho_kl_div.tex}
+  \caption{KL divergence with increasing \( \rho \)}
+\end{figure}
+
+\begin{figure}[ht]
+  \centering
+  \input{figures/cholesky/rho_time.tex}
+  \caption{KL divergence against time with increasing \( \rho \)}
+\end{figure}
+
+\begin{figure}[ht]
+  \centering
+  \input{figures/cholesky/s_kl_div.tex}
+  \caption{KL divergence with increasing \( \rho_s \)}
+\end{figure}
+
+\begin{figure}[ht]
+  \centering
+  \input{figures/cholesky/s_time.tex}
+  \caption{Time with increasing \( \rho_s \)}
+\end{figure}
+
 \subsection{Gaussian process regression}
 
+\begin{figure}[ht]
+  \centering
+  \input{figures/gp/rho_logdet.tex}
+  \caption{Log determinant with increasing \( \rho \)}
+\end{figure}
+
+\begin{figure}[ht]
+  \centering
+  \input{figures/gp/rho_time_logdet.tex}
+  \caption{Log determinant against time with increasing \( \rho \)}
+\end{figure}
+
+\begin{figure}[ht]
+  \centering
+  \input{figures/gp/rho_loss.tex}
+  \caption{RMSE loss with increasing \( \rho \)}
+\end{figure}
+
+\begin{figure}[ht]
+  \centering
+  \input{figures/gp/rho_time_loss.tex}
+  \caption{RMSE against time with increasing \( \rho \)}
+\end{figure}
+
 \subsection{Preconditioning for conjugate gradient}
+
+\begin{figure}[ht]
+  \centering
+  \input{figures/cg/n_iter-res.tex}
+  \caption{Residual with iterations}
+\end{figure}
+
+\begin{figure}[ht]
+  \centering
+  \input{figures/cg/nnz_nnz.tex}
+  \caption{Nonzero entries per column with increasing \( N \)}
+\end{figure}
+
+\begin{figure}[ht]
+  \centering
+  \input{figures/cg/rho_iter.tex}
+  \caption{Iterations with increasing \( \rho \)}
+\end{figure}
+
+\begin{figure}[ht]
+  \centering
+  \input{figures/cg/rho_time.tex}
+  \caption{Time with increasing \( \rho \)}
+\end{figure}
 
 \subsection{Comparison to other methods}
 \label{subsec:compare}
@@ -1523,6 +1607,7 @@ objective \cref{eq:obj_gp} but without conditioning on previously
 selected points reduces to \cite{kang2021correlationbased}.
 
 \section{Conclusions}
+\Stodo{todo}
 
 \section*{Acknowledgments}
 \todo{add more funding information}

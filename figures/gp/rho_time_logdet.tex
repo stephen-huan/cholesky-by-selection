@@ -1,0 +1,17 @@
+\begin{tikzpicture}
+  \begin{loglogaxis}[
+    width={0.8\linewidth},
+    grid={major},
+    % title={Log determinant against time with increasing \( \rho \)
+    % (\( N = 65536, \rho_s = 2, \lambda = 1.5 \))},
+    xlabel={\( \log_{10} \) Time (seconds)},
+    ylabel={\( \log_{10} \) Log determinant},
+    legend entries={kl, kl (agg), select, select (agg)},
+    legend pos={north east},
+  ]
+  \addplot [lightblue]  table {figures/gp/rho_time_KL_logdet.csv};
+  \addplot [seagreen]   table {figures/gp/rho_time_KL_agg_logdet.csv};
+  \addplot [orange]     table {figures/gp/rho_time_select_logdet.csv};
+  \addplot [rust]       table {figures/gp/rho_time_select_agg_logdet.csv};
+  \end{loglogaxis}
+\end{tikzpicture}

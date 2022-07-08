@@ -1,0 +1,17 @@
+\begin{tikzpicture}
+  \begin{axis}[
+    width={0.8\linewidth},
+    grid={major},
+    % title={Nonzero entries per column with increasing \( N \)
+    % (\( \text{iters} = 50, \rho = 4, \rho_s = 2, \lambda = 1.5 \))},
+    xlabel={\( N \)},
+    ylabel={Number of nonzeros},
+    legend entries={kl, kl (agg), select, select (agg)},
+    legend pos={north west},
+  ]
+  \addplot [lightblue]  table {figures/cg/nnz_nnz_KL.csv};
+  \addplot [seagreen]   table {figures/cg/nnz_nnz_KL_agg.csv};
+  \addplot [orange]     table {figures/cg/nnz_nnz_select.csv};
+  \addplot [rust]       table {figures/cg/nnz_nnz_select_agg.csv};
+  \end{axis}
+\end{tikzpicture}
