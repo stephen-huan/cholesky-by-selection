@@ -1,21 +1,21 @@
-\begin{tikzpicture}
+\begin{tikzpicture}[baseline, scale=0.75]
   \begin{axis}[
-      width={0.8\linewidth},
-      grid={major},
-      title={Accuracy with increasing \( s \)
-      (\( N = 256 \))},
-      xlabel={\( s \)},
-      ylabel={Accuracy (IOU)},
-      legend entries={cknn-0.00, cknn-0.01, cknn-0.10, cknn-0.20},
-      legend pos={south east}
-    ]
-    \addplot [orange, style=solid]
-      table {figures/recover/noise-s_score_cknn-0.00.csv};
-    \addplot [orange, style=dashed]
-      table {figures/recover/noise-s_score_cknn-0.01.csv};
-    \addplot [orange, style=dotted]
-      table {figures/recover/noise-s_score_cknn-0.10.csv};
-    \addplot [orange, style=dashdotted]
-      table {figures/recover/noise-s_score_cknn-0.20.csv};
+    grid={major},
+    % title={Accuracy with increasing \( \sigma^2 \)
+    %   (\( N = 1024, s = 32 \))},
+    xlabel={Noise (\( \sigma^2 \))},
+    ylabel={Accuracy (IOU)},
+    legend entries={C\( k \)-NN, \( k \)-NN, corr., rand.},
+    legend pos={north east},
+    legend style={nodes={scale=0.85, transform shape}},
+  ]
+  \addplot [very thick, orange]    table
+    {figures/recover/noise_score_cknn.csv};
+  \addplot [very thick, lightblue] table
+    {figures/recover/noise_score_knn.csv};
+  \addplot [very thick, seagreen]  table
+    {figures/recover/noise_score_corr.csv};
+  \addplot [very thick, silver]    table
+    {figures/recover/noise_score_random.csv};
   \end{axis}
 \end{tikzpicture}

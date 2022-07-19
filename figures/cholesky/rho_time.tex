@@ -1,23 +1,21 @@
-\begin{tikzpicture}
+\begin{tikzpicture}[baseline, scale=0.75]
   \begin{loglogaxis}[
-    width={0.8\linewidth},
     grid={major},
     % title={KL divergence against time with increasing \( \rho \)
-    % (\( N = 65536, \rho_s = 2, \lambda = 1.5 \))},
+    %   (\( N = 65536, \rho_s = 2, \lambda = 1.5 \))},
     xlabel={\( \log_{10} \) Time (seconds)},
-    ylabel={\( \log_{10} \) KL divergence},
-    legend entries={kl, kl (agg), select (knn), select, select (agg)},
-    legend pos={north east},
+    % legend entries={KL, KL (agg.), select (\( k \)-NN), select, select (agg.)},
+    % legend pos={north east},
   ]
-  \addplot [lightblue]  table
+  \addplot [very thick, lightblue]  table
     {figures/cholesky/rho_time_KL_kl_div.csv};
-  \addplot [seagreen]   table
+  \addplot [very thick, seagreen]   table
     {figures/cholesky/rho_time_KL_agg_kl_div.csv};
-  \addplot [darksilver] table
+  \addplot [very thick, darksilver] table
     {figures/cholesky/rho_time_select-KNN_kl_div.csv};
-  \addplot [orange]     table
+  \addplot [very thick, orange]     table
     {figures/cholesky/rho_time_select_kl_div.csv};
-  \addplot [rust]       table
+  \addplot [very thick, rust]       table
     {figures/cholesky/rho_time_select_agg_kl_div.csv};
   \end{loglogaxis}
 \end{tikzpicture}

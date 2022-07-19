@@ -1155,7 +1155,7 @@ more complicated to compute than its multiple-point counterpart.
   \centering
   \input{figures/cholesky_factor.tex}%
   % TODO: matching GP image with 13 candidates, 3 selected, 1 training point
-  \input{figures/selection/cknn.tex}
+  \input{figures/selection/cknn_factor.tex}
   \caption{For a column in isolation, the \textcolor{orange}{unknown} point
     is the diagonal entry, below it are \textcolor{lightblue}{candidates},
     and the \textcolor{seagreen}{selected} entries are added to the sparsity
@@ -1382,10 +1382,11 @@ label in the \( k \) selected points.
 
 \Stodo{cite mnist dataset}
 
-\begin{figure}[h]
+\begin{figure}[ht]
   \centering
-  \input{figures/mnist/accuracy_k.tex}
-  \caption{Accuracy with increasing \( k \)}
+  \input{figures/mnist/accuracy_k.tex}%
+  \input{figures/mnist/time_k.tex}
+  \caption{Accuracy and time with increasing \( k \).}
 \end{figure}
 
 As \( k \) increases, KNN degrades near-linearly in accuracy. We hypothesize
@@ -1429,20 +1430,15 @@ set over the cardinality of their union, intersection over union (IOU).
 
 \begin{figure}[ht]
   \centering
-  \input{figures/recover/accuracy_n.tex}
-  \caption{Accuracy with increasing \( N \)}
+  \input{figures/recover/accuracy_n.tex}%
+  \input{figures/recover/accuracy_s.tex}
+  \caption{Accuracy with increasing \( N \) and \( s \).}
 \end{figure}
 
 As the number of nonzero entries per column is fixed and the number of rows
 and columns is increased, the ```cknn'' retains high accuracy near perfect
 recovery, and the rest of the methods quickly degrade and asymptote to their
 final accuracies.
-
-\begin{figure}[ht]
-  \centering
-  \input{figures/recover/accuracy_s.tex}
-  \caption{Accuracy with increasing \( s \)}
-\end{figure}
 
 If the number of rows and columns is fixed while the number of nonzero entries
 per column is increased, all methods drop in accuracy with increasing density
@@ -1454,7 +1450,8 @@ maintains much higher accuracy than the rest of the strategies.
 \begin{figure}[ht]
   \centering
   \input{figures/recover/accuracy_noise.tex}
-  \caption{Accuracy with increasing \( s \)}
+  \input{figures/recover/accuracy_noise_cknn.tex}
+  \caption{Accuracy with increasing \( s \).}
 \end{figure}
 
 Finally, we experiment with the addition of noise. Noise sampled i.i.d
@@ -1474,90 +1471,56 @@ positive-definiteness and dense cholesky factors}
 
 \begin{figure}[ht]
   \centering
-  \input{figures/cholesky/n_kl_div.tex}
-  \caption{KL divergence with increasing \( N \)}
-\end{figure}
-
-\begin{figure}[ht]
-  \centering
+  \input{figures/cholesky/n_kl_div.tex}%
   \input{figures/cholesky/n_time.tex}
-  \caption{Time with increasing \( N \)}
+  \caption{KL divergence and time with increasing \( N \).}
 \end{figure}
 
 \begin{figure}[ht]
   \centering
-  \input{figures/cholesky/rho_kl_div.tex}
-  \caption{KL divergence with increasing \( \rho \)}
-\end{figure}
-
-\begin{figure}[ht]
-  \centering
+  \input{figures/cholesky/rho_kl_div.tex}%
   \input{figures/cholesky/rho_time.tex}
-  \caption{KL divergence against time with increasing \( \rho \)}
+  \caption{KL divergence with increasing \( \rho \) and against time.}
 \end{figure}
 
 \begin{figure}[ht]
   \centering
-  \input{figures/cholesky/s_kl_div.tex}
-  \caption{KL divergence with increasing \( \rho_s \)}
-\end{figure}
-
-\begin{figure}[ht]
-  \centering
+  \input{figures/cholesky/s_kl_div.tex}%
   \input{figures/cholesky/s_time.tex}
-  \caption{Time with increasing \( \rho_s \)}
+  \caption{KL divergence and time with increasing \( \rho_s \).}
 \end{figure}
 
 \subsection{Gaussian process regression}
 
 \begin{figure}[ht]
   \centering
-  \input{figures/gp/rho_logdet.tex}
-  \caption{Log determinant with increasing \( \rho \)}
-\end{figure}
-
-\begin{figure}[ht]
-  \centering
+  \input{figures/gp/rho_logdet.tex}%
   \input{figures/gp/rho_time_logdet.tex}
-  \caption{Log determinant against time with increasing \( \rho \)}
+  \caption{Log determinant with increasing \( \rho \) and against time.}
 \end{figure}
 
 \begin{figure}[ht]
   \centering
-  \input{figures/gp/rho_loss.tex}
-  \caption{RMSE loss with increasing \( \rho \)}
-\end{figure}
-
-\begin{figure}[ht]
-  \centering
+  \input{figures/gp/rho_loss.tex}%
   \input{figures/gp/rho_time_loss.tex}
-  \caption{RMSE against time with increasing \( \rho \)}
+  \caption{RMSE loss with increasing \( \rho \) and against time.}
 \end{figure}
 
 \subsection{Preconditioning for conjugate gradient}
 
 \begin{figure}[ht]
   \centering
-  \input{figures/cg/n_iter-res.tex}
-  \caption{Residual with iterations}
-\end{figure}
-
-\begin{figure}[ht]
-  \centering
+  \input{figures/cg/n_iter-res.tex}%
   \input{figures/cg/nnz_nnz.tex}
-  \caption{Nonzero entries per column with increasing \( N \)}
+  \caption{Residual with iterations and nonzero
+    entries per column with increasing \( N \).}
 \end{figure}
 
 \begin{figure}[ht]
   \centering
-  \input{figures/cg/rho_iter.tex}
-  \caption{Iterations with increasing \( \rho \)}
-\end{figure}
-
-\begin{figure}[ht]
-  \centering
+  \input{figures/cg/rho_iter.tex}%
   \input{figures/cg/rho_time.tex}
-  \caption{Time with increasing \( \rho \)}
+  \caption{Iterations and time with increasing \( \rho \).}
 \end{figure}
 
 \subsection{Comparison to other methods}

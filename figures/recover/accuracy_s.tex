@@ -1,17 +1,20 @@
-\begin{tikzpicture}
+\begin{tikzpicture}[baseline, scale=0.75]
   \begin{axis}[
-      width={0.8\linewidth},
-      grid={major},
-      title={Accuracy with increasing \( s \)
-      (\( N = 256 \))},
-      xlabel={\( s \)},
-      ylabel={Accuracy (IOU)},
-      legend entries={cknn, knn, corr, random},
-      legend pos={south east}
-    ]
-    \addplot [orange]    table {figures/recover/s_score_cknn.csv};
-    \addplot [lightblue] table {figures/recover/s_score_knn.csv};
-    \addplot [seagreen]  table {figures/recover/s_score_corr.csv};
-    \addplot [silver]    table {figures/recover/s_score_random.csv};
+    grid={major},
+    % title={Accuracy with increasing \( s \)
+    %   (\( N = 256 \))},
+    xlabel={\( s \)},
+    % ylabel={Accuracy (IOU)},
+    legend entries={C\( k \)-NN, \( k \)-NN, corr., rand.},
+    legend pos={south east}
+  ]
+  \addplot [very thick, orange]    table
+    {figures/recover/s_score_cknn.csv};
+  \addplot [very thick, lightblue] table
+    {figures/recover/s_score_knn.csv};
+  \addplot [very thick, seagreen]  table
+    {figures/recover/s_score_corr.csv};
+  \addplot [very thick, silver]    table
+    {figures/recover/s_score_random.csv};
   \end{axis}
 \end{tikzpicture}

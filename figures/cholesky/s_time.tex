@@ -1,18 +1,23 @@
-\begin{tikzpicture}
+\begin{tikzpicture}[baseline, scale=0.75]
   \begin{semilogyaxis}[
-    width={0.8\linewidth},
     grid={major},
     % title={Time with increasing \( \rho_s \)
-    % (\( N = 65536, \rho = 4, \lambda = 1.5 \))},
+    %   (\( N = 65536, \rho = 4, \lambda = 1.5 \))},
     xlabel={\( \rho_s \)},
     ylabel={\( \log_{10} \) Time (seconds)},
-    legend entries={kl, kl (agg), select (knn), select, select (agg)},
+    legend entries={KL, KL (agg.), select (\( k \)-NN), select, select (agg.)},
     legend pos={north west},
+    legend style={nodes={scale=0.65, transform shape}},
   ]
-  \addplot [lightblue]  table {figures/cholesky/s_time_KL.csv};
-  \addplot [seagreen]   table {figures/cholesky/s_time_KL_agg.csv};
-  \addplot [darksilver] table {figures/cholesky/s_time_select-KNN.csv};
-  \addplot [orange]     table {figures/cholesky/s_time_select.csv};
-  \addplot [rust]       table {figures/cholesky/s_time_select_agg.csv};
+  \addplot [very thick, lightblue]  table
+    {figures/cholesky/s_time_KL.csv};
+  \addplot [very thick, seagreen]   table
+    {figures/cholesky/s_time_KL_agg.csv};
+  \addplot [very thick, darksilver] table
+    {figures/cholesky/s_time_select-KNN.csv};
+  \addplot [very thick, orange]     table
+    {figures/cholesky/s_time_select.csv};
+  \addplot [very thick, rust]       table
+    {figures/cholesky/s_time_select_agg.csv};
   \end{semilogyaxis}
 \end{tikzpicture}

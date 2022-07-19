@@ -1,17 +1,20 @@
-\begin{tikzpicture}
+\begin{tikzpicture}[baseline, scale=0.75]
   \begin{semilogyaxis}[
-    width={0.8\linewidth},
     grid={major},
     % title={Iterations with increasing \( \rho \)
-    % (\( N = 32768, \rho_s = 2, \lambda = 1.5 \))},
+    %   (\( N = 32768, \rho_s = 2, \lambda = 1.5 \))},
     xlabel={\( \rho \)},
     ylabel={\( \log_{10} \) Iterations},
-    legend entries={kl, kl (agg), select, select (agg)},
+    legend entries={KL, KL (agg.), select, select (agg.)},
     legend pos={north east},
   ]
-  \addplot [lightblue]  table {figures/cg/rho_iter_KL.csv};
-  \addplot [seagreen]   table {figures/cg/rho_iter_KL_agg.csv};
-  \addplot [orange]     table {figures/cg/rho_iter_select.csv};
-  \addplot [rust]       table {figures/cg/rho_iter_select_agg.csv};
+  \addplot [very thick, lightblue]  table
+    {figures/cg/rho_iter_KL.csv};
+  \addplot [very thick, seagreen]   table
+    {figures/cg/rho_iter_KL_agg.csv};
+  \addplot [very thick, orange]     table
+    {figures/cg/rho_iter_select.csv};
+  \addplot [very thick, rust]       table
+    {figures/cg/rho_iter_select_agg.csv};
   \end{semilogyaxis}
 \end{tikzpicture}
