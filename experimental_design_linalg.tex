@@ -250,8 +250,8 @@ priority queue shared between each local greedy selection algorithm.
 This paper is organized as follows.
 In \cref{sec:chol}, we show how minimizing KL divergence to compute sparse
 Cholesky factors reduces to solving independent regression problems and
-extend this result to adjacent and non-adjacent aggregated factorization
-in \cref{subsec:kl}.
+extend this result to adjacent and nonadjacent aggregated factorization in
+\cref{subsec:kl}.
 In \cref{sec:select}, we develop greedy algorithms to select
 the sparsity pattern independently for each regression problem.
 In \cref{sec:chol_select}, we combine the greedy selection algorithms with
@@ -579,7 +579,7 @@ Assuming every entry of \( \tilde{s} \) is after every index in \( \tilde{i}
 \), then \( s_k = \tilde{s} \cup \{ j \in \tilde{i} : j \succeq k \} \).
 This condition is guaranteed if the aggregated
 columns are adjacent in the ordering, for example.
-We defer handling the non-adjacent case to \cref{subsubsec:partial}.
+We defer handling the nonadjacent case to \cref{subsubsec:partial}.
 We now simplify the KL minimization objective on aggregated
 indices with the conditional chain rule of log determinants.
 Using the same blocking as \cref{eq:inverse_cond},
@@ -610,7 +610,7 @@ determinant of the covariance matrix of the columns,
 conditional on (well-behaved) selected entries.
 We briefly discuss what happens in the general case.
 
-\subsubsection{Non-adjacent or partial aggregation}
+\subsubsection{Nonadjacent or partial aggregation}
 \label{subsubsec:partial}
 
 \begin{figure}[t]
