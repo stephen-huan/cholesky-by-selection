@@ -247,8 +247,22 @@ priority queue shared between each local greedy selection algorithm.
 
 \paragraph{Outline}
 
-\Stodo{todo once more of the paper is solidified}
-The remainder of the paper is organized as follows.
+This paper is organized as follows.
+In \cref{sec:chol}, we show how minimizing KL divergence to compute sparse
+Cholesky factors reduces to solving independent regression problems and
+extend this result to adjacent and non-adjacent aggregated factorization
+in \cref{subsec:kl}.
+In \cref{sec:select}, we develop greedy algorithms to select
+the sparsity pattern independently for each regression problem.
+In \cref{sec:chol_select}, we combine the greedy selection algorithms with
+KL minimization to yield algorithms for sparse Cholesky factorization.
+In \cref{sec:experiments}, we present numerical experiments applying our method
+to image classification, recovery of \textit{a priori} sparse Cholesky factors,
+Cholesky factorization, Gaussian process regression, and preconditioning with
+the conjugate gradient.
+In \cref{sec:conclusion}, we summarize our results.
+Proofs and details on implementing our algorithms are
+provided in the appendix and supplementary material.
 
 \begin{figure}[t]
   \centering
