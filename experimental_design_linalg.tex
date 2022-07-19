@@ -1621,7 +1621,19 @@ objective \cref{eq:obj_gp} but without conditioning on previously
 selected points reduces to \cite{kang2021correlationbased}.
 
 \section{Conclusions}
-\Stodo{todo}
+\label{sec:conclusion}
+
+We have shown that accounting for conditioning while selecting sparsity
+entries for sparse Cholesky factors significantly improves accuracy and
+performance in downstream tasks compared to selection by Euclidean distance.
+Not only is conditional selection computationally efficient,
+it can be extended to the settings of multiple-point and
+partial conditioning at no additional asymptotic time cost.
+In addition, conditional selection gives a principled
+way of deciding the number of nonzeros per column of the
+Cholesky factor by greedy selection over all columns.
+We support these claims by extensive numerical
+experimentation for a variety of problems.
 
 \section*{Acknowledgments}
 \todo{add more funding information}
