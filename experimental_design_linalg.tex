@@ -2097,22 +2097,22 @@ index \( k \) to \( \I \), that is, to compute \( \logdet(\CM_{\Pred, \Pred
 
 \section{Algorithms}
 
-\begin{figure}[th!]
+\begin{figure}[t]
   \centering
   \begin{minipage}[t]{0.49\textwidth}
-  \begin{algorithm}[H]
-    \caption{Point selection by \\ explicit precision}
-    \label{alg:select_prec}
-    \input{figures/algorithms/select_prec.tex}
-  \end{algorithm}
+    \begin{algorithm}[H]
+      \caption{Point selection by \\ explicit precision}
+      \label{alg:select_prec}
+      \input{figures/algorithms/select_prec.tex}
+    \end{algorithm}
   \end{minipage}
   \hfill
   \begin{minipage}[t]{0.49\textwidth}
-  \begin{algorithm}[H]
-    \caption{Point selection by \\ Cholesky factorization}
-    \label{alg:select_chol}
-    \input{figures/algorithms/select_chol.tex}
-  \end{algorithm}
+    \begin{algorithm}[H]
+      \caption{Point selection by \\ Cholesky factorization}
+      \label{alg:select_chol}
+      \input{figures/algorithms/select_chol.tex}
+    \end{algorithm}
   \end{minipage}
   \caption{Algorithms for single-point selection.}
   \label{fig:alg_select}
@@ -2124,59 +2124,61 @@ index \( k \) to \( \I \), that is, to compute \( \logdet(\CM_{\Pred, \Pred
   \input{figures/algorithms/infer_select.tex}
 \end{algorithm}
 
-\begin{figure}[th!]
+\begin{figure}[t]
   \centering
   \begin{minipage}[t]{0.49\textwidth}
-  \begin{algorithm}[H]
-    \caption{Multiple-point selection by explicit precision}
-    \label{alg:select_mult_prec}
-    \input{figures/algorithms/select_mult_prec.tex}
-  \end{algorithm}
+    \begin{algorithm}[H]
+      \caption{Multiple-point selection by explicit precision}
+      \label{alg:select_mult_prec}
+      \input{figures/algorithms/select_mult_prec.tex}
+    \end{algorithm}
   \end{minipage}
   \hfill
   \begin{minipage}[t]{0.49\textwidth}
-  \begin{algorithm}[H]
-    \caption{Multiple-point selection by Cholesky factorization}
-    \label{alg:select_mult_chol}
-    \input{figures/algorithms/select_mult_chol.tex}
-  \end{algorithm}
+    \begin{algorithm}[H]
+      \caption{Multiple-point selection by Cholesky factorization}
+      \label{alg:select_mult_chol}
+      \input{figures/algorithms/select_mult_chol.tex}
+    \end{algorithm}
 
-  \begin{algorithm}[H]
-    \caption{Update Cholesky factor}
-    \label{alg:chol_update}
-    \input{figures/algorithms/chol_update.tex}
-  \end{algorithm}
+    \begin{algorithm}[H]
+      \caption{Update Cholesky factor}
+      \label{alg:chol_update}
+      \input{figures/algorithms/chol_update.tex}
+    \end{algorithm}
   \end{minipage}
   \caption{Algorithms for multiple-point selection.}
   \label{fig:alg_mult_select}
 \end{figure}
 
-\begin{figure}[th!]
+\begin{figure}[t]
   \centering
   \begin{minipage}[t]{0.49\textwidth}
-  \begin{algorithm}[H]
-    \caption{Partial point selection}
-    \label{alg:select_partial}
-    \input{figures/algorithms/select_partial.tex}
-  \end{algorithm}
-  \begin{algorithm}[H]
-    \caption{Find \( j \)'s index in \( \Order \)}
-    \label{alg:insert_index}
-    \input{figures/algorithms/insert_index.tex}
-  \end{algorithm}
+    \begin{algorithm}[H]
+      \caption{Partial point selection}
+      \label{alg:select_partial}
+      \input{figures/algorithms/select_partial.tex}
+    \end{algorithm}
+
+    \begin{algorithm}[H]
+      \caption{Find \( j \)'s index in \( \Order \)}
+      \label{alg:insert_index}
+      \input{figures/algorithms/insert_index.tex}
+    \end{algorithm}
   \end{minipage}
   \hfill
   \begin{minipage}[t]{0.49\textwidth}
-  \begin{algorithm}[H]
-    \caption{Compute \( j \)'s objective}
-    \label{alg:partial_score}
-    \input{figures/algorithms/partial_score.tex}
-  \end{algorithm}
-  \begin{algorithm}[H]
-    \caption{Insert \( k \) into \( L \)}
-    \label{alg:chol_insert}
-    \input{figures/algorithms/chol_insert.tex}
-  \end{algorithm}
+    \begin{algorithm}[H]
+      \caption{Compute \( j \)'s objective}
+      \label{alg:partial_score}
+      \input{figures/algorithms/partial_score.tex}
+    \end{algorithm}
+
+    \begin{algorithm}[H]
+      \caption{Insert \( k \) into \( L \)}
+      \label{alg:chol_insert}
+      \input{figures/algorithms/chol_insert.tex}
+    \end{algorithm}
   \end{minipage}
   \caption{Algorithms for partial selection.}
   \label{fig:alg_partial_select}
