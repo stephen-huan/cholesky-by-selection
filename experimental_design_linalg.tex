@@ -1909,21 +1909,21 @@ USA.
 \subsection{Reduction for optimal factor}
 \label{app:kl_L}
 
-We wish to compute the KL divergence between \( \CM \) and the Cholesky
-factor \( L \) computed according to \cref{eq:L_col}. From \cref{eq:kl},
+We wish to compute the KL divergence between \( \CM \) and the optimal
+sparse approximate Cholesky factor \( L \) computed from \cref{eq:L_col}.
+From \cref{eq:kl} and letting \( \Delta = 2
+\KL*{\N(\vec{0}, \CM)}{\N(\vec{0}, (L L^{\top})^{-1})} \),
 \begin{align}
   \label{eq:kl_L}
-  2 \KL*{\N(\vec{0}, \CM)}{\N(\vec{0}, (L L^{\top})^{-1})} &=
-    \trace(L L^{\top} \CM) - \logdet(L L^{\top}) - \logdet(\CM) - N
-  \shortintertext{Ignoring terms not depending on \( L \),}
-  &= \trace(L L^{\top} \CM) - \logdet(L L^{\top})
-  \shortintertext{By the cyclic property of trace,}
-  &= \trace(L \CM L^{\top}) - \logdet(L L^{\top})
-  \shortintertext{Focusing on \( \trace(L \CM
-    L^{\top}) \) and expanding on the columns of \( L \),}
-  \trace(L \CM L^{\top}) &= \sum_{i = 1}^N
-    L_{s_i, i}^{\top} \CM_{s_i, s_i} L_{s_i, i}
-  \shortintertext{Plugging in \( L_{s_i, i} \) from \cref{eq:L_col},}
+  \Delta &= \trace(L L^{\top} \CM) - \logdet(L L^{\top}) - \logdet(\CM) - N
+  \shortintertext{
+    Focusing on the term \( \trace(L L^{\top} \CM) = \trace(L^{\top} \CM L)
+    \) by the cyclic property of trace and using the sparsity of \( L \) by
+    plugging in the definition \cref{eq:L_col} for each column \( L_{s_i, i}
+    \),
+  }
+  \trace(L^{\top} \CM L) &= \sum_{i = 1}^N
+    L_{s_i, i}^{\top} \CM_{s_i, s_i} L_{s_i, i} \\
   &= \sum_{i = 1}^N
     \left (
       \frac{\left ( \CM_{s_i, s_i}^{-1} \vec{e}_1 \right )^{\top}}
@@ -1937,72 +1937,66 @@ factor \( L \) computed according to \cref{eq:L_col}. From \cref{eq:kl},
   &= \sum_{i = 1}^N
     \frac{\vec{e}_1^{\top} \CM_{s_i, s_i}^{-1}
           \CM_{s_i, s_i} \CM_{s_i, s_i}^{-1}
-          \vec{e}_1}{\vec{e}_1^{\top} \CM_{s_i, s_i}^{-1} \vec{e}_1} \\
-  &= \sum_{i = 1}^N 1 = N
-\end{align}
-Using \( N \) for \( \trace(L L^{\top} \CM) \) in \cref{eq:kl_L},
-\begin{align}
-  2 \KL*{\N(\vec{0}, \CM)}{\N(\vec{0}, (L L^{\top})^{-1})} &=
-    -\logdet(L L^{\top}) - \logdet(\CM)
-  \shortintertext{\( L^{\top} \) has the same log determinant
-    as \( L \), and because \( L \) is lower triangular, its
-    log determinant is the sum of its diagonal entries:}
-  &= -2 \sum_{i = 1}^N \left [ \log(L_{i, i}) \right ] - \logdet(\CM)
-  \shortintertext{Plugging \cref{eq:L_col} for the diagonal entries,}
+          \vec{e}_1}{\vec{e}_1^{\top} \CM_{s_i, s_i}^{-1} \vec{e}_1}
+  = \sum_{i = 1}^N 1 = N
+  \shortintertext{
+    exactly the Jacobi scaling constraint \( \diag(L^{\top} \CM L) = 1 \).
+    Substituting back into \cref{eq:kl_L},
+  }
+  \Delta &= -\logdet(L L^{\top}) - \logdet(\CM)
+  \shortintertext{
+    Computing the determinant of a triangular matrix as the
+    product of its diagonal entries and plugging in the
+    definition \cref{eq:L_col} for the diagonal entries,
+  }
+  &= -2 \sum_{i = 1}^N \left [ \log(L_{i, i}) \right ] - \logdet(\CM) \\
   &= -\sum_{i = 1}^N
     \left [ \log(\vec{e}_1^{\top} \CM_{s_i, s_i}^{-1} \vec{e}_1) \right ]
-    - \logdet(\CM)
-  \shortintertext{Bringing the negative inside,}
-  &= \sum_{i = 1}^N
-    \left [
-      \log
-      \left (
-        (\vec{e}_1^{\top} \CM_{s_i, s_i}^{-1} \vec{e}_1)^{-1}
-      \right )
-    \right ]
-    - \logdet(\CM)
-\end{align}
-So minimizing the KL divergence (given optimal \( L \)) corresponds
-to minimizing the sum of the inverse of the diagonal entries.
-We can give an intuitive view of this result by making
-use of \cref{eq:L_cond_var} and expanding the log
-determinant by the chain rule \cref{eq:det_chain}.
-\begin{align}
-  \sum_{i = 1}^N
-    \left [
-      \log
-      \left (
-        (\vec{e}_1^{\top} \CM_{s_i, s_i}^{-1} \vec{e}_1)^{-1}
-      \right )
-    \right ]
-    - \logdet(\CM)
-  &= \sum_{i = 1}^N
-    \left [
-      \log \left ( \CM_{i, i \mid s_i - \{ i \}} \right )
-    \right ]
     - \logdet(\CM) \\
   &= \sum_{i = 1}^N
-      \log \left ( \CM_{i, i \mid s_i - \{ i \}} \right ) -
+    \left [
+      \log
+      \left (
+        (\vec{e}_1^{\top} \CM_{s_i, s_i}^{-1} \vec{e}_1)^{-1}
+      \right )
+    \right ]
+    - \logdet(\CM)
+  \shortintertext{
+    Applying \cref{eq:L_cond_var} to turn each term \(
+    (\vec{e}_1^{\top} \CM_{s_i, s_i}^{-1} \vec{e}_1)^{-1} \)
+    into a variance \( \CM_{i, i \mid s_i \setminus \{ i \}} \),
+  }
+  &= \sum_{i = 1}^N
+    \left [
+      \log \left ( \CM_{i, i \mid s_i \setminus \{ i \}} \right )
+    \right ]
+    - \logdet(\CM) \\
+  \shortintertext{
+    Expanding the log determinant by the chain rule \cref{eq:det_chain},
+  }
+  &= \sum_{i = 1}^N
+      \log \left ( \CM_{i, i \mid s_i \setminus \{ i \}} \right ) -
     \sum_{i = 1}^N
       \log \left ( \CM_{i, i \mid i + 1:} \right ) \\
   &= \sum_{i = 1}^N
     \left [
-      \log \left ( \CM_{i, i \mid s_i - \{ i \}} \right ) -
+      \log \left ( \CM_{i, i \mid s_i \setminus \{ i \}} \right ) -
       \log \left ( \CM_{i, i \mid i + 1:} \right )
     \right ]
 \end{align}
-This sum is the accumulated \emph{difference} in error for a series of
-independent prediction problems: to predict the \( i \)th variable given
-the variables after it in the ordering, \( i + 1, i + 2, \dotsc, N \).
-The left term \( \log \left ( \CM_{i, i \mid s_i - \{ i \}} \right ) \) is
-restricted to the variables in the sparsity pattern \( s_i \), while the right
-term \( \log \left ( \CM_{i, i \mid i + 1:} \right ) \) is unconstrained.
+We can interpret this sum as the accumulated \emph{difference} in error for
+a series of independent prediction problems: each to predict the \( i \)th
+variable given a subset of the variables after it in the ordering, \( i + 1,
+i + 2, \dotsc, N \).
+The left term \( \log \left ( \CM_{i, i \mid s_i \setminus \{ i \}} \right )
+\) is restricted to the variables in the sparsity pattern \( s_i \), while the
+right term \( \log \left ( \CM_{i, i \mid i + 1:} \right ) \) is unconstrained.
 As a result, the left term will necessarily be greater than the
 right, and the goal is to minimize the accumulated deviation.
 Thus, the KL divergence measures the maintenance of predictive accuracy after
-adding conditional independence (sparsity) to the original distribution.
+forcing conditional independence (sparsity) on the original distribution.
 This independent regression problem interpretation of the KL
-divergence is also given in \cite{katzfuss2022scalable}, equation 5.
+divergence is also given in equation 5 of \cite{katzfuss2022scalable}.
 
 The asymmetry of KL divergence implies the order of the matrices matters as
 well as whether both matrices have been inverted or not. This seems to imply
@@ -2016,9 +2010,9 @@ from \cref{eq:kl} and the cyclic property of trace, so inverting both
 matrices implicitly reverses the order of the KL divergence.
 There are therefore only two possible ways to
 compare the two matrices, depending on their order.
-From a statistical perspective, the KL divergence can interpreted
-as the likelihood-ratio test, so the asymmetry in order corresponds
-to the asymmetry between the null and alternative hypotheses.
+From a statistical perspective the KL divergence can interpreted as the
+likelihood-ratio test, so the asymmetry in order corresponds to the asymmetry
+between the null and alternative hypotheses \cite{eguchi2006interpreting}.
 
 \subsection{Partial updates in the selection algorithm}
 \label{app:partial}
@@ -2057,14 +2051,17 @@ By definition,
   &= \E[(L_i \vec{z}) ({L'}_j \vec{z} + \mu_j - \mu_j)] \\
   &= \E[(L_{i, 1} z_1 + \dotsb + L_{i, m} z_m)
         ({L'}_{j, 1} z_1 + \dotsb + {L'}_{j, m} z_m)]
-  \shortintertext{For \( i \neq j \), \( \E[z_i z_j] = \E[z_i] \E[z_j]
-    = 0 \) since \( z_i \) is independent of \( z_j \) and has mean 0.}
+  \shortintertext{
+    For \( i \neq j \), \( \E[z_i z_j] = \E[z_i] \E[z_j] = 0 \)
+    since \( z_i \) is independent of \( z_j \) and has mean 0.
+  }
   &= \E[L_{i, 1} {L'}_{j, 1} z_1^2 + \dotsb +
         L_{i, m} {L'}_{j, m} z_m^2] \\
   &= L_{i, 1} {L'}_{j, 1} \E[z_1^2] + \dotsb +
      L_{i, m} {L'}_{j, m} \E[z_m^2]
-  \shortintertext{For any \( i \), \( \E[z_i^2]
-    = \Var[z_i] + \E[z_i]^2 = 1 + 0 = 1 \)}
+  \shortintertext{
+    For any \( i \), \( \E[z_i^2] = \Var[z_i] + \E[z_i]^2 = 1 + 0 = 1 \).
+  }
   &= L_{i, 1} {L'}_{j, 1} + \dotsb + L_{i, m} {L'}_{j, m} \\
   &= L_i \cdot {L'}_j
   \shortintertext{Thus, the new covariance matrix can be written as}
@@ -2110,12 +2107,16 @@ Because \( s_{\tilde{i}} \) is sorted according to \(
 \begin{align}
   L_{s_i, i} &= \frac{\CM_{s_i, s_i}^{-1} \vec{e}_1}
                      {\sqrt{\vec{e}_1^{\top} \CM_{s_i, s_i}^{-1} \vec{e}_1}} \\
-  \shortintertext{Since \( Q^{-1} = \CM_{s_{\tilde{i}}, s_{\tilde{i}}} \)
-    and \( s_i \) is the \( k \)th index of \( s_{\tilde{i}} \) and after,}
+  \shortintertext{
+    Since \( Q^{-1} = \CM_{s_{\tilde{i}}, s_{\tilde{i}}} \) and \(
+    s_i \) is the \( k \)th index of \( s_{\tilde{i}} \) and after,
+  }
   &= \frac{\left (Q^{-1} \right )_{k:, k:}^{-1} \vec{e}_1}
     {\sqrt{\vec{e}_1^{\top} \left (Q^{-1} \right )_{k:, k:} \vec{e}_1}} \\
-  \shortintertext{By \cref{eq:inverse_cond}, we can turn
-    marginalization in precision into conditioning in covariance.}
+  \shortintertext{
+    By \cref{eq:inverse_cond}, we can turn marginalization
+    in precision into conditioning in covariance.
+  }
   \label{eq:L_precision}
              &= \frac{Q_{k:, k: \mid :k - 1} \vec{e}_1}
                      {\sqrt{\vec{e}_1^{\top} Q_{k:, k: \mid :k - 1} \vec{e}_1}}
@@ -2191,9 +2192,8 @@ information \cref{eq:info} to the EV-VE identity \cref{eq:eve},
     \textcolor{rust}{     \Var[\E[\vec{y}_\Pred \mid \vec{y}_\Train]]}
 \end{align}
 On the left hand side, entropy is monotone with variance.
-On the right hand side, the expectation of conditional variance
-is monotone with conditional entropy and can be interpreted to
-be the fluctuation of the prediction point after conditioning.
+On the right hand side, the expectation of conditional
+variance is monotone with conditional entropy.
 Because the sum of the two terms on the right hand side is constant,
 minimizing the expectation of conditional variance is equivalent to
 maximizing the variance of conditional expectation, which corresponds
@@ -2227,11 +2227,12 @@ new row and column added to it, that is, compute \( \CM^{-1} \) for
       \CM_{2, 1} & \CM_{2, 2}
     \end{pmatrix}
 \)
-where \( \CM_{2, 1} = \CM_{1, 2}^{\top} \) is a column vector and \(
-\CM_{2, 2} \) is a scalar, assuming \( \CM \) is positive-definite.
+where \( \CM_{1, 2} = \CM_{2, 1}^{\top} \) is a
+column vector and \( \CM_{2, 2} \) is a scalar.
+Using the same block \( L D L^{\top} \) factorization as \cref{eq:chol}
+where the Schur complement is denoted \textcolor{lightblue}{\(
+\CM_{2, 2 \mid 1} \)} from \cref{eq:cond_cov_notation},
 \begin{align}
-  \shortintertext{Using the same block \( L D
-    L^{\top} \) factorization as \cref{eq:chol_schur},}
   \begin{pmatrix}
     \CM_{1, 1} & \CM_{1, 2} \\
     \CM_{2, 1} & \CM_{2, 2}
@@ -2242,18 +2243,13 @@ where \( \CM_{2, 1} = \CM_{1, 2}^{\top} \) is a column vector and \(
   \end{pmatrix}
   \begin{pmatrix}
     \CM_{1, 1} & 0 \\
-    0 & \textcolor{lightblue}{
-      \CM_{2, 2} - \CM_{2, 1} \CM_{1, 1}^{-1} \CM_{1, 2}
-    }
+    0 & \textcolor{lightblue}{\CM_{2, 2 \mid 1}}
   \end{pmatrix}
   \begin{pmatrix}
     \Id & \textcolor{darkorange}{\CM_{1, 1}^{-1} \CM_{1, 2}} \\
     0 & \Id
   \end{pmatrix}
-  \shortintertext{For brevity of notation, we denote the Schur complement
-    \textcolor{lightblue}{\( \CM_{2, 2} - \CM_{2, 1} \CM_{1, 1}^{-1} \CM_{1,
-    2} \)} as the conditional covariance \textcolor{lightblue}{\( \CM_{2, 2
-    \mid 1} \)}. Inverting both sides of the equation,}
+  \shortintertext{Inverting both sides of the equation,}
   \CM^{-1} &=
   \begin{pmatrix}
     \Id & -\textcolor{darkorange}{\CM_{1, 1}^{-1} \CM_{1, 2}} \\
@@ -2283,13 +2279,13 @@ where \( \CM_{2, 1} = \CM_{1, 2}^{\top} \) is a column vector and \(
       \left (\CM_{2, 1} \CM_{1, 1}^{-1} \right )
     } & \textcolor{lightblue}{\CM_{2, 2 \mid 1}^{-1}}
   \end{pmatrix}
-  \shortintertext{In the context of adding a new entry to the matrix, \(
-    \CM_{1, 1} = \CM_{\I, \I} \), \( \CM_{1, 2} = \CM_{\I, k} \), and \(
+  \shortintertext{In the context of adding a new entry \( k \) to the matrix,
+    \( \CM_{1, 1} = \CM_{\I, \I} \), \( \CM_{1, 2} = \CM_{\I, k} \), and \(
     \CM_{2, 2} = \CM_{k, k} \). Also note that \( \textcolor{lightblue}{\CM_{k,
     k \mid \I}^{-1}} \) is the precision of \( k \) conditional on the entries
-    in \( \I \), which has already been computed in \cref{alg:select_prec}.
-    If we let \( \vec{v} = \textcolor{darkorange}{\CM_{\I, \I}^{-1} \CM_{\I,
-    k}} \), then}
+    in \( \I \), which has already been computed in \cref{alg:select_prec}. If
+    we let \( \vec{v} = \textcolor{darkorange}{\CM_{\I, \I}^{-1} \CM_{\I, k}}
+    \), then}
   &=
   \begin{pmatrix}
     \CM_{\I, \I}^{-1} + \CM_{k, k \mid \I}^{-1} \vec{v} \vec{v}^T &
@@ -2321,19 +2317,23 @@ formula which states that:
   \right )^{-1} &= \CM_{1, 1}^{-1} +
     \left (\CM_{1, 1}^{-1} \CM_{1, 2} \right ) \CM_{2, 2 \mid 1}^{-1}
     \left (\CM_{2, 1} \CM_{1, 1}^{-1} \right )
-  \shortintertext{For brevity of notation, letting \( \vec{u} = \CM_{1, 2} \)
-    and \( \vec{v} = \CM_{1, 1}^{-1} \CM_{1, 2} = \CM_{1, 1}^{-1} \vec{u} \),}
+  \shortintertext{
+    For brevity of notation, letting \( \vec{u} = \CM_{1, 2} \) and \(
+    \vec{v} = \CM_{1, 1}^{-1} \CM_{1, 2} = \CM_{1, 1}^{-1} \vec{u} \),
+  }
   (\CM_{1, 1} - \CM_{2, 2}^{-1} \vec{u} \vec{u}^{\top})^{-1} &=
     \CM_{1, 1}^{-1} + \CM_{2, 2 \mid 1}^{-1} \vec{v} \vec{v}^{\top}
-  \shortintertext{So we see that a rank-one update to \( \CM_{1, 1}
-    \) then inverting is a rank-one update to \( \CM_{1, 1}^{-1} \). In
-    our context, \( \CM_{1, 1} = \CM_{\Pred, \Pred \mid \I}, \vec{u}
+  \shortintertext{
+    So we see that a rank-one update to \( \CM_{1, 1} \) then
+    inverting is a rank-one update to \( \CM_{1, 1}^{-1} \).
+    In our context, \( \CM_{1, 1} = \CM_{\Pred, \Pred \mid \I}, \vec{u}
     = \CM_{\Pred, k \mid I}, \CM_{2, 2} = \CM_{k, k \mid \I} \) so \(
-    \CM_{2, 2 \mid 1}^{-1} = \CM_{k, k \mid \Pred, I}^{-1} \) (this can
-    be rigorously shown by expanding the Schur complement and taking
-    advantage of the quotient rule as in \cref{eq:greedy_mult}). \(
-    \vec{v} \) can be computed according to definition as \( \CM_{\Pred,
-    \Pred \mid \I}^{-1} \vec{u} \). Thus, we can write the update as}
+    \CM_{2, 2 \mid 1}^{-1} = \CM_{k, k \mid \Pred, I}^{-1} \) (from the
+    quotient rule \cref{eq:quotient_rule}).
+    \( \vec{v} \) can be computed according to definition
+    as \( \CM_{\Pred, \Pred \mid \I}^{-1} \vec{u} \).
+    Thus, we can write the update as
+  }
   \left ( \CM_{\Pred, \Pred \mid \I} -
     \frac{\CM_{\Pred, k \mid \I} \CM_{\Pred, k \mid \I}^{\top}}
          {\CM_{kk \mid \I}}
@@ -2353,9 +2353,10 @@ prediction points conditional on the selected entries, \( \logdet(\CM_{\Pred,
 \Pred \mid \I}) \), we wish to compute the log determinant after we add an
 index \( k \) to \( \I \), that is, to compute \( \logdet(\CM_{\Pred, \Pred
 \mid \I \cup \{ k \}}) \).
+From \cref{eq:cond_select}, selecting a new point
+is a rank-one downdate on the covariance matrix.
 \begin{align}
-  \shortintertext{From \cref{eq:cond_select}, selecting a
-    new point is a rank-one downdate on the covariance matrix.}
+  \nonumber
   \logdet \left ( \CM_{\Pred, \Pred \mid \I \cup \{ k \}} \right )
   &= \logdet \left ( \CM_{\Pred, \Pred \mid \I} -
        \frac{\CM_{\Pred, k \mid \I} \CM_{\Pred, k \mid \I}^{\top}}
@@ -2368,8 +2369,10 @@ index \( k \) to \( \I \), that is, to compute \( \logdet(\CM_{\Pred, \Pred
              \CM_{\Pred, k \mid \I}
             }{\CM_{k, k \mid \I}}
      \right )
-  \shortintertext{Focusing on the second term, we can turn
-    the quadratic form into condtioning.}
+  \shortintertext{
+    Focusing on the second term, we can turn
+    the quadratic form into condtioning.
+  }
   &= \logdet \left ( \CM_{\Pred, \Pred \mid \I} \right ) +
      \log \left (
        \frac{\CM_{k, k \mid \I} -
@@ -2377,8 +2380,9 @@ index \( k \) to \( \I \), that is, to compute \( \logdet(\CM_{\Pred, \Pred
              \CM_{\Pred, k \mid \I}
             }{\CM_{k, k \mid \I}}
      \right )
-  \shortintertext{By the quotient rule
-    \cref{eq:quotient_rule}, we combine the conditioning.}
+  \shortintertext{
+    By the quotient rule \cref{eq:quotient_rule}, we combine the conditioning.
+  }
   &= \logdet \left ( \CM_{\Pred, \Pred \mid \I} \right ) +
      \log \left ( \frac{\CM_{k, k \mid \I, \Pred}}{\CM_{k, k \mid \I}} \right )
 \end{align}
