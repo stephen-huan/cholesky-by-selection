@@ -337,23 +337,28 @@ For Gaussian processes, the closed-form posterior distribution is
     \CM_{\Pred, \Pred} -
     \CM_{\Pred, \Train} \CM_{\Train, \Train}^{-1}
     \CM_{\Train, \Pred}
-  \shortintertext{For brevity of notation, we
-    denote the conditional covariance matrix as}
+  \shortintertext{
+    For brevity of notation, we denote the conditional covariance matrix as
+  }
   \label{eq:cond_cov_notation}
   \CM_{\I, \J \mid \V} &\defeq
     \CM_{\I, \J} - \CM_{\I, \V} \CM_{\V, \V}^{-1} \CM_{\V, \J}
-  \shortintertext{where \( \CM_{\V, \V}^{-1} \defeq (\CM_{\V, \V})^{-1} \).
-    To denote the covariance between the variables in index sets \( \I \) and
-    \( \J \), conditional on the variables in \( \V_1, \V_2, \dots, \V_n \) we
-    write}
+  \shortintertext{
+    where \( \CM_{\V, \V}^{-1} \defeq (\CM_{\V, \V})^{-1} \).
+    To denote the covariance between the variables in index
+    sets \( \I \) and \( \J \), conditional on the variables
+    in the index sets \( \V_1, \V_2, \dots, \V_n \) we write
+  }
   \CM_{I, J \mid \V_1, \V_2, \dotsc, \V_n} &\defeq
     \Cov[\vec{y}_\I, \vec{y}_\J \mid
          \vec{y}_{\V_1 \cup \V_2 \cup \dotsb \cup \V_n}]
-  \shortintertext{The sets \( \V_1, \dotsc, \V_n \) are written in order
+  \shortintertext{
+    The sets \( \V_1, \dotsc, \V_n \) are written in order
     of computation. Although the final covariance matrix is the same, a
     different order of conditioning means different intermediate results
     in repeated application of \cref{eq:cond_cov}. By the quotient rule
-    of Schur complementation:}
+    of Schur complementation:
+  }
   \label{eq:quotient_rule}
   \CM_{\I,   \J   \mid \V_{1 \dots n}} &=
   \CM_{\I,   \J   \mid \V_{1 \dots n - 1}} -
@@ -386,12 +391,14 @@ We start by decomposing the joint likelihood \( \pi \).
   \label{eq:joint}
   \p(\vec{x}) &= \p(x_1) \p(x_2 \mid x_1) \p(x_3 \mid x_1, x_2) \dots
     \p(x_N \mid x_1, x_2, \dotsc, x_{N - 1})
-  \shortintertext{The key assumption is that many of the points are
-    redundant after conditioning on a carefully chosen subset of the
-    points. Letting \( i_1, \dotsc, i_N \) denote an ordering of the
-    points and \( s_k \) the indices of points that condition the \(
-    k \)th point in the ordering, the Vecchia approximation proposes
-    to approximate \cref{eq:joint} by the sparse approximation}
+  \shortintertext{
+    The key assumption is that many of the points are redundant
+    after conditioning on a carefully chosen subset of the points.
+    Letting \( i_1, \dotsc, i_N \) denote an ordering of the points and
+    \( s_k \) the indices of points that condition the \( k \)th point
+    in the ordering, the Vecchia approximation proposes to approximate
+    \cref{eq:joint} by the sparse approximation
+  }
   \label{eq:vecchia}
   \p(\vec{x}) &\approx \p(x_{i_1}) \p(x_{i_2} \mid x_{s_2})
     \p(x_{i_3} \mid x_{s_3}) \dots \p(x_{i_N} \mid x_{s_N})
@@ -541,10 +548,11 @@ For
 \begin{align}
   \label{eq:inverse_cond}
   \CM_{1, 1 \mid 2} &= \left ( \CM^{-1} \right )_{1, 1}^{-1} \\
-  \shortintertext{Viewing \( (\vec{e}_1^{\top} \CM_{s_i, s_i}^{-1}
-    \vec{e}_1)^{-1} = \left (\CM_{s_i, s_i}^{-1} \right )_{1, 1}^{-1}
-    \) as a marginalization of \( \CM_{s_i, s_i}^{-1} \) to apply
-    \cref{eq:inverse_cond},}
+  \shortintertext{
+    Viewing \( (\vec{e}_1^{\top} \CM_{s_i, s_i}^{-1} \vec{e}_1)^{-1} =
+    \left (\CM_{s_i, s_i}^{-1} \right )_{1, 1}^{-1} \) as a marginalization
+    of \( \CM_{s_i, s_i}^{-1} \) to apply \cref{eq:inverse_cond},
+  }
   \label{eq:L_cond_var}
   (\vec{e}_1^{\top} \CM_{s_i, s_i}^{-1} \vec{e}_1)^{-1}
          &= \CM_{i, i \mid s_i \setminus \{ i \}}
@@ -594,13 +602,17 @@ to the contribution from the group \( \tilde{i} \) is
     \log(\CM_{i_1 \mid \tilde{s}}) +
     \log(\CM_{i_2 \mid \tilde{s} \cup \{ i_1 \}}) + \dotsb +
     \log(\CM_{i_m \mid \tilde{s} \cup \tilde{i}}) \\
-  \shortintertext{where we write \( \CM_j \defeq \CM_{j, j} \).
-    Combining the first two terms by the chain rule \cref{eq:det_chain},}
+  \shortintertext{
+    where we write \( \CM_j \defeq \CM_{j, j} \).
+    Combining the first two terms by the chain rule \cref{eq:det_chain},
+  }
   &= \logdet(\CM_{\{ i_1, i_2 \} \mid \tilde{s}}) +
      \log(\CM_{i_3 \mid \tilde{s} \cup \{ i_1, i_2 \}}) + \dotsb +
      \log(\CM_{i_m \mid \tilde{s} \cup \tilde{i}}) \\
-  \shortintertext{Proceeding by induction, we are
-    able to reduce the entire sum to the single term}
+  \shortintertext{
+    Proceeding by induction, we are able to
+    reduce the entire sum to the single term
+  }
   \label{eq:obj_mult}
   &= \logdet(\CM_{\tilde{i}, \tilde{i} \mid \tilde{s}})
 \end{align}
@@ -672,8 +684,10 @@ a triangular matrix is the product of its diagonal entries.
   \underbrace{
     \log({L'}_{p + 1, p + 1}) + \dotsb + \log({L'}_{m, m})
   }_{\text{conditioned}}
-  \shortintertext{Comparing to the KL divergence \cref{eq:obj_chol}
-    and recalling that \( k \) is added to \( s_i \) if \( i > p \),}
+  \shortintertext{
+    Comparing to the KL divergence \cref{eq:obj_chol} and
+    recalling that \( k \) is added to \( s_i \) if \( i > p \),
+  }
   \sum_{i = 1}^m \log \left ( \CM_{i, i \mid s_i \setminus \{ i \}} \right )
   \label{eq:partial_kl}
   &= \underbrace{
@@ -689,11 +703,13 @@ a triangular matrix is the product of its diagonal entries.
     \right ) + \dotsb +
     \log \left ( \CM_{m, m \mid s_m \setminus \{ m \}} \right )
   }_\text{conditioned}
-  \shortintertext{Since \( L_{i, i} \) (and \( {L'}_{i, i} \)) is the
-    square root of the conditional variance of the \( i \)th variable from
-    the staistical perspective in \cref{eq:chol}, we have \( 2 \log(L_{i,
-    i}) = \log(\CM_{i, i \mid s_i \setminus \{ i \}}) \) and so}
-  \nonumber
+  \shortintertext{
+    Since \( L_{i, i} \) (and \( {L'}_{i, i} \)) is the square root
+    of the conditional variance of the \( i \)th variable from the
+    statistical perspective in \cref{eq:chol}, we have \( 2 \log(L_{i,
+    i}) = \log(\CM_{i, i \mid s_i \setminus \{ i \}}) \) and so
+  }
+  \label{eq:partial_kl}
   \logdet(\CM_{\tilde{i}, \tilde{i} \parallel k}) &=
     \sum_{i = 1}^m \log \left ( \CM_{i, i \mid s_i \setminus \{ i \}} \right )
 \end{align}
@@ -849,8 +865,10 @@ two steps of block Gaussisan elimination,
     \Id & \textcolor{darkorange}{\CM_{1, 1}^{-1} \CM_{1, 2}} \\
     0 & \Id
   \end{pmatrix}
-  \shortintertext{so we see that the Cholesky factorization of the joint
-    covariance \( \CM \) is}
+  \shortintertext{
+    so we see that the Cholesky factorization
+    of the joint covariance \( \CM \) is
+  }
   \label{eq:chol}
   \chol(\CM) &=
   \begin{pmatrix}
@@ -941,8 +959,10 @@ is a rank-one downdate on the covariance matrix:
        \frac{\CM_{\Pred, k \mid \I} \CM_{\Pred, k \mid \I}^{\top}}
             {\CM_{k, k \mid \I}}
      \right ) \\
-  \shortintertext{By application of the matrix determinant lemma
-    (the details are in \cref{app:logdet_downdate}),}
+  \shortintertext{
+    By application of the matrix determinant lemma
+    (the details are in \cref{app:logdet_downdate}),
+  }
   \label{eq:greedy_mult}
   &= \logdet \left ( \CM_{\Pred, \Pred \mid \I} \right ) +
      \log \left ( \frac{\CM_{k, k \mid \I, \Pred}}{\CM_{k, k \mid \I}} \right )
@@ -1046,8 +1066,10 @@ spot in the Cholesky factor \( L \),
     L_{:, :j} & \vec{u} & {L'}_{:, j + 1:}
   \end{pmatrix} \\
   \vec{u} &= \frac{\CM_{:, k \mid :j}}{\sqrt{\CM_{k, k \mid :j}}}
-  \shortintertext{where unlike \cref{eq:chol_partial}, we are using a
-    lower-triangular factor \( L^{\top} L = \CM \) for simplicity: if}
+  \shortintertext{
+    where unlike \cref{eq:chol_partial}, we are using a
+    lower-triangular factor \( L^{\top} L = \CM \) for simplicity: if
+  }
   \label{eq:U_chol}
   U &= P^{\Reverse} \chol(P^{\Reverse} \CM P^{\Reverse}) P^{\Reverse}
 \end{align}
