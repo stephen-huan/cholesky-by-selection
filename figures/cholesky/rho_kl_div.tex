@@ -8,15 +8,10 @@
     legend entries={KL, KL (agg.), select (\( k \)-NN), select, select (agg.)},
     legend pos={north east},
   ]
-  \addplot [very thick, lightblue]  table
-    {figures/cholesky/rho_kl_div_KL.csv};
-  \addplot [very thick, seagreen]   table
-    {figures/cholesky/rho_kl_div_KL_agg.csv};
-  \addplot [very thick, darksilver] table
-    {figures/cholesky/rho_kl_div_select-KNN.csv};
-  \addplot [very thick, orange]     table
-    {figures/cholesky/rho_kl_div_select.csv};
-  \addplot [very thick, rust]       table
-    {figures/cholesky/rho_kl_div_select_agg.csv};
+  \addplot table {figures/cholesky/rho_kl_div_KL.csv};
+  \addplot table {figures/cholesky/rho_kl_div_KL_agg.csv};
+  \addplot table {figures/cholesky/rho_kl_div_select-KNN.csv};
+  \addplot table {figures/cholesky/rho_kl_div_select.csv};
+  \addplot table {figures/cholesky/rho_kl_div_select_agg.csv};
   \end{semilogyaxis}
 \end{tikzpicture}

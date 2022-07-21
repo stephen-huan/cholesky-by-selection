@@ -3,19 +3,17 @@
     grid={major},
     % title={Accuracy with increasing \( \sigma^2 \)
     %   (\( N = 1024, s = 32 \))},
+    % 0.05 shows up as \( 5 \cdot 10^{-2} \), suppress exponential
+    every tick label/.append style={/pgf/number format/fixed},
     xlabel={Noise (\( \var \))},
     ylabel={Accuracy (IOU)},
-    legend entries={C\( k \)-NN, \( k \)-NN, corr., rand.},
+    legend entries={rand., \( k \)-NN, corr., C\( k \)-NN},
     legend pos={north east},
     legend style={nodes={scale=0.85, transform shape}},
   ]
-  \addplot [very thick, orange]    table
-    {figures/recover/noise_score_cknn.csv};
-  \addplot [very thick, lightblue] table
-    {figures/recover/noise_score_knn.csv};
-  \addplot [very thick, seagreen]  table
-    {figures/recover/noise_score_corr.csv};
-  \addplot [very thick, silver]    table
-    {figures/recover/noise_score_random.csv};
+  \addplot+ [mark=triangle*] table {figures/recover/noise_score_random.csv};
+  \addplot+ [mark=*]         table {figures/recover/noise_score_knn.csv};
+  \addplot+ [mark=o]         table {figures/recover/noise_score_corr.csv};
+  \addplot+ [mark=square*]   table {figures/recover/noise_score_cknn.csv};
   \end{axis}
 \end{tikzpicture}

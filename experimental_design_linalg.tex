@@ -616,12 +616,15 @@ We briefly discuss what happens in the general case.
 \begin{figure}[t]
   \centering
   \input{figures/partial_factor.tex}
-  \caption{Illustration of the Cholesky factorization of a partially
-    conditioned covariance matrix. Here \textcolor{darksilver}{grey}
-    denotes fully unconditional, \textcolor{darklightblue}{blue} denotes
-    fully conditional, and the \textcolor{silver!50!lightblue}{mixed
-    color} denotes interaction between the two. Surprisingly, such a
-    matrix factors into a ``pure'' Cholesky factor.}
+  \caption{
+    Illustration of the Cholesky factorization of
+    a partially conditioned covariance matrix.
+    Here \textcolor{darksilver}{grey} denotes fully unconditional,
+    \textcolor{darklightblue}{blue} denotes fully conditional, and the
+    \textcolor{silver!50!lightblue}{mixed color} denotes interaction
+    between the two.
+    Surprisingly, such a matrix factors into a ``pure'' Cholesky factor.
+  }
   \label{fig:partial_factor}
 \end{figure}
 
@@ -1401,6 +1404,13 @@ points, rather than performing Gaussian process classification.
 The difference in accuracy results exactly
 from the methods selecting different points.
 
+\pgfplotsset{
+  cycle list={
+    {very thick, lightblue, style=dashed},
+    {very thick, orange,    style=solid},
+  }
+}
+
 \begin{figure}[t]
   \centering
   \input{figures/mnist/accuracy_k.tex}%
@@ -1479,6 +1489,15 @@ resulting from a set of points and a ``well-behaved'' kernel function.
 For solving sparse Laplacian systems, a method designed
 to exploit the sparsity and graph structure of Laplacian
 matrices like \cite{kyng2016approximate} is more appropriate.
+
+\pgfplotsset{
+  cycle list={
+    {very thick, silver,    style=densely dotted},
+    {very thick, lightblue, style=dashed},
+    {very thick, seagreen,  style=dashdotted},
+    {very thick, orange,    style=solid},
+  }
+}
 
 \begin{figure}[t]
   \centering
@@ -1569,6 +1588,16 @@ Since the conditional selection methods scale linearly with the number of
 candidates, increasing \( \rho_s \) is much cheaper than increasing \( \rho \).
 As shown in \cref{fig:chol_s}, increasing \( \rho_s \)
 has diminishing returns past \( \rho_s \approx 4 \).
+
+\pgfplotsset{
+  cycle list={
+    {very thick, lightblue, style=dashed,         mark=*},
+    {very thick, seagreen,  style=dashdotted,     mark=o},
+    {very thick, silver,    style=densely dotted, mark=triangle*},
+    {very thick, orange,    style=solid,          mark=square*},
+    {very thick, rust,      style=dotted,         mark=square},
+  }
+}
 
 \begin{figure}[t]
   \centering
@@ -1667,6 +1696,15 @@ Despite an increased cost to select points, the conditional methods have
 better accuracy per unit computational cost than their unconditional
 counterparts as a result of their superior accuracy at the same sparsity.
 
+\pgfplotsset{
+  cycle list={
+    {very thick, lightblue, style=dashed,         mark=*},
+    {very thick, seagreen,  style=dashdotted,     mark=o},
+    {very thick, orange,    style=solid,          mark=square*},
+    {very thick, rust,      style=dotted,         mark=square},
+  }
+}
+
 \begin{figure}[t]
   \centering
   \input{figures/gp/rho_loss.tex}%
@@ -1677,8 +1715,11 @@ counterparts as a result of their superior accuracy at the same sparsity.
     Like Cholesky factorization in \cref{subsec:chol_exp},
     we use a candidate size scaling factor of \( \rho_s = 2
     \) and an aggregation parameter of \( \lambda = 1.5 \).
-    The left panel shows RMSE with increasing density \( \rho \) and the right
-    shows the time to accuracy trade-off over different values of \( \rho \).
+    The left panel shows the difference in RMSE from
+    exact Gaussian process regression using the same
+    training points with increasing density \( \rho \).
+    The right panel shows the time to accuracy
+    trade-off over different values of \( \rho \).
   }
   \label{fig:gp_rho}
 \end{figure}
@@ -2141,11 +2182,11 @@ Another perspective arises from comparing the definition of mutual
 information \cref{eq:info} to the EV-VE identity \cref{eq:eve},
 \begin{align}
   \label{eq:info_eve}
-  \textcolor{orange}{\entropy[\vec{y}_\Pred]} &=
+  \textcolor{darkorange}{\entropy[\vec{y}_\Pred]} &=
     \textcolor{lightblue}{\entropy[\vec{y}_\Pred \mid \vec{y}_\Train]} +
     \textcolor{rust}{\MI[\vec{y}_\Pred;\vec{y}_\Train]} \\
   \label{eq:eve}
-  \textcolor{orange}{\Var[\vec{y}_\Pred]} &=
+  \textcolor{darkorange}{\Var[\vec{y}_\Pred]} &=
     \textcolor{lightblue}{\E[\Var[\vec{y}_\Pred \mid \vec{y}_\Train]]} +
     \textcolor{rust}{     \Var[\E[\vec{y}_\Pred \mid \vec{y}_\Train]]}
 \end{align}

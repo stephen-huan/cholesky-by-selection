@@ -5,16 +5,12 @@
     %   (\( N = 256 \))},
     xlabel={\( s \)},
     % ylabel={Accuracy (IOU)},
-    legend entries={C\( k \)-NN, \( k \)-NN, corr., rand.},
+    legend entries={rand., \( k \)-NN, corr., C\( k \)-NN},
     legend pos={south east}
   ]
-  \addplot [very thick, orange]    table
-    {figures/recover/s_score_cknn.csv};
-  \addplot [very thick, lightblue] table
-    {figures/recover/s_score_knn.csv};
-  \addplot [very thick, seagreen]  table
-    {figures/recover/s_score_corr.csv};
-  \addplot [very thick, silver]    table
-    {figures/recover/s_score_random.csv};
+  \addplot table {figures/recover/s_score_random.csv};
+  \addplot table {figures/recover/s_score_knn.csv};
+  \addplot table {figures/recover/s_score_corr.csv};
+  \addplot table {figures/recover/s_score_cknn.csv};
   \end{axis}
 \end{tikzpicture}

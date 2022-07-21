@@ -8,13 +8,9 @@
     % legend entries={KL, KL (agg.), select, select (agg.)},
     % legend pos={north east},
   ]
-  \addplot [very thick, lightblue]  table
-    {figures/gp/rho_time_KL_loss.csv};
-  \addplot [very thick, seagreen]   table
-    {figures/gp/rho_time_KL_agg_loss.csv};
-  \addplot [very thick, orange]     table
-    {figures/gp/rho_time_select_loss.csv};
-  \addplot [very thick, rust]       table
-    {figures/gp/rho_time_select_agg_loss.csv};
+  \addplot table {figures/gp/rho_time_KL_loss.csv};
+  \addplot table {figures/gp/rho_time_KL_agg_loss.csv};
+  \addplot table {figures/gp/rho_time_select_loss.csv};
+  \addplot table {figures/gp/rho_time_select_agg_loss.csv};
   \end{loglogaxis}
 \end{tikzpicture}

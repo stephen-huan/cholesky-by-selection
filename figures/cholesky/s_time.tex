@@ -9,15 +9,10 @@
     legend pos={north west},
     legend style={nodes={scale=0.65, transform shape}},
   ]
-  \addplot [very thick, lightblue]  table
-    {figures/cholesky/s_time_KL.csv};
-  \addplot [very thick, seagreen]   table
-    {figures/cholesky/s_time_KL_agg.csv};
-  \addplot [very thick, darksilver] table
-    {figures/cholesky/s_time_select-KNN.csv};
-  \addplot [very thick, orange]     table
-    {figures/cholesky/s_time_select.csv};
-  \addplot [very thick, rust]       table
-    {figures/cholesky/s_time_select_agg.csv};
+  \addplot table {figures/cholesky/s_time_KL.csv};
+  \addplot table {figures/cholesky/s_time_KL_agg.csv};
+  \addplot table {figures/cholesky/s_time_select-KNN.csv};
+  \addplot table {figures/cholesky/s_time_select.csv};
+  \addplot table {figures/cholesky/s_time_select_agg.csv};
   \end{semilogyaxis}
 \end{tikzpicture}

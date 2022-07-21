@@ -7,15 +7,10 @@
     % legend entries={KL, KL (agg.), select (\( k \)-NN), select, select (agg.)},
     % legend pos={north east},
   ]
-  \addplot [very thick, lightblue]  table
-    {figures/cholesky/rho_time_KL_kl_div.csv};
-  \addplot [very thick, seagreen]   table
-    {figures/cholesky/rho_time_KL_agg_kl_div.csv};
-  \addplot [very thick, darksilver] table
-    {figures/cholesky/rho_time_select-KNN_kl_div.csv};
-  \addplot [very thick, orange]     table
-    {figures/cholesky/rho_time_select_kl_div.csv};
-  \addplot [very thick, rust]       table
-    {figures/cholesky/rho_time_select_agg_kl_div.csv};
+  \addplot table {figures/cholesky/rho_time_KL_kl_div.csv};
+  \addplot table {figures/cholesky/rho_time_KL_agg_kl_div.csv};
+  \addplot table {figures/cholesky/rho_time_select-KNN_kl_div.csv};
+  \addplot table {figures/cholesky/rho_time_select_kl_div.csv};
+  \addplot table {figures/cholesky/rho_time_select_agg_kl_div.csv};
   \end{loglogaxis}
 \end{tikzpicture}

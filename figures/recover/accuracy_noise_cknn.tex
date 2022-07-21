@@ -9,13 +9,13 @@
       \( \var = 0.10 \), \( \var = 0.20 \)},
     legend pos={south east}
   ]
-  \addplot [style=solid, very thick, orange]
+  \addplot [very thick, orange, style=solid]
     table {figures/recover/noise-s_score_cknn-0.00.csv};
-  \addplot [style=dashed, very thick, orange]
+  \addplot [very thick, orange, style=dashed]
     table {figures/recover/noise-s_score_cknn-0.01.csv};
-  \addplot [style=dotted, very thick, orange]
+  \addplot [very thick, orange, style=dotted]
     table {figures/recover/noise-s_score_cknn-0.10.csv};
-  \addplot [style=dashdotted, very thick, orange]
+  \addplot [very thick, orange, style=dashdotted]
     table {figures/recover/noise-s_score_cknn-0.20.csv};
   \end{axis}
 \end{tikzpicture}

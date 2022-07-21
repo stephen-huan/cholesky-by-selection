@@ -8,15 +8,10 @@
     % legend entries={KL, KL (agg.), select (\( k \)-NN), select, select (agg.)},
     % legend pos={north west},
   ]
-  \addplot [very thick, lightblue]  table
-    {figures/cholesky/n_time_KL.csv};
-  \addplot [very thick, seagreen]   table
-    {figures/cholesky/n_time_KL_agg.csv};
-  \addplot [very thick, darksilver] table
-    {figures/cholesky/n_time_select-KNN.csv};
-  \addplot [very thick, orange]     table
-    {figures/cholesky/n_time_select.csv};
-  \addplot [very thick, rust]       table
-    {figures/cholesky/n_time_select_agg.csv};
+  \addplot table {figures/cholesky/n_time_KL.csv};
+  \addplot table {figures/cholesky/n_time_KL_agg.csv};
+  \addplot table {figures/cholesky/n_time_select-KNN.csv};
+  \addplot table {figures/cholesky/n_time_select.csv};
+  \addplot table {figures/cholesky/n_time_select_agg.csv};
   \end{axis}
 \end{tikzpicture}

@@ -32,10 +32,10 @@
 \definecolor{rust}{HTML}{b8420f}
 \definecolor{seagreen}{HTML}{23553c}
 
-\colorlet{lightsilver}{silver!30!white}
-\colorlet{darkorange}{orange!85!black}
-\colorlet{darksilver}{silver!85!black}
 \colorlet{darklightblue}{lightblue!85!black}
+\colorlet{darkorange}{orange!85!black}
+\colorlet{lightsilver}{silver!15!white}
+\colorlet{darksilver}{silver!85!black}
 \colorlet{darkrust}{rust!85!black}
 \colorlet{darkseagreen}{seagreen!85!black}
 
@@ -48,6 +48,8 @@
 
 \pgfplotsset{compat=newest}
 \usepgfplotslibrary{fillbetween}
+% make marks not follow the style of lines
+\tikzset{every mark/.append style={solid}}
 
 % Custom commands:
 % \newcommand{\todo}[1]{{\color{red} #1}}

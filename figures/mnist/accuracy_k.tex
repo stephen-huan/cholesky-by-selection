@@ -6,11 +6,10 @@
     %   (\( n = 100, m = 100, l = 1024, \nu = 1.5 \))},
     xlabel={\( k \)},
     ylabel={Accuracy (\%)},
-    legend entries={C\( k \)-NN, \( k \)-NN},
+    legend entries={\( k \)-NN, C\( k \)-NN},
+    legend pos={north east},
   ]
-  \addplot [very thick, orange]    table
-    {figures/mnist/k_acc_conditional-knn.csv};
-  \addplot [very thick, lightblue] table
-    {figures/mnist/k_acc_scikit-knn.csv};
+  \addplot table {figures/mnist/k_acc_scikit-knn.csv};
+  \addplot table {figures/mnist/k_acc_conditional-knn.csv};
   \end{axis}
 \end{tikzpicture}

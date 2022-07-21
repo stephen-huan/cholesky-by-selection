@@ -8,13 +8,9 @@
     % legend entries={KL, KL (agg.), select, select (agg.)},
     % legend pos={north west},
   ]
-  \addplot [very thick, lightblue]  table
-    {figures/cg/rho_time_tot_KL.csv};
-  \addplot [very thick, seagreen]   table
-    {figures/cg/rho_time_tot_KL_agg.csv};
-  \addplot [very thick, orange]     table
-    {figures/cg/rho_time_tot_select.csv};
-  \addplot [very thick, rust]       table
-    {figures/cg/rho_time_tot_select_agg.csv};
+  \addplot table {figures/cg/rho_time_tot_KL.csv};
+  \addplot table {figures/cg/rho_time_tot_KL_agg.csv};
+  \addplot table {figures/cg/rho_time_tot_select.csv};
+  \addplot table {figures/cg/rho_time_tot_select_agg.csv};
   \end{semilogyaxis}
 \end{tikzpicture}
