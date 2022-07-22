@@ -30,7 +30,7 @@
   \WHILE{\( \card{-\I} > 0 \) and \( \card{\I} < s \)}
     \STATE \(
       k \gets \min_{j \in -\I}
-      \frac{\CM_{j, \Pred \mid \I}}{\CM_{j, j \mid \I}}
+      \frac{\CM_{j, j \mid \I, \Pred}}{\CM_{j, j \mid \I}}
     \)
     \STATE \( \I \gets \I \cup \{ k \} \)
     \STATE \( -\I \gets -\I \setminus \{ k \} \)

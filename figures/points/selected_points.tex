@@ -1,0 +1,19 @@
+\begin{tikzpicture}[baseline]
+  \begin{axis}[
+    % calculated from Cholesky factor, exactly 16 cm x 16 cm
+    width={4cm},
+    height={4cm},
+    axis lines={none},
+    % force axis box to have exactly the right dimensions, ignoring labels
+    scale only axis=true,
+  ]
+  \addplot [only marks, mark size=1, silver]    table
+    {figures/points/all_points.csv};
+  \addplot [only marks, mark size=2, lightblue] table
+    {figures/points/candidates.csv};
+  \addplot [only marks, mark size=4, seagreen]  table
+    {figures/points/selected.csv};
+  \addplot [only marks, mark size=4, orange]    table
+    {figures/points/target.csv};
+  \end{axis}
+\end{tikzpicture}
