@@ -1,1 +1,2 @@
-# experimental_linear_algebra_design
+# Sparse Cholesky factorization by greedy conditional selection
+

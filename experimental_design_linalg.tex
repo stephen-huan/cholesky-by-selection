@@ -822,9 +822,9 @@ two steps of block Gaussisan elimination,
     })
   \end{pmatrix}
 \end{align}
-Here the conditional expectation \cref{eq:cond_mean} corresponds
-to \( \textcolor{darkorange}{\CM_{2, 1} \CM_{1, 1}^{-1}} \)
-and the conditional covariance \cref{eq:cond_cov} corresponds to
+where the conditional expectation \cref{eq:cond_mean} corresponds
+to \( \textcolor{darkorange}{\CM_{2, 1} \CM_{1, 1}^{-1}} \) and
+the conditional covariance \cref{eq:cond_cov} corresponds to
 \(
   \textcolor{lightblue}{\CM_{2, 2} - \CM_{2, 1} \CM_{1, 1}^{-1} \CM_{1, 2}}
 \).
@@ -972,16 +972,12 @@ We now generalize the multiple-target algorithm to track the
 log determinant of the target points' covariance matrix if a
 selected index \( k \) only conditions \emph{suffixes} of the
 target points, skipping the first \( p \) targets, say.
-The form of the Cholesky factor of the target covariance
-matrix \cref{eq:chol_partial} suggests to keep track of
-the \emph{insertion position} of the new index \( k \).
-To be precise, we maintain a partial Cholesky factor \( L \) of the joint
-covariance matrix of the target and training points, whose columns consist
-of the target points and previously selected points sorted in reverse order
-with respect to \( \prec \).
-Adding a new entry adds a column to \( L \).
-Inserting the index \( k \) into its proper
-spot in the Cholesky factor \( L \),
+Following the suggestive form of the target covariance matrix
+\cref{eq:chol_partial}, we maintain a partial Cholesky factor \( L
+\) of the joint covariance matrix of target and training points,
+whose columns consist of the target points and previously selected
+points sorted in reverse order with respect to \( \prec \).
+Inserting the index \( k \) into its proper column in \( L \),
 \begin{align}
   \label{eq:chol_partial_update}
   L &\gets
@@ -997,20 +993,18 @@ where unlike \cref{eq:chol_partial}, we use a lower-triangular factor \( L
 factor satisfying \( U U^{\top} = \CM \) so \( L = U^{\top} \) satisfies \(
 L^{\top} L = \CM \).
 
-To account for this insertion, the first \( p \) columns \( L_{:, :p} \)
-are unchanged, the newly inserted column \( \vec{u} \) as a variance-scaled
-conditional covariance of the form \cref{eq:cond_select} can be computed
-as usual with left-looking (see \cref{alg:chol_update}), and the remaining
-columns \( {L'}_{:, p + 1:} \) are the Cholesky factor of the covariance
-matrix conditional on the point \( k \).
+To account for this insertion, the first \( p \) columns \( L_{:, :p}
+\) are unchanged, the newly inserted column \( \vec{u} \) of the form
+\cref{eq:cond_select} can be computed as usual with left-looking (see
+\cref{alg:chol_update}), and the remaining columns \( {L'}_{:, p + 1:} \) are
+the Cholesky factor of the covariance matrix conditional on the point \( k \).
 From \cref{eq:cond_select} conditioning on an additional point is a rank-one
 downdate of the covariance matrix by the vector \( \vec{u} \), allowing the
 updated factor \( {L'}_{:, p + 1:} \) to be efficiently computed from the
 original factor \( L_{:, p + 1:} \).
-Specifically we adapt Lemma 1 of \cite{krause2015more} to make no
-assumption on the row ordering of the Cholesky factor, allowing
-the downdate to be implemented with in-place BLAS \texttt{daxpy}
-operations (see \cref{alg:chol_insert}).
+Specifically we adapt Lemma 1 of \cite{krause2015more} to make
+no assumption on the row ordering of \( L \), allowing the
+downdate to be implemented in-place (see \cref{alg:chol_insert}).
 For a Cholesky factor with \( R \) rows and \( C \) columns, the
 time complexity of the downdate is \( \BigO(R C) \) compared to
 \( \BigO(R C^2) \) if the factor was recomputed from scratch.
@@ -1076,6 +1070,7 @@ more complicated to compute than its multiple-target counterpart.
 \begin{figure}[t]
   \centering
   \input{figures/cholesky_factor.tex}%
+  \qquad
   \input{figures/points/selected_points.tex}
   \caption{
     For a column of a Cholesky factor in isolation, the
@@ -1225,24 +1220,24 @@ Subtracting the updated variance and original variance,
 \begin{align}
   \min \left [
     \log(\CM_{\Pred, \Pred \mid \I, k}) - \log(\CM_{\Pred, \Pred \mid \I})
-  \right ]  &=
+  \right ]  =
     \min \frac{\CM_{\Pred, \Pred \mid \I, k}}
               {\CM_{\Pred, \Pred \mid \I}} \\
   \shortintertext{From the original objective and update \cref{eq:obj_gp},}
-            &= \min \frac{\CM_{\Pred, \Pred \mid \I}
+  \nonumber
+              \min \frac{\CM_{\Pred, \Pred \mid \I}
                           - \CM_{k, \Pred \mid \I}^2/\CM_{k, k \mid \I}}
-                         {\CM_{\Pred, \Pred \mid \I}} \\
-            &= \min \left [ 1 -
+                         {\CM_{\Pred, \Pred \mid \I}}
+            = \min \left [ 1 -
               \frac{\CM_{k, \Pred \mid \I}^2}
                    {\CM_{k, k \mid \I} \CM_{\Pred, \Pred \mid \I}}
-               \right ] \\
-  \label{eq:global_obj}
-            &= \max
+               \right ]
+            = \max
               \frac{\CM_{k, \Pred \mid \I}^2}
                    {\CM_{k, k \mid \I} \CM_{\Pred, \Pred \mid \I}}
 \end{align}
-where the new objective \cref{eq:global_obj} can be interpreted
-as the percentage of variance the decrease in variance takes up.
+where the new objective can be interpreted as the
+percentage of variance the decrease in variance takes up.
 The new objective is easily computed as the original objective
 \cref{eq:obj_gp} divided by the target point's conditional variance.
 
@@ -1821,7 +1816,7 @@ Environment (PACE) at the Georgia Institute of Technology, Atlanta, Georgia,
 USA.
 
 \bibliographystyle{siamplain}
-\bibliography{cholesky}
+\bibliography{references}
 
 \newpage
 
