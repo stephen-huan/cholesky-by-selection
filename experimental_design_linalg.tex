@@ -468,10 +468,10 @@ has a closed-form expression given by
     \trace(\CM_2^{-1} \CM_1) + \logdet(\CM_2) - \logdet(\CM_1) - N
 \end{align}
 where \( \CM_1, \CM_2 \in \Reals^{N \times N} \).
-Using this expression for the KL divergence and optimizing for \( L \)
-yields the following closed-form expression for the \( i \)th column of
-\( L \) with sparsity pattern \( s_i \), reproduced from Theorem 2.1 of
-\cite{schafer2021sparse}:
+Using this expression for the KL divergence and optimizing for \( L \) yields
+the following closed-form expression for the nonzero entries in the \( i \)th
+column of \( L \) with sparsity pattern \( s_i \), reproduced from Theorem 2.1
+of \cite{schafer2021sparse}:
 \begin{align}
   \label{eq:L_col}
   L_{s_i, i} &= \frac{\CM_{s_i, s_i}^{-1} \vec{e}_1}
@@ -986,12 +986,9 @@ Inserting the index \( k \) into its proper column in \( L \),
   \end{pmatrix} &
     \vec{u} &= \frac{\CM_{:, k \mid :p}}{\sqrt{\CM_{k, k \mid :p}}}
 \end{align}
-where unlike \cref{eq:chol_partial}, we use a lower-triangular factor \( L
-\) such that \( L^{\top} L = \CM \) for simplicity: if \( U = P^{\Reverse}
-\chol(P^{\Reverse} \CM P^{\Reverse}) P^{\Reverse} \) where \( P^{\Reverse}
-\) is the order-reversing permutation, then \( U \) is an upper-triangular
-factor satisfying \( U U^{\top} = \CM \) so \( L = U^{\top} \) satisfies \(
-L^{\top} L = \CM \).
+where \( L' \) is the Cholesky factor of the covariance matrix
+conditional on \( k \) and the updated form of \( L \) after insertion
+is derived from the statistical perspective in \cref{eq:chol}.
 
 To account for this insertion, the first \( p \) columns \( L_{:, :p}
 \) are unchanged, the newly inserted column \( \vec{u} \) of the form
@@ -1064,7 +1061,7 @@ performance for the same asymptotic time complexity.
 In addition, the objective for the partial selection algorithm is
 more complicated to compute than its multiple-target counterpart.
 
-\section{Greedy selection for \emph{global} approximation by KL-minimization}
+\section{Greedy selection for global approximation by KL-minimization}
 \label{sec:chol_select}
 
 \begin{figure}[t]
@@ -1077,7 +1074,7 @@ more complicated to compute than its multiple-target counterpart.
     \textcolor{orange}{target} point is the \textcolor{orange}{diagonal}
     entry, \textcolor{lightblue}{candidates} are \textcolor{lightblue}{below}
     it, and the \textcolor{seagreen}{selected} entries are added to
-    the \textcolor{seagreen}{sparsity pattern} \( s_i \).
+    the \textcolor{seagreen}{sparsity pattern}.
     Points violating lower triangularity are
     shown in \textcolor{darksilver}{grey}.
     Thus, sparsity selection in Cholesky factorization
@@ -1087,185 +1084,168 @@ more complicated to compute than its multiple-target counterpart.
   \label{fig:select_chol}
 \end{figure}
 
-It is remarkably straightforward to apply the suite of selection
-algorithms we developed to sparse Cholesky factorization.
-As depicted in \cref{fig:select_chol}, for computing
-the \( i \)th column of the Cholesky factor, we use the
-\( i \)th point in the ordering as the target point.
-For the training points, we use all the points satisfying
-lower-triangularity, those after the target in the ordering.
-Running the selection algorithm for the desired number of nonzeros
-picks out indices which we add to the sparsity set \( s_i \).
-Finally, once the sparsity pattern is determined, we compute the
-entries of the factor column-by-column according to \cref{eq:L_col}.
-For \( s \) nonzero entries per column, each column costs \( \BigO(s^3)
-\) to compute \( \CM_{s_i, s_i}^{-1} \) for a total time complexity
-cost of \( \BigO(N s^3) \) for the \( N \) columns of \( L \).
-Using the single-target selection algorithm in \cref{subsec:greedy_select}
-costs \( \BigO(C s^2) \) for selecting \( s \) points out of \(
-C \) candidates, so \( \BigO(N C s^2) \) over \( N \) columns.
-If \( C \) is chosen to be a constant factor bigger than \( s \),
-then selection has the same complexity as computing the entries of
-\( L \), suggesting the need to limit the candidates considered.
-In practice we pick the candidate set as the nearest neighbors
-to the point of interest and use the selection algorithm to
-subsample within these candidates as \cite{gramacy2014local} does.
-Specifically we use the framework of \cite{schafer2021sparse} which selects all
-points within a radius of \( \rho \ell_i \) to the \( i \)th point, where \(
-\rho \) is a tuning parameter and \( \ell_i \) is a length scale systematically
-decreasing with decreasing position in the ordering.
+Directed Gaussian process regression infers the
+\emph{local} distribution at points of interest.
+We turn our attention to \emph{global} approximation of the entire Gaussian
+process; given a kernel function \( \K(\vec{x}, \vec{x}') \) and a set of \(
+N \) points \( \{ \vec{x}_i \}^N_{i = 1} \) we have the covariance matrix \(
+\CM_{ij} = K(\vec{x}_i, \vec{x}_j) \) for which we seek a sparse approximate
+Cholesky factor \( L \) of the precision, \( L L^{\top} \approx \CM^{-1} \).
+We first order the points by the reverse-maximin ordering described in
+\cref{subsec:ordering} and then straightforwardly apply our suite of selection
+algorithms developed in \cref{sec:select} to form the sparsity pattern.
+For the \( i \)th column of \( L \), the target point is the \( i \)th point
+in the ordering, the candidate points are those satisfying lower triangularity
+(after the target in the ordering), and running the selection algorithm for
+the desired number of nonzeros entries picks out indices which we add to the
+sparsity set \( s_i \); this process is illustrated in \cref{fig:select_chol}.
+Finally, we compute the values of the selected nonzero
+indices by the closed-form expression \cref{eq:L_col}.
+Both sparsity selection and computing entries are
+embarrassingly parallel over \( L \)'s columns.
+
+Using the single-target selection algorithm from \cref{subsec:greedy_select}
+has time complexity \( \BigO(C s^2) \) to select \( s \) nonzero entries out of
+\( C \) candidates, for a total of \( \BigO(N C s^2) \) over \( N \) columns.
+Computing the corresponding values \( \CM_{s_i, s_i}^{-1} \vec{e}_1
+\) has cost \( \BigO(s^3) \) for a total of \( \BigO(N s^3) \).
+Sparsity selection has the same complexity as entry computation
+if the number of candidates \( C \) is \( \BigO(s) \), suggesting
+the need to limit the number of candidates considered.
+In practice, we pick the candidate set to be the nearest neighbors
+of the point of interest as \cite{gramacy2014local} does.
+We specifically use the framework of \cite{schafer2021sparse} which considers
+all points within a radius systematically decreasing earlier in the ordering.
 
 \subsection{Aggregated sparsity pattern}
 
-For an aggregated sparsity pattern as discussed in \cref{subsubsec:aggregated},
-the target points become all the points in the group \( \tilde{i} \).
-We use the framework of \cite{schafer2021sparse} which
-determines the groups by aggregating the points that are
-both close geometrically as well as close in the ordering.
-The aggregated sparsity pattern is then the union of
-the nearest neighbors for each point in the group.
-If all the points in the group are adjacent in the ordering or only candidate
-indices \( k \) that satisfy \( k \succ \max{\tilde{i}} \) are considered, then
-each candidate conditions every point in the group and so the multiple-target
-algorithm \cref{subsec:mult_select} can be directly applied.
-However, we observe forcing these conditions irreparably damages the
-approximation quality of the resulting factor: forcing groups to be
-contiguous in the ordering removes the guarantee that points in the
-group are geometrically close, and removing candidates between target
-points filters a large number of candidates, obviating the benefit of
-aggregation in the first place.
-If these conditions are not met, then candidates
-can condition partial subsets of the group.
-Of course, the multiple-target algorithm can still be applied, but it
-systematically overestimates the effect of selecting candidate points.
-In practice, we also observe a significant decrease in approximation quality,
-to the extent that it becomes worse than non-aggregated factorization.
-The partial selection algorithm is necessary to be able to use the original
-grouping and candidate sets while maintaining approximation quality.
+In an aggregated sparsity pattern, columns are partitioned into groups and
+selecting an index for a group \( \tilde{i} \) adds it to the sparsity
+pattern of every column in \( \tilde{i} \) satisfying lower triangularity.
+We group columns by the framework of \cite{schafer2021sparse} which aggregates
+points that are close both geometrically as well as in the ordering.
+To select sparsity entries, the targets are all points in \( \tilde{i} \)
+and the candidates are the union of the nearest neighbors to each target.
+If every candidate \( k \) satisfies \( k \succ \max{\tilde{i}} \) which
+occurs if the group is contiguous in the ordering e.g., then every candidate
+conditions every target and so the multiple-target selection algorithm
+(\cref{subsec:mult_select}) can be directly applied.
+However, we empirically observe that forcing this condition irreparably
+damages the accuracy of the resulting factor: forming groups contiguous in
+the ordering no longer guarantees that grouped points are spatially close,
+and removing candidates between targets filters many of them out.
+If the condition is not forced, then selecting candidates can
+condition subsets of the group; the multiple-target algorithm
+now systematically overestimates the effect on targets.
+Using the partial selection algorithm (\cref{subsec:partial_select})
+instead on unmodified grouping and candidate sets
+significantly improves the approximation quality.
 
-Once the sparsity pattern has been determined, we again need to
-compute each column of \( L \) according to \cref{eq:L_col}.
-Because the sparsity pattern for a column is a subset of its group's
-aggregated sparsity pattern, we can efficiently compute the group's
-entries together in the time for a single column, \( \BigO(s^3) \).
-See Algorithm 3.2 in \cite{schafer2021sparse} or
-\cref{app:L_mult} for a statistical explanation.
-If the average group size is \( m \) points, for both the multiple-target
-or partial selection algorithms the time complexity of selecting \( s \)
-points out of \( C \) candidates is \( \BigO(C s^2 + C m^2 + m^3) \).
-Over \( \frac{N}{m} \) groups the total time complexity to do both sparsity
-selection and entry computation is \( \BigO(\frac{N}{m} (C s^2 + C m^2 + m^3 +
-s^3)) \) which simplifies to \( \BigO(\frac{N C s^2}{m}) \) assuming \( s > m
-\), resulting in a \( m \) times improvement over non-aggregated factorization.
-This allows the aggregated factorization to produce denser factors in the same
-time as the non-aggregated factorization, often leading to better accuracy.
-However the resulting factor will be less efficient at reducing the KL
-divergence per sparsity entry, since the algorithm is forced to select
-the same entry for nearly \emph{all} columns in the group rather than
-tailoring the sparsity pattern to a particular column.
+We still compute the entries of \( L \) by equation \cref{eq:L_col}.
+Because the sparsity patterns for columns in the same group are subsets of
+each other, we can efficiently compute the group's entries together in the
+time complexity for a single column, \( \BigO(s^3) \) (see \cref{app:L_mult}
+or Algorithm 3.2 in \cite{schafer2021sparse}).
+If each group has \( m \) points, both the multiple-target and
+partial selection algorithms have time complexity \( \BigO(C s^2 +
+C m^2 + m^3) \) to select \( s \) points out of \( C \) candidates.
+Over \( N/m \) groups the time complexity for both selection and entry
+computation is \( \BigO(\frac{N}{m} (C s^2 + C m^2 + m^3 + s^3)) \),
+simplifying to \( \BigO(\frac{N C s^2}{m}) \) assuming \( m = \BigO(s) \),
+a \( m \) times improvement over non-aggregated factorization, yielding
+denser and hopefully more accurate factors in the same amount of time.
+Inheriting the primary downside of the multiple-target selection algorithm,
+the aggregated factor is less efficient at reducing the KL divergence per
+nonzero since the sparsity pattern is shared between all columns in the
+group, not tailored to any particular column.
 
 \subsection{Allocating nonzeros by global greedy selection}
 \label{subsec:global_greedy}
 
-Although columns are essentially independent from the perspective of
-KL minimization, if there is a prescribed budget on the total number
-of nonzeros, then one must distribute the nonzeros over the columns,
-tying the fate of one column to another.
-\cite{schafer2021sparse} implicitly determines both the total number of
-zeros as well as their distribution over columns by selecting points
-within a radius that monotonically decreases earlier in the ordering.
+With a budget on the total number of nonzeros, one
+inevitably decides how many nonzeros each column gets.
+\cite{schafer2021sparse} implicitly determines both the total
+number of nonzeros as well as their distribution over columns by
+selecting points within a radius decreasing earlier in the ordering.
 We observe in our numerical experiments as \cite{kang2021correlationbased}
-does that this approach of \cite{schafer2021sparse} leads to significantly
-worse results than simply allocating the same number of nonzeros per column.
-Distributing nonzeros as evenly as possible also maximizes
-computational efficiency since computing the entries for a
-column scales cubically with the number of nonzeros, denser
-columns have an outsized impact on computational time.
-In addition, it is simple to implement and adds almost
-no overhead, so we recommend allocating the number of
-nonzeros divided by the number of columns for each column.
+does that this approach is less accurate than simply
+allocating the same number of nonzeros per column.
+Distributing nonzeros as evenly as possible also maximizes computational
+efficiency since denser columns have an outsized impact on the
+computational time from the cubic scaling cost with the number of nonzeros.
+For these reasons we recommend allocating to each column
+the budget of nonzeros divided by the number of columns.
 
-However, one principled way of distributing nonzeros might be to minimize KL
-divergence in an end-to-end manner like we did for sparsity pattern selection.
-The local greedy selection algorithms select the sparsity entry for a column
-or group of columns that minimizes prediction error at those columns.
-We generalize this to \emph{global} greedy selection by picking from
-\emph{any} of the columns the candidate entry that minimizes the
-overall KL divergence \cref{eq:obj_chol} when added to the sparsity.
-We maintain a global priority queue over all columns that determines both the
-next column to select from as well as the particular entry within the column
-to add as a nonzero, keyed by the effect of the entry on the KL divergence.
-This priority queue data structure must support popping off the largest
-element currently in the queue as well as updating the value for an
-element in the queue, given a unique identifier for the element.
-Both operations can be done in \( \BigO(\log n) \) for \( n \) elements in the
-queue if efficiently implemented as an array-backed binary heap, for example.
+A principled way of distributing nonzeros might be to minimize
+KL divergence end-to-end like was done for sparsity selection.
+The \emph{local} greedy algorithms select the sparsity entry that
+minimizes prediction error at \emph{particular} columns of interest.
+In \emph{global} greedy selection, we pick from \emph{any} column the
+candidate that minimizes the overall KL divergence \cref{eq:obj_chol}.
+We maintain a priority queue containing all candidates from every
+column, keyed by the candidate's effect on the KL divergence.
+The data structure must support popping the largest element off the
+queue as well as updating the value for an element in the queue.
+Both operations have time complexity \( \BigO(\log n) \) for \( n \) elements
+if efficiently implemented as an array-backed binary heap, for example.
 
-The greedy selection algorithms already compute the effect of an
-entry on the KL divergence, at least up to monotonically increasing
-transformation (which preserves the relative ranking of candidates).
-But from the global perspective, if different columns
-use different transformations, then the relative
-ranking of candidates between columns is skewed.
-Thus, we now describe the modifications necessary to compute exactly the
-difference in KL divergence without any monotone transformations.
+The greedy selection algorithms already compute the effect of
+an entry on the KL divergence, up to monotonically increasing
+transformation (which preserve the ranking of candidates).
+But in the global context, if different columns use different
+transformations, then the ranking of candidates between columns is skewed.
+We describe the necessary modifications to
+compute exactly the difference in KL divergence.
 
 \subsubsection{Single column selection}
 \label{subsubsec:single_column}
 
-Selecting an entry \( k \) for a single target point
-only affects its conditional variance, so exactly one
-term in the KL divergence \cref{eq:obj_chol} changes.
-Subtracting the updated variance and original variance,
+Selecting an entry \( k \) for a single target only affects its conditional
+variance, so exactly one term in the KL divergence \cref{eq:obj_chol} changes:
 \begin{align}
-  \min \left [
+  \argmin_k \left [
     \log(\CM_{\Pred, \Pred \mid \I, k}) - \log(\CM_{\Pred, \Pred \mid \I})
-  \right ]  =
-    \min \frac{\CM_{\Pred, \Pred \mid \I, k}}
-              {\CM_{\Pred, \Pred \mid \I}} \\
-  \shortintertext{From the original objective and update \cref{eq:obj_gp},}
-  \nonumber
-              \min \frac{\CM_{\Pred, \Pred \mid \I}
-                          - \CM_{k, \Pred \mid \I}^2/\CM_{k, k \mid \I}}
-                         {\CM_{\Pred, \Pred \mid \I}}
-            = \min \left [ 1 -
-              \frac{\CM_{k, \Pred \mid \I}^2}
-                   {\CM_{k, k \mid \I} \CM_{\Pred, \Pred \mid \I}}
-               \right ]
-            = \max
-              \frac{\CM_{k, \Pred \mid \I}^2}
-                   {\CM_{k, k \mid \I} \CM_{\Pred, \Pred \mid \I}}
+  \right ] &=
+    \argmin_k \left (
+      \CM_{\Pred, \Pred \mid \I, k}
+    \right ) \CM_{\Pred, \Pred \mid \I}^{-1}
+  \shortintertext{
+    Using the original objective \cref{eq:obj_gp} to
+    compute the change in variance from selecting \( k \),
+  }
+  \label{eq:global_obj}
+  \argmin_k \left (
+    \CM_{\Pred, \Pred \mid \I} -
+      \frac{\CM_{\Pred, k \mid \I}^2}{\CM_{k, k \mid \I}}
+  \right ) \CM_{\Pred, \Pred \mid \I}^{-1} &=
+    \argmax_k \left (
+      \frac{\CM_{\Pred, k \mid \I}^2}{\CM_{k, k \mid \I}}
+    \right ) \CM_{\Pred, \Pred \mid \I}^{-1}
 \end{align}
-where the new objective can be interpreted as the
-percentage of variance the decrease in variance takes up.
-The new objective is easily computed as the original objective
-\cref{eq:obj_gp} divided by the target point's conditional variance.
+where the new objective \cref{eq:global_obj} is easily computed as
+the original objective \cref{eq:obj_gp} divided by the target's
+conditional variance, the percentage the decrease in variance takes up.
 
 \subsubsection{Aggregated selection}
 \label{subsubsec:mult_column}
 
-The multiple-target algorithm already computes the difference in log
-determinant after selecting the candidate so no modification must be made.
-The partial selection algorithm computes exactly the log determinant after
-selecting the candidate, not the difference, so the log determinant before
-the selection needs to be subtracted, which is easily computed as the sum of
-the squared ``diagonal'' entries of \( L \) corresponding to target points
-in \cref{eq:partial_diag}.
+The multiple-target algorithm already computes the exact
+difference in log determinant after selecting a candidate.
+The partial selection algorithm computes the log determinant itself, not
+the difference, so the log determinant before the selection needs to be
+subtracted, easily computed as the sum of the squared ``diagonal'' entries
+of \( L \) corresponding to target points from \cref{eq:partial_diag}.
 
-One heuristical improvement is to account for ``bang-for-buck'', that is, to
-consider that different candidates cost a different number of nonzero entries.
-The number of nonzeros selecting a candidate can add is
-between one and the number of columns in its aggregated
-group, depending on its position in the ordering.
-The KL divergence is a purely additive measure of a candidate's effect
-on every point in its group, so candidates with larger groups tend to
-decrease the KL divergence more, even if they are not as efficient per
-target point as candidates with smaller groups.
-In practice it is better to use the objective \( \frac{\Delta}{n} \) where
-\( \Delta \) is the change in KL divergence from selecting the candidate
-and \( n \) is the number of nonzero entries selecting the candidate adds.
+One heuristical improvement is to measure ``bang for the buck'',
+i.e. to consider that the number of nonzeros added from selecting
+a candidate varies depending on the number of targets conditioned.
+The KL divergence adds a candidate's effect on each target together,
+so candidates conditioning more targets tend to decrease the KL
+divergence more, even if they are less efficient per target.
+In practice, it is often better to divide the change
+in KL divergence by the number of targets conditioned.
 
-For the multiple-target algorithm this modification makes no difference
+For the multiple-target algorithm, this modification makes no difference
 within a group since every candidate conditions every target point, but can
 make a difference in the global setting if groups have different sizes.
 This modification can make a difference both within a column and
@@ -1470,6 +1450,12 @@ uses the reverse-maximin ordering and selects sparsity entries by selecting
 points within a radius that decreases earlier in the ordering.
 The density of the factor is tuned by the hyperparameter \( \rho \), increasing
 \( \rho \) increases the radius and therefore the number of nonzeros.
+
+We specifically use the framework of \cite{schafer2021sparse} which selects all
+points within a radius of \( \rho \ell_i \) to the \( i \)th point, where \(
+\rho \) is a tuning parameter for density and \( \ell_i \) is a length scale
+systematically decreasing with decreasing position in the ordering.
+
 We compare with a simpler \( k \)-nearest neighbors approach where
 \( k \) is chosen to match the density of the baseline factor.
 For our method, we run the baseline \cite{schafer2021sparse} with a larger
@@ -2012,7 +1998,7 @@ Recall that we have aggregated the column indices \( i_1 \succ
 \dotsb \succ i_m \) into \( \tilde{i} = \{ i_1, \dotsc, i_m \} \)
 and \( s_{\tilde{i}} \) denotes the aggregated sparsity pattern.
 The sparsity pattern for the \( i \)th column of the group is all
-those entries that satisfy lower-triangularity, \( s_i \defeq \{
+those entries that satisfy lower triangularity, \( s_i \defeq \{
 j \in s_{\tilde{i}} : j \succeq i \} \subseteq s_{\tilde{i}} \).
 Because each column's sparsity pattern is a subset of the
 overall sparsity pattern, it is possible to compute an outer
@@ -2050,21 +2036,20 @@ However, computing \( Q = \CM_{s_{\tilde{i}}, s_{\tilde{i}}}^{-1} \) by
 inverting \( \CM_{s_{\tilde{i}}, s_{\tilde{i}}} \) and then additionally
 computing its Cholesky factor \( L = \chol(Q) \) is a bit wasteful.
 
-Instead of computing a \emph{lower}-triangular factor for the precision,
-we can compute an \emph{upper}-triangular factor for the covariance whose
-inverse transpose will be a lower-triangular factor for the precision.
-Using the same flipping trick as \cref{subsec:partial_select}, let \(
-U = P^{\Reverse} \chol(P^{\Reverse} \CM_{s_{\tilde{i}}, s_{\tilde{i}}}
-P^{\Reverse}) P^{\Reverse} \) where \( P^{\Reverse} \) is the order-reversing
-permutation; \( U \) is upper-triangular and satisfies \( U U^{\top}
-= \CM_{s_{\tilde{i}}, s_{\tilde{i}}} \) so \( U^{-\top} U^{-1} =
+Instead of computing a \emph{lower} triangular factor for the precision,
+we can compute an \emph{upper} triangular factor for the covariance whose
+inverse transpose will be a lower triangular factor for the precision.
+Let \( U = P^{\Reverse} \chol(P^{\Reverse} \CM_{s_{\tilde{i}},
+s_{\tilde{i}}} P^{\Reverse}) P^{\Reverse} \) where \( P^{\Reverse} \) is the
+order-reversing permutation; \( U \) is upper triangular and satisfies \( U
+U^{\top} = \CM_{s_{\tilde{i}}, s_{\tilde{i}}} \) so \( U^{-\top} U^{-1} =
 \CM_{s_{\tilde{i}}, s_{\tilde{i}}}^{-1} = Q \) and we see that \( L = U^{-\top}
-\) is a lower-triangular Cholesky factor satisfying \( L L^{\top} = Q \).
+\) is a lower triangular factor satisfying \( L L^{\top} = Q \).
 Thus we can compute \( U \) as a Cholesky factor of the covariance and
-dynamically form its inverse transpose by solving the triangular system
-\( L_{:, k} = U^{-T} \vec{e}_k \) for the desired column \( k \) of \(
-L \) (like \cref{eq:obj_chol}, \( \vec{e}_k \) is the vector with \( k
-\)th entry one and rest zero).
+dynamically form \( L \) by solving the triangular system \( L_{:, k}
+= U^{-T} \vec{e}_k \) for the desired column \( k \) of \( L \) (like
+\cref{eq:obj_chol}, \( \vec{e}_k \) is the vector with \( k \)th entry
+one and rest zero).
 
 \section{Computation in sparse Gaussian process selection}
 
