@@ -52,16 +52,16 @@
 \tikzset{every mark/.append style={solid}}
 
 % Custom commands:
-% \newcommand{\todo}[1]{{\color{red} #1}}
-\newcommand{\Ftodo}[1]{\todo[color=lightblue]{Florian: #1}}
-\newcommand{\Stodo}[1]{\todo[color=seagreen]{Stephen: #1}}
+% \newcommand*{\todo}[1]{{\color{red} #1}}
+\newcommand*{\Ftodo}[1]{\todo[color=lightblue]{Florian: #1}}
+\newcommand*{\Stodo}[1]{\todo[color=seagreen]{Stephen: #1}}
 
 % Names of standard objects
 \newcommand*{\Reals}{\mathbb{R}}
 \newcommand*{\Naturals}{\mathbb{N}}
 
 \makeatletter
-\renewcommand{\paragraph}{%
+\renewcommand*{\paragraph}{%
   \@startsection{paragraph}{4}%
   {\z@}{1.0ex \@plus .5ex \@minus .2ex}{-.7em}%
   {\normalfont\normalsize\bfseries}%
@@ -70,7 +70,7 @@
 
 % From https://tex.stackexchange.com/questions/198771/align-in-substack
 \makeatletter
-\newcommand{\subalign}[1]{%
+\newcommand*{\subalign}[1]{%
   \vcenter{%
     \Let@ \restore@math@cr \default@tag
     \baselineskip\fontdimen10 \scriptfont\tw@
@@ -84,11 +84,11 @@
 }
 \makeatother
 
-\renewcommand{\algorithmicrequire}{\textbf{Input:}}
-\renewcommand{\algorithmicensure}{\textbf{Output:}}
+\renewcommand*{\algorithmicrequire}{\textbf{Input:}}
+\renewcommand*{\algorithmicensure}{\textbf{Output:}}
 
 % Add a serial/Oxford comma by default.
-\newcommand{\creflastconjunction}{, and~}
+\newcommand*{\creflastconjunction}{, and~}
 
 % Used for creating new theorem and remark environments
 \newsiamremark{remark}{Remark}
@@ -160,16 +160,12 @@ S. Huan, J. Guinness, M. Katzfuss, H. Owhadi, F. Sch{\"a}fer}
 }
 \newcommand*{\KL}{\mathbb{D}_{\operatorname{KL}}\infdivx}
 \newcommand*{\p}{\pi}
-\DeclareMathOperator{\E}{E}
-% \DeclareMathOperator{\E}{\mathbb{E}}
-\DeclareMathOperator{\Var}{Var}
-% \DeclareMathOperator{\Var}{\mathbb{V}}
-\DeclareMathOperator{\Cov}{Cov}
-\DeclareMathOperator{\Corr}{Corr}
-\DeclareMathOperator{\MI}{MI}
-% \DeclareMathOperator{\MI}{\mathbb{I}}
-\DeclareMathOperator{\entropy}{H}
-% \DeclareMathOperator{\entropy}{\mathbb{H}}
+\DeclareMathOperator{\E}{\mathbb{E}}
+\DeclareMathOperator{\Var}{\mathbb{V}ar}
+\DeclareMathOperator{\Cov}{\mathbb{C}ov}
+\DeclareMathOperator{\Corr}{\mathbb{C}orr}
+\DeclareMathOperator{\entropy}{\mathbb{H}}
+\DeclareMathOperator{\MI}{\mathbb{I}}
 
 %%% Local Variables:
 %%% mode:latex
