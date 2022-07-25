@@ -1641,7 +1641,7 @@ We note that from \cref{eq:kl} the KL divergence strongly
 penalizes zero eigenvalues of the preconditioned matrix
 \( \CM L L^{\top} \), improving its condition number.
 In order to generate the covariance matrix \( \CM \) we sample up to \( N
-= 32768 \) points from the unit hypercube in \( D = 3 \) dimensions with a
+= 65536 \) points from the unit hypercube in \( D = 3 \) dimensions with a
 Mat{\'e}rn kernel with smoothness \( \nu = \frac{1}{2} \) and length scale
 \( \ell = 1 \).
 In exploratory numerical experiments, we found higher smoothnesses
@@ -1698,7 +1698,7 @@ sparsity and selecting nonzeros being more expensive to compute.
     sparse Cholesky factors to solve the symmetric
     positive-definite system \( \CM \vec{x} = \vec{y} \).
     The left panel shows iteration progress for \( N =
-    32768 \) points and a factor density of \( \rho = 4 \).
+    65536 \) points and a factor density of \( \rho = 4 \).
     The right panel shows the minimum number of nonzeros
     per column for conjugate gradient to converge within
     50 iterations with an increasing number of points.
@@ -1712,7 +1712,7 @@ sparsity and selecting nonzeros being more expensive to compute.
   \input{figures/cg/rho_time.tex}
   \caption{
     The left panel shows how iterations of the conjugate gradient decrease with
-    increasing preconditioner density \( \rho \) for \( N = 32768 \) points.
+    increasing preconditioner density \( \rho \) for \( N = 65536 \) points.
     The right panel shows the corresponding total wall-clock time (both to
     compute the preconditioner and to converge) with increasing density.
   }
