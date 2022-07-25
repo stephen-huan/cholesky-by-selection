@@ -186,8 +186,8 @@ In contrast \cite{wada2013gaussian} uses inference \emph{directed} towards
 a point of interest, selecting the active (sparsity) set by the kernel
 function itself like the later work \cite{kang2021correlationbased};
 \cite{gramacy2014local} and the follow-up work \cite{gramacy2015speeding}
-use the more sophisticated active learning Cohn (ALC) objective, yielding
-an algorithm equivalent to ours for a single point of interest.
+use the more sophisticated active learning Cohn (ALC) objective,
+yielding an algorithm equivalent to ours for a single point of interest.
 Our proposed algorithm can also be viewed as a variant of orthogonal matching
 pursuit (OMP) \cite{tropp2007signal, tropp2006algorithms}, a workhorse
 algorithm in compressive sensing which seeks to approximate a target signal
@@ -736,7 +736,7 @@ conditional on the selected points \cref{eq:L_cond_var}.
 The variance objective was first described by \cite{cohn1996neural} for optimal
 experimental design and later applied to directed Gaussian process inference
 by \cite{gramacy2014local} who refer to it as the active learning Cohn (ALC)
-objective in honor of \cite{cohn1996neural}.
+technique in honor of \cite{cohn1996neural}.
 In addition, the variance objective is equivalent to maximizing
 the \emph{mutual information} or \emph{information gain} with the
 target point as well as minimizing the expected mean squared error
@@ -1657,69 +1657,56 @@ until reaching a relative tolerance of \( 10^{-12} \).
 
 As shown in \cref{fig:cg_iter}, the conditional methods converge
 in half the iterations of their unconditional counterparts
-and aggregation does not reduce the number of iterations.
-The minimum number of nonzeros per column for the conjugate
-gradient to converge within a constant number of iterations (here,
-50) seems to grow logarithmically with the number of points.
-Although this logarithmic growth likely holds for the conditional
-methods, they appear near constant due to their slow growth.
+and aggregation barely reduces the number of iterations.
+The minimum number of nonzeros per column to converge within a constant number
+of iterations (here, 50) seems to grow logarithmically with the number of
+points for all methods; although the conditional methods appear near constant.
 
-We observe a characteristic ``U'' shape for the total wall-clock
-time (the total time to form the preconditioner and for
-the conjugate gradient to converge) in \cref{fig:cg_rho}.
-If the preconditioner is too sparse, the conjugate gradient dominates
-the computational time, and if the preconditioner is too dense, it can be
-expensive to form without significantly reducing the number of iterations.
-We note there always exists a setting where more accurate methods at the
-same sparsity have better wall-clock time by simply increasing the number of
-iterations, e.g. by demanding better tolerance or by using matrices with worse
-condition (e.g. Mat{\'e}rn kernels with higher smoothnesses or length scales).
-The only way to have better wall-clock time in \emph{every} setting is to be
-both more accurate and faster, which is not achieved by conditional selection,
-so it is hard to compare the conditional methods to the unconditional methods.
-We do observe that aggregated variants perform worse than their non-aggregated
-counterparts due to barely reducing the number of iterations while producing
-significantly denser factors, leading to slower matrix-vector products.
+We observe a characteristic ``U'' shape for the total wall-clock time
+in \cref{fig:cg_rho} from the trade-off between spending computational
+time in forming the preconditioner or in conjugate gradient iterations.
+Across all preconditioner densities, the aggregated variants are slower
+than their non-aggregated counterparts due to barely reducing the number
+of iterations while producing significantly denser factors with slower
+matrix-vector products.
 The time-optimal density for conditional methods is sparser than
-their unconditional counterparts due to having less iterations at
-the same sparsity and being more expensive to select nonzeros.
+their unconditional counterparts due to using less iterations at
+the same sparsity and it being more expensive to select nonzeros.
+It is hard to directly compare the total computational time of the methods
+because simply increasing the number of iterations, e.g. by demanding better
+tolerance or by using matrices with worse condition, will prefer more accurate
+methods even if they are slower to form the preconditioner.
 
 \subsection{Comparison to other methods}
 \label{subsec:compare}
-
-In this section we compare our selection algorithm and
-resulting Cholesky factorization procedure to existing work.
 
 \paragraph{Local approximate Gaussian process (laGP)}
 
 Our conditional variance objective for point selection \cref{eq:obj_gp} was
 first described in \cite{cohn1996neural} for optimal experimental design,
-and has subsequently been named the active learning Cohn (ALC) objective.
-\cite{gramacy2014local} and the follow-up work \cite{gramacy2015speeding}
-apply the ALC objective to directed Gaussian process regression, yielding
-an algorithm equivalent to our \cref{alg:select_prec} (described in
-\cref{subsec:greedy_select}) for a single point of interest.
+and has subsequently been named the active learning Cohn (ALC) technique.
+\cite{gramacy2014local} and the follow-up work \cite{gramacy2015speeding} apply
+ALC to directed Gaussian process inference, yielding an algorithm equivalent
+to our \cref{alg:select_prec} (described in \cref{subsec:greedy_select}) for a
+single point of interest.
 We note that their definition of conditional variance in equation (5) is
-analogous to our equation \cref{eq:cond_cov}, equating their conditional
-variance objective in equation (8) to our equation \cref{eq:obj_gp} (the
-connection is explicitly stated in SM\S4's equation (SM.22)).
-We also note that they update the precision after a new
-point is selected through the blocked equations in SM\S1
-like our \cref{app:prec_insert}.
+analogous to our \cref{eq:cond_cov}, equating their conditional variance
+objective in equation (8) to our \cref{eq:obj_gp} (the connection is
+explicitly stated in SM\S4's equation (SM.22)).
+They also update the precision by the blocked
+equations in SM\S1 like our \cref{app:prec_insert}.
 
-For inference at multiple points of interest, \cite{gramacy2014local}
-seems to only consider direct parallelization of the
-single-target algorithm to each of the target points.
-They mention that the \texttt{laGP} function in their \texttt{R}
-package jointly considers target points if multiple points are
-provided, but without providing details on this procedure.
-We generalize the ALC objective to multiple prediction points through the log
-determinant of their covariance matrix \cref{eq:greedy_mult} and provide an
-explicit \cref{alg:select_mult_chol} described in \cref{subsec:mult_select}.
-In addition, integration of the selection algorithm into Cholesky
-factorization (\cref{sec:chol_select}) provides a global approximation
-of the Gaussian process helpful for Gaussian process regression as
-shown in the numerical experiments of \cref{subsec:gp_exp}.
+For inference at multiple points of interest, \cite{gramacy2014local} suggests
+direct parallelization of the single-target algorithm over each target.
+They mention that the \texttt{laGP} function in their
+\texttt{R} package jointly considers multiple target
+points, but without providing details on this procedure.
+We generalize ALC to multiple prediction points through their posterior
+log determinant \cref{eq:greedy_mult} and provide an explicit
+\cref{alg:select_mult_chol} described in \cref{subsec:mult_select}.
+In addition, integration of the algorithm into Cholesky factorization
+(\cref{sec:chol_select}) provides a global approximation of the
+Gaussian process (\cref{subsec:gp_exp}).
 
 \paragraph{Orthogonal matching pursuit (OMP)}
 
@@ -2096,21 +2083,19 @@ results of \( \vec{y}_\Train \).
 \subsection{Updating precision after insertion}
 \label{app:prec_insert}
 
-Assuming we have the precision matrix \( \CM_{1, 1}^{-1} \), we wish
-to compute the precision of the covariance \( \CM_{1, 1} \) with a
-new row and column added to it, that is, compute \( \CM^{-1} \) for
+Given the precision matrix \( \CM_{1, 1}^{-1} \) we wish to
+compute the inverse of the covariance matrix \( \CM_{1, 1} \)
+with added rows and columns, i.e. to compute \( \CM^{-1} \) for
 \(
   \CM =
     \begin{pmatrix}
       \CM_{1, 1} & \CM_{1, 2} \\
       \CM_{2, 1} & \CM_{2, 2}
     \end{pmatrix}
-\)
-where \( \CM_{1, 2} = \CM_{2, 1}^{\top} \) is a
-column vector and \( \CM_{2, 2} \) is a scalar.
-Using the same block \( L D L^{\top} \) factorization as \cref{eq:chol}
-where the Schur complement is denoted \textcolor{lightblue}{\(
-\CM_{2, 2 \mid 1} \)} from \cref{eq:cond_cov_notation},
+\).
+Using the same block \( L D L^{\top} \) factorization as \cref{eq:chol} with
+the Schur complement \textcolor{lightblue}{\( \CM_{2, 2} - \CM_{2, 1} \CM_{1,
+1}^{-1} \CM_{1, 2} \)} denoted \textcolor{lightblue}{\( \CM_{2, 2 \mid 1} \)},
 \begin{align}
   \begin{pmatrix}
     \CM_{1, 1} & \CM_{1, 2} \\
@@ -2179,11 +2164,11 @@ Note that the bulk of the update is a rank-one update to \( \CM_{1,
 \subsection{Updating precision after conditioning}
 \label{app:prec_cond}
 
-Assuming we have the precision matrix of the prediction points conditional
-on the selected entries, \( \CM_{\Pred, \Pred \mid \I}^{-1} \), we want to
-take into account selecting an index \( k \), or to compute \( \CM_{\Pred,
-\Pred \mid \I, k}^{-1} \), which is a rank-one update to the covariance (but
-not necessarily the precision) from \cref{eq:obj_gp_mult}.
+Given the precision matrix of the prediction points conditional on the selected
+entries, \( \CM_{\Pred, \Pred \mid \I}^{-1} \), we want to take into account
+selecting an index \( k \), or to compute \( \CM_{\Pred, \Pred \mid \I, k}^{-1}
+\), which is a rank-one update to the covariance matrix (but not necessarily
+the precision matrix) from \cref{eq:obj_gp_mult}.
 We can directly apply the Sherman–Morrison–Woodbury
 formula which states that:
 \begin{align}
@@ -2227,13 +2212,12 @@ computed in \( \BigO(\card{\Pred}^2) = \BigO(m^2) \).
 \subsection{Updating the log determinant after a rank-one downdate}
 \label{app:logdet_downdate}
 
-Assuming we already have the log determinant of the covariance matrix of the
-prediction points conditional on the selected entries, \( \logdet(\CM_{\Pred,
-\Pred \mid \I}) \), we wish to compute the log determinant after we add an
-index \( k \) to \( \I \), that is, to compute \( \logdet(\CM_{\Pred, \Pred
-\mid \I, k}) \).
+Given the log determinant of the covariance matrix of the prediction points
+conditional on the selected entries, \( \logdet(\CM_{\Pred, \Pred \mid \I})
+\), we wish to compute the log determinant after we add an index \( k \) to
+\( \I \), that is, to compute \( \logdet(\CM_{\Pred, \Pred \mid \I, k}) \).
 From \cref{eq:cond_select}, selecting a new point
-is a rank-one downdate on the covariance matrix.
+is a rank-one downdate on the covariance matrix:
 \begin{align}
   \nonumber
   \logdet(\CM_{\Pred, \Pred \mid \I, k})
