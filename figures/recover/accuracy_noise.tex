@@ -5,11 +5,12 @@
     %   (\( N = 1024, s = 32 \))},
     % 0.05 shows up as \( 5 \cdot 10^{-2} \), suppress exponential
     every tick label/.append style={/pgf/number format/fixed},
-    xlabel={Noise (\( \var \))},
+    xlabel={\( \var \)},
     ylabel={Accuracy (IOU)},
     legend entries={rand., \( k \)-NN, corr., C\( k \)-NN},
     legend pos={north east},
     legend style={nodes={scale=0.85, transform shape}},
+    ymin=0, ymax=1.1,
   ]
   \addplot+ [mark=triangle*] table {figures/recover/noise_score_random.csv};
   \addplot+ [mark=*]         table {figures/recover/noise_score_knn.csv};

@@ -7,6 +7,7 @@
     ylabel={Accuracy (IOU)},
     % legend entries={rand., \( k \)-NN, corr., C\( k \)-NN},
     % legend pos={south west},
+    ymin=0, ymax=1.1,
   ]
   \addplot table {figures/recover/n_score_random.csv};
   \addplot table {figures/recover/n_score_knn.csv};

@@ -7,7 +7,8 @@
     % ylabel={Accuracy (IOU)},
     legend entries={\( \var = 0.00 \), \( \var = 0.01 \),
       \( \var = 0.10 \), \( \var = 0.20 \)},
-    legend pos={south east}
+    legend pos={south east},
+    ymin=0.9, ymax=1.01,
   ]
   \addplot [very thick, orange, style=solid]
     table {figures/recover/noise-s_score_cknn-0.00.csv};

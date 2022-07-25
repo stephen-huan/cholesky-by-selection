@@ -6,7 +6,8 @@
     xlabel={\( s \)},
     % ylabel={Accuracy (IOU)},
     legend entries={rand., \( k \)-NN, corr., C\( k \)-NN},
-    legend pos={south east}
+    legend pos={south east},
+    ymin=0, ymax=1.1,
   ]
   \addplot table {figures/recover/s_score_random.csv};
   \addplot table {figures/recover/s_score_knn.csv};
