@@ -539,7 +539,7 @@ the contribution from the group \( \tilde{i} \) is
 \begin{align}
   \label{eq:obj_mult}
   \sum_{i \in \tilde{i}}
-    \log \left (\CM_{i \mid s_i \setminus \{ i \} } \right ) &=
+    \log \left (\CM_{i, i \mid s_i \setminus \{ i \} } \right ) &=
     \logdet(\CM_{\tilde{i}, \tilde{i} \mid \tilde{s}})
 \end{align}
 So the generalization of the posterior variance in \cref{eq:obj_chol}
@@ -587,7 +587,7 @@ Armed with this representation, we compute \(
 \begin{align}
   \label{eq:partial_kl}
   \sum_{i \in \tilde{i}}
-    \log \left (\CM_{i \mid s_i \setminus \{ i \} } \right ) &=
+    \log \left (\CM_{i, i \mid s_i \setminus \{ i \} } \right ) &=
     \logdet(\CM_{\tilde{i}, \tilde{i} \parallel k})
 \end{align}
 Like the aggregated case \cref{eq:obj_mult}, minimizing the log determinant
@@ -663,7 +663,7 @@ Let \( \I = \{ i_j \}^t_{j = 1} \subseteq \Train \) be
 the indices of previously selected training points.
 For a newly selected index \( k \), we condition the current
 covariance matrix on \( y_k \) according to the posterior
-\cref{eq:quotient_rule}, which we see is a rank-one downdate.
+\cref{eq:quotient_rule}, which we see is a rank-one downdate:
 \begin{align}
   \label{eq:cond_select}
   \CM_{:, : \mid \I, k} &= \CM_{:, : \mid \I} - \vec{u} \vec{u}^{\top} &
@@ -677,90 +677,24 @@ selecting \( k \) is given by \( u_\Pred^2 \), or
   = \frac{\Cov[y_\Pred, y_k \mid \I]^2}{\Var[y_k \mid \I]}
   = \Var[y_\Pred \mid \I] \Corr[y_\Pred, y_k \mid \I]^2
 \end{align}
-To compute the objective \cref{eq:obj_gp} for each candidate index \( j \),
-we start with the unconditional variance \( \CM_{j, j} \) and covariance \(
-\CM_{\Pred, j} \), updating these quantities if an index \( k \) is selected.
-If we can compute \( \vec{u} \) for \( k \), then we can update
-\( j \)'s conditional variance by subtracting \( u_j^2 \) and
-update its conditional covariance by subtracting \( u_j u_\Pred \).
+To compute the objective \cref{eq:obj_gp} for each candidate index
+\( j \), we start with the unconditional variance \( \CM_{j, j} \)
+and covariance \( \CM_{\Pred, j} \), updating these quantities when
+an index \( k \) is selected by equation \cref{eq:cond_select}.
+We have two efficient strategies to compute \( \vec{u} \): either by
+maintaining the precision of selected entries \( \CM_{\I, \I}^{-1} \)
+(\cref{alg:select_prec}) or by storing only the \( \card{I} \) columns
+corresponding to selected points from the Cholesky factor of the joint
+covariance matrix \( \CM \) (\cref{alg:select_chol}); both methods are
+detailed in \cref{app:select}.
 
-We have two efficient strategies to compute \( \vec{u} \).
-The direct method is update \( \CM_{\I, \I}^{-1} \) (the precision
-of the selected entries) whenever a new index is added to \( \I \)
-in time complexity \( \BigO(s^2) \) (see \cref{app:prec_insert}).
-With \( \CM_{\I, \I}^{-1} \) in hand \( \vec{u} \) is
-computed directly according to \cref{eq:cond_cov}.
-For each of the \( s \) rounds of selection it takes \( \BigO(s^2)
-\) to update the precision and \( \BigO(Ns) \) to compute \(
-\vec{u} \), for an overall time complexity of \( \BigO(N s^2) \).
-
-The second strategy exploits the iterative
-conditioning in Cholesky factorization.
-Re-writing the joint covariance matrix by
-two steps of block Gaussisan elimination,
-\begin{align}
-  \nonumber
-  \begin{pmatrix}
-    \CM_{1, 1} & \CM_{1, 2} \\
-    \CM_{2, 1} & \CM_{2, 2}
-  \end{pmatrix} &=
-  \begin{pmatrix}
-    \Id & 0 \\
-    \textcolor{darkorange}{\CM_{2, 1} \CM_{1, 1}^{-1}} & \Id
-  \end{pmatrix}
-  \begin{pmatrix}
-    \CM_{1, 1} & 0 \\
-    0 & \textcolor{lightblue}{
-      \CM_{2, 2} - \CM_{2, 1} \CM_{1, 1}^{-1} \CM_{1, 2}
-    }
-  \end{pmatrix}
-  \begin{pmatrix}
-    \Id & \textcolor{darkorange}{\CM_{1, 1}^{-1} \CM_{1, 2}} \\
-    0 & \Id
-  \end{pmatrix}
-  \shortintertext{
-    so we see that the Cholesky factorization
-    of the joint covariance \( \CM \) is
-  }
-  \label{eq:chol}
-  \chol(\CM) &=
-  \begin{pmatrix}
-    \textcolor{darkorange}{\chol(\CM_{1, 1})} & 0 \\
-    \textcolor{darkorange}{\CM_{2, 1} \chol(\CM_{1, 1})^{-\top}} &
-    \chol(\textcolor{lightblue}{
-      \CM_{2, 2} - \CM_{2, 1} \CM_{1, 1}^{-1} \CM_{1, 2}
-    })
-  \end{pmatrix}
-\end{align}
-where the conditional expectation \cref{eq:cond_mean} corresponds
-to \( \textcolor{darkorange}{\CM_{2, 1} \CM_{1, 1}^{-1}} \) and
-the conditional covariance \cref{eq:cond_cov} corresponds to
-\(
-  \textcolor{lightblue}{\CM_{2, 2} - \CM_{2, 1} \CM_{1, 1}^{-1} \CM_{1, 2}}
-\).
-Blocking \( \CM \) such that 1 is the current column and 2 is
-all the indices past 1, we observe the column of the Cholesky
-factor is a conditional covariance \( \CM_{2, 1} \) divided by
-\( \chol(\CM_{1, 1})^{\top} \), the square root of the variance
-(the Cholesky factor of a scalar is its square root).
-We conclude that the \( k \)th column of the Cholesky factor equals \( \vec{u}
-\) in \cref{eq:cond_select} since iteratively conditioning on the columns \(
-i_1, i_2, \dotsc, i_{k - 1} \) is equivalent to conditioning on \( \I \) by the
-quotient rule \cref{eq:quotient_rule}.
-
-We maintain a partial Cholesky factor whose rows are the training points
-and target point, and whose columns are the currently selected points.
-Adding a column to the Cholesky factor can be efficiently
-computed with left-looking (see \cref{alg:chol_update}).
-For each of the \( s \) rounds of selection it costs \( \BigO(N s)
-\) to compute the next column of the Cholesky factor, the same \(
-\BigO(N s^2) \) time complexity as the explicit precision approach.
-
-However, the precision \( \Theta_{\I, \I}^{-1} \) takes \( \BigO(s^2)
-\) space while the first \( s \) columns of the Cholesky factor of \(
-\CM \) uses \( \BigO(N s) \) space, always more memory (\( N > s \)).
-Both algorithms use at least \( \BigO(N) \) space
-to store the conditional variances and covariances.
+Both approaches have a time complexity of \( \BigO(N s^2) \) to select
+\( s \) points out of \( N \) candidates, differing in space complexity.
+The precision takes \( \BigO(s^2) \) space while the first
+\( s \) columns of the Cholesky factor of \( \CM \) uses
+\( \BigO(N s) \) space, always more memory (\( N > s \)).
+Both algorithms use \( \BigO(N) \) space
+to store the conditional (co)variances.
 Although the precision algorithm uses less memory than the
 Cholesky algorithm, the Cholesky algorithm is preferred
 for ease of implementation and better performance.
@@ -797,97 +731,58 @@ increasing with its log determinant (see \cref{app:mutual_info}).
 
 We want to quickly compute how selecting an
 index \( k \) affects the log determinant.
-From \cref{eq:cond_select}, selecting an index
-is a rank-one downdate on the covariance matrix:
+By application of the matrix determinant lemma
+(the details are in \cref{app:logdet_downdate}),
 \begin{align}
-  \label{eq:obj_gp_mult}
-  \logdet(\CM_{\Pred, \Pred \mid \I, k}) &=
-    \logdet(\CM_{\Pred, \Pred \mid \I} -
-       \CM_{\Pred, k \mid \I} \CM_{k, k \mid \I}^{-1}
-       \CM_{\Pred, k \mid \I}^{\top}) \\
-  \shortintertext{
-    By application of the matrix determinant lemma
-    (the details are in \cref{app:logdet_downdate}),
-  }
   \label{eq:greedy_mult}
-  \logdet(\CM_{\Pred, \Pred \mid \I, k}) - \logdet(\CM_{\Pred, \Pred \mid \I})
-  &= \log(\CM_{k, k \mid \I, \Pred}) - \log(\CM_{k, k \mid \I})
+  \logdet(\CM_{\Pred, \Pred \mid \I, k})  - \logdet(\CM_{\Pred, \Pred \mid \I})
+  &= \log(\CM_{    k,     k \mid \I, \Pred}) - \log(\CM_{    k,     k \mid \I})
 \end{align}
-Equation \cref{eq:greedy_mult} swaps the roles of the targets and the
-candidate; instead of the targets being conditioned by the candidate, the
-candidate is conditioned by the targets, reducing to single-target selection.
-Using the recipes from the previous section to compute conditional variances,
+Equation \cref{eq:greedy_mult} swaps the roles of the targets
+and the candidate: the \emph{candidate} is now conditioned
+by the \emph{targets}, reducing to single-target selection.
+Using the recipes from \cref{subsec:greedy_select}
+to compute conditional variances,
 we can compute the objective by maintaining a data structure for each term: one
 for \( \CM_{k, k \mid \I, \Pred} \) and the other
 for \( \CM_{k, k \mid \I} \).
 By the quotient rule \( \CM_{k, k \mid \I, \Pred} = \CM_{k,
-k \mid \Pred, \I} \) so we condition on the prediction
+k \mid \Pred, \I} \) so we can condition on the prediction
 points \emph{before} any points have been selected.
-After this initialization we select the best candidate by
-the objective \cref{eq:greedy_mult} and simultaneously
-update both data structures after selecting each index.
-We again have two strategies from the two
-approaches of the single-target algorithm.
+After this initialization, we repeatedly update both data structures after
+selecting the best candidate by the objective \cref{eq:greedy_mult}.
 
-% TODO: this goes on for too long
-The precision approach initializes the precision \( \CM_{\Pred, \Pred}^{-1} \)
-for \( m \) prediction points in time \( \BigO(m^3) \) and computes the initial
-conditional variances \( \CM_{k, k \mid \Pred} \) for \( N \) candidates by
-direct application of the posterior \cref{eq:cond_cov} in time \( \BigO(N m^2)
-\).
-For each of the \( s \) rounds of selecting candidates, it costs \(
-\BigO(s^2) \) and \( \BigO(m^2) \) to update the precisions \( \CM_{\I,
-\I}^{-1} \) and \( \CM_{\Pred, \Pred}^{-1} \) respectively, where the details
-of efficiently updating \( \CM_{\Pred, \Pred}^{-1} \) after the rank-one
-update in \cref{eq:obj_gp_mult} are given in \cref{app:prec_cond}.
-Given the precisions, \( \vec{u} \) \cref{eq:cond_select} and \( \vec{u}_\Pred
-\defeq \frac{\CM_{:, k \mid \I, \Pred}}{\sqrt{\CM_{k, k \mid \I, \Pred}}} \)
-are computed as usual according to \cref{eq:cond_cov} in time \( \BigO(N s) \)
-and \( \BigO(N m) \).
-Finally, for each candidate \( j \) the conditional variance \( \CM_{j, j \mid
-\I} \) is updated by subtracting \( u_j^2 \), the conditional covariance \(
-\CM_{\Pred, k \mid \I} \) is updated for each prediction point index \( c \)
-by subtracting \( u_j u_c \), and the conditional variance \( \CM_{j, j \mid
-I, \Pred} \) is updated by subtracting \( (u_\Pred)_j^2 \).
-The total time complexity after simplification
-is \( \BigO(N s^2 + N m^2 + m^3) \).
+We have two strategies from the two approaches of the single-target
+algorithm: one maintaining the precision of the selected entries \( \CM_{\I,
+\I}^{-1} \) as well as of the target points \( \CM_{\Pred, \Pred}^{-1} \)
+(\cref{alg:select_mult_prec}) and the other simply storing two Cholesky factors
+of the joint covariance matrix \( \CM \) (\cref{alg:select_mult_chol}); both
+methods are detailed in \cref{app:mult_select}.
 
-The approach storing two partial Cholesky factors is
-considerably simpler from the symmetry of the factors and
-the lack of explicitly computing conditional covariances.
-We first add each prediction point to one Cholesky factor,
-for a total time complexity of \( \BigO((N + m) m^2) \).
-After a candidate is selected, both Cholesky factors are updated in time \(
-\BigO((N + m)(m + s)) \) dominated by updating the initialized Cholesky factor.
-The desired covariances \( \vec{u} \) and \( \vec{u}_\Pred \) are directly
-read off the columns of the Cholesky factors and both conditional variances \(
-\CM_{j, j \mid I} \) and \( \CM_{j, j \mid I, \Pred} \) are computed as above.
-Over \( s \) rounds the total time complexity after
-simplification is \( \BigO(N s^2 + N m^2 + m^3) \).
-
-Like the single-target case, both approaches have the
-same time complexity but differ in space complexity.
+Both approaches have a time complexity of \( \BigO(N s^2 + N m^2
++ m^3) \) to select \( s \) points out of \( N \) candidates
+for \( m \) targets, again differing in space complexity.
 The precision algorithm requires \( \BigO(s^2 + m^2) \)
 memory to store both precisions as well as \( \BigO(N
 m) \) memory to store the conditional covariances.
-The Cholesky algorithm requires \( \BigO(N s + N m + m^2) \) memory
-to store a partial Cholesky factor for the joint covariance matrix.
+The Cholesky algorithm requires \( \BigO(N s + N m + m^2) \)
+memory to store two \( (N + m) \times (m + s) \) sized partial
+Cholesky factors for the joint covariance matrix \( \CM \).
 The memory usages are identical except for \( \BigO(N s) \) versus \(
 \BigO(s^2) \), so the Cholesky algorithm again uses more memory than the
-precision algorithm but is preferred for simplicity and performance.
+precision algorithm but is again preferred for simplicity and performance.
 
 \subsection{Partial selection}
 \label{subsec:partial_select}
 
-We now generalize the multiple-target algorithm to track the
-log determinant of the target points' covariance matrix if a
-selected index \( k \) only conditions \emph{suffixes} of the
-target points, skipping the first \( p \) targets, say.
+We now compute the log determinant of the target covariance matrix
+if a selected index \( k \) only conditions \emph{suffixes} of
+the target points, skipping the first \( p \) targets, say.
 Following the suggestive form of the target covariance matrix
-\cref{eq:chol_partial}, we maintain a partial Cholesky factor \( L
-\) of the joint covariance matrix of target and training points,
-whose columns consist of the target points and previously selected
-points sorted in reverse order with respect to \( \prec \).
+\cref{eq:chol_partial}, we maintain a Cholesky factor \( L \)
+taking from the factor of the joint covariance matrix \( \CM \)
+only the \( \card{I} + m \) columns corresponding to selected
+points and target points, sorted w.r.t \( \succ \).
 Inserting the index \( k \) into its proper column in \( L \),
 \begin{align}
   \label{eq:chol_partial_update}
@@ -904,29 +799,24 @@ is derived from the statistical perspective in \cref{eq:chol}.
 To account for this insertion, the first \( p \) columns \( L_{:, :p}
 \) are unchanged, the newly inserted column \( \vec{u} \) of the form
 \cref{eq:cond_select} can be computed as usual with left-looking (see
-\cref{alg:chol_update}), and the remaining columns \( {L'}_{:, p + 1:} \) are
-the Cholesky factor of the covariance matrix conditional on the point \( k \).
-From \cref{eq:cond_select} conditioning on an additional point is a rank-one
-downdate of the covariance matrix by the vector \( \vec{u} \), allowing the
-updated factor \( {L'}_{:, p + 1:} \) to be efficiently computed from the
-original factor \( L_{:, p + 1:} \).
+\cref{alg:chol_update}), and the remaining columns \( {L'}_{:, p + 1:}
+\) are from the Cholesky factor of \( \CM \) after a rank-one downdate
+by \( \vec{u} \), allowing the updated factor \( {L'}_{:, p + 1:} \) to
+be efficiently computed from the original factor \( L_{:, p + 1:} \).
 Specifically we adapt Lemma 1 of \cite{krause2015more} to make
-no assumption on the row ordering of \( L \), allowing the
-downdate to be implemented in-place (see \cref{alg:chol_insert}).
-For a Cholesky factor with \( R \) rows and \( C \) columns, the
-time complexity of the downdate is \( \BigO(R C) \) compared to
-\( \BigO(R C^2) \) if the factor was recomputed from scratch.
+no assumption on the row ordering of \( L \), in order to
+implement the downdate in-place (see \cref{alg:chol_insert}).
+For a Cholesky factor of size \( R \times C \), the time
+complexity of the downdate is \( \BigO(R C) \) compared
+to \( \BigO(R C^2) \) if recomputed from scratch.
 
-For \( N \) training points, \( m \) target points,
-and a budget of \( s \) selected points, the Cholesky
-factor \( L \) has size \( (N + m) \times (s + m) \).
+For \( N \) candidates, \( m \) targets, and a budget of \( s \) points to
+select, the Cholesky factor \( L \) has size \( (N + m) \times (s + m) \).
 When adding a new index \( k \) that ignores the first \( p \) targets, the
-first \( j \) columns of \( L \) are ignored, the new column \( \vec{u} \)
-must be computed with left-looking in time \( \BigO((N + m) p) \), and the
-columns past \( p \) are computed with downdating in time \( \BigO((N + m)
-(s + m - p)) \).
-The cost for a single insertion is \( \BigO((N + m)(s + m)) \) for a total time
-complexity of \( \BigO(s(N + m)(s + m)) \) over \( s \) rounds of selection.
+first \( p \) columns of \( L \) are correspondingly ignored, the new column \(
+\vec{u} \) is computed with left-looking in time \( \BigO((N + m) p) \), and
+the columns past \( p \) are updated with downdating in time \( \BigO((N + m)
+(s + m - p)) \) for a total time complexity of \( \BigO(s(N + m)(s + m)) \).
 With the factor \( L \) in hand, we discuss
 actually computing the log determinant objective
 \cref{eq:partial_kl} after adding a candidate index \( j \).
@@ -954,10 +844,7 @@ For the \( i \)th column,
 \end{align}
 where \cref{eq:partial_induct} satisfies the conditions of the inductive
 hypothesis for the next column and \cref{eq:obj_partial} is the desired
-conditional variance when the \( i \)th point is a target (recall the
-columns of \( L \) include previously selected training points, whose
-variances are ignored in the objective but whose columns still need to
-be processed to compute \cref{eq:partial_induct}).
+conditional variance when the \( i \)th point is a target.
 
 For each of the \( N \) candidates, it requires \( \BigO(1) \) work per column
 for \( s + m \) columns. Over \( s \) selections, the total time complexity is
@@ -971,6 +858,8 @@ Higher level operations often have better constant-factor
 performance for the same asymptotic time complexity.
 In addition, the objective for the partial selection algorithm is
 more complicated to compute than its multiple-target counterpart.
+Psuedocode for the algorithm is provided in
+\cref{alg:select_partial} to \cref{alg:chol_insert}.
 
 \section{Greedy selection for global approximation by KL-minimization}
 \label{sec:chol_select}
@@ -2004,8 +1893,8 @@ dynamically form \( L \) by solving the triangular system \( L_{:, k} =
 U^{-\top} \vec{e}_k \) for the desired column \( k \) of \( L \) (like
 \cref{eq:obj_chol}, \( \vec{e}_k \) is the vector with \( k \)th entry
 one and rest zero).
-This method is described in Algorithm 3.2 and
-illustrated in Figure 4 of \cite{schafer2021sparse}.
+This method is described in Algorithm 3.2, Figure
+4, and Appendix A.2 of of \cite{schafer2021sparse}.
 
 \section{Computation in sparse Gaussian process selection}
 
@@ -2074,6 +1963,72 @@ between \( \vec{y}_\Pred \) and \( \vec{y}_\Train \), as it increases
 when the predictor for \( \vec{y}_\Pred \) (the conditional expectation
 \( \E[\vec{y}_\Pred \mid \vec{y}_\Train] \)) depends on the observed
 results of \( \vec{y}_\Train \).
+
+\subsection{Cholesky factorization as iterative conditioning}
+\label{app:chol_stat}
+
+Factoring the joint covariance matrix \( \CM \) blocked as
+\cref{eq:inverse_cond} by two steps of block Gaussisan elimination,
+\begin{align}
+  \nonumber
+  \begin{pmatrix}
+    \CM_{1, 1} & \CM_{1, 2} \\
+    \CM_{2, 1} & \CM_{2, 2}
+  \end{pmatrix} &=
+  \begin{pmatrix}
+    \Id & 0 \\
+    \textcolor{darkorange}{\CM_{2, 1} \CM_{1, 1}^{-1}} & \Id
+  \end{pmatrix}
+  \begin{pmatrix}
+    \CM_{1, 1} & 0 \\
+    0 & \textcolor{lightblue}{
+      \CM_{2, 2} - \CM_{2, 1} \CM_{1, 1}^{-1} \CM_{1, 2}
+    }
+  \end{pmatrix}
+  \begin{pmatrix}
+    \Id & \textcolor{darkorange}{\CM_{1, 1}^{-1} \CM_{1, 2}} \\
+    0 & \Id
+  \end{pmatrix}
+  \shortintertext{
+    so we see that the Cholesky factorization
+    of the joint covariance \( \CM \) is
+  }
+  \chol(\CM) &=
+  \begin{pmatrix}
+    \Id & 0 \\
+    \textcolor{darkorange}{\CM_{2, 1} \CM_{1, 1}^{-1}} & \Id
+  \end{pmatrix}
+  \begin{pmatrix}
+    \textcolor{darkorange}{\chol(\CM_{1, 1})} & 0 \\
+    0 & \chol(\textcolor{lightblue}{
+      \CM_{2, 2} - \CM_{2, 1} \CM_{1, 1}^{-1} \CM_{1, 2}
+    })
+  \end{pmatrix} \\
+  \label{eq:chol}
+  &=
+  \begin{pmatrix}
+    \textcolor{darkorange}{\chol(\CM_{1, 1})} & 0 \\
+    \textcolor{darkorange}{\CM_{2, 1} \chol(\CM_{1, 1})^{-\top}} &
+    \chol(\textcolor{lightblue}{
+      \CM_{2, 2} - \CM_{2, 1} \CM_{1, 1}^{-1} \CM_{1, 2}
+    })
+  \end{pmatrix}
+\end{align}
+where the conditional expectation \cref{eq:cond_mean} corresponds
+to \( \textcolor{darkorange}{\CM_{2, 1} \CM_{1, 1}^{-1}} \) and
+the conditional covariance \cref{eq:cond_cov} corresponds to
+\(
+  \textcolor{lightblue}{\CM_{2, 2} - \CM_{2, 1} \CM_{1, 1}^{-1} \CM_{1, 2}}
+\).
+Blocking \( \CM \) such that 1 is the current column and 2 is
+all the indices past 1, we observe the column of the Cholesky
+factor is a conditional covariance \( \CM_{2, 1} \) divided by
+\( \chol(\CM_{1, 1})^{\top} \), the square root of the variance
+(the Cholesky factor of a scalar is its square root).
+We conclude that the \( k \)th column of the Cholesky factor equals \( \vec{u}
+\) in \cref{eq:cond_select} since iteratively conditioning on the columns \(
+i_1, i_2, \dotsc, i_{k - 1} \) is equivalent to conditioning on \( \I \) by the
+quotient rule \cref{eq:quotient_rule}.
 
 \subsection{Updating precision after insertion}
 \label{app:prec_insert}
@@ -2163,7 +2118,7 @@ Given the precision matrix of the prediction points conditional on the selected
 entries, \( \CM_{\Pred, \Pred \mid \I}^{-1} \), we want to take into account
 selecting an index \( k \), or to compute \( \CM_{\Pred, \Pred \mid \I, k}^{-1}
 \), which is a rank-one update to the covariance matrix (but not necessarily
-the precision matrix) from \cref{eq:obj_gp_mult}.
+the precision matrix) from \cref{eq:cond_select}.
 We can directly apply the Sherman–Morrison–Woodbury
 formula which states that:
 \begin{align}
@@ -2245,9 +2200,84 @@ is a rank-one downdate on the covariance matrix:
      \log \left ( \frac{\CM_{k, k \mid \I, \Pred}}{\CM_{k, k \mid \I}} \right )
 \end{align}
 
-\newpage
-
 \section{Algorithms}
+
+\subsection{Single-target selection}
+\label{app:select}
+
+To compute the objective \cref{eq:obj_gp} for each candidate index \( j \),
+we start with the unconditional variance \( \CM_{j, j} \) and covariance \(
+\CM_{\Pred, j} \), updating these quantities when an index \( k \) is selected.
+If we can compute \( \vec{u} \) for \( k \), then we can update
+\( j \)'s conditional variance by subtracting \( u_j^2 \) and
+update its conditional covariance by subtracting \( u_j u_\Pred \).
+We have two efficient strategies to compute \( \vec{u} \).
+
+\paragraph{Precision approach}
+(\cref{alg:select_prec}).
+The precision of the selected entries \( \CM_{\I, \I}^{-1} \)
+can be updated whenever a new index is added to \( \I \) in
+time complexity \( \BigO(s^2) \) (see \cref{app:prec_insert}).
+With \( \CM_{\I, \I}^{-1} \) in hand \( \vec{u} \) is computed
+directly according to the posterior covariance \cref{eq:cond_cov}.
+On each of the \( s \) rounds of selection it takes \( \BigO(s^2)
+\) to update the precision and \( \BigO(Ns) \) to compute \(
+\vec{u} \), for an overall time complexity of \( \BigO(N s^2) \).
+
+\paragraph{Cholesky approach}
+(\cref{alg:select_chol}).
+The second strategy exploits the iterative conditioning in Cholesky
+factorization: we maintain only the first \( \card{I} \) columns corresponding
+to selected points from the Cholesky factor of the joint covariance matrix
+between the training and target points; the \( k \)th column of this factor
+is precisely \( \vec{u} \) (see \cref{app:chol_stat} for details).
+Adding a new column to the end of this factor can
+be efficiently computed with left-looking in time complexity \( \BigO(N s) \)
+(see \cref{alg:chol_update}), resulting in the same \( \BigO(N s^2) \) time
+complexity as the explicit precision approach.
+
+\subsection{Multiple-target selection}
+\label{app:mult_select}
+
+\paragraph{Precision approach}
+(\cref{alg:select_mult_prec}).
+The precision approach initializes the precision \( \CM_{\Pred, \Pred}^{-1} \)
+for \( m \) prediction points in time \( \BigO(m^3) \) and computes the initial
+conditional variances \( \CM_{k, k \mid \Pred} \) for \( N \) candidates by
+direct application of the posterior \cref{eq:cond_cov} in time \( \BigO(N m^2)
+\).
+For each of the \( s \) rounds of selecting candidates, it costs \(
+\BigO(s^2) \) and \( \BigO(m^2) \) to update the precisions \( \CM_{\I,
+\I}^{-1} \) and \( \CM_{\Pred, \Pred}^{-1} \) respectively, where the details
+of efficiently updating \( \CM_{\Pred, \Pred}^{-1} \) after the rank-one
+update are given in \cref{app:prec_cond}.
+Given the precisions, \( \vec{u} \) \cref{eq:cond_select} and \( \vec{u}_\Pred
+\defeq \frac{\CM_{:, k \mid \I, \Pred}}{\sqrt{\CM_{k, k \mid \I, \Pred}}} \)
+are computed as usual according to \cref{eq:cond_cov} in time \( \BigO(N s) \)
+and \( \BigO(N m) \).
+Finally, for each candidate \( j \) the conditional variance \( \CM_{j, j \mid
+\I} \) is updated by subtracting \( u_j^2 \), the conditional covariance \(
+\CM_{\Pred, k \mid \I} \) is updated for each prediction point index \( c \)
+by subtracting \( u_j u_c \), and the conditional variance \( \CM_{j, j \mid
+I, \Pred} \) is updated by subtracting \( (u_\Pred)_j^2 \).
+The total time complexity is \( \BigO(N s^2 + N m^2 + m^3) \).
+
+\paragraph{Cholesky approach}
+(\cref{alg:select_mult_chol}).
+The approach storing two partial Cholesky factors is considerably
+simpler than the explicit precision approach from the symmetry of the
+factors and the lack of explicitly computing conditional covariances.
+We first add each prediction point to one Cholesky factor,
+for a total time complexity of \( \BigO((N + m) m^2) \).
+After a candidate is selected, both Cholesky factors are updated in time \(
+\BigO((N + m)(m + s)) \) dominated by updating the initialized Cholesky factor.
+The desired covariances \( \vec{u} \) and \( \vec{u}_\Pred \) are directly
+read off the columns of the Cholesky factors and both conditional variances \(
+\CM_{j, j \mid I} \) and \( \CM_{j, j \mid I, \Pred} \) are computed as above.
+Over \( s \) points selected the total time complexity
+after simplification is \( \BigO(N s^2 + N m^2 + m^3) \).
+
+\newpage
 
 \begin{figure}[th!]
   \centering
