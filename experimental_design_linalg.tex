@@ -385,37 +385,38 @@ then all is needed is a functional criterion \( \Loss: \Reals^{N \times N}
 where \( \SpSet \defeq \{ M \in \Reals^{N \times N} :
 M_{ij} \neq 0 \Rightarrow (i, j) \in S \} \) is the space
 of matrices satisfying the sparsity pattern \( S \).
-Proposed functionals which compute inverse Cholesky factors of the
-covariance, \( L \chol(\CM) \approx \Id \), include the Kaporin
-condition number \( (\trace(L \CM L^{\top})/N)^N/\det(L \CM L^{\top})
-\) \cite{kaporin1990alternative} and the Frobenius norm \( \norm{\Id
-- L \chol(\CM)}_{\FRO} \) additionally subject to the constraint \(
-\diag(L \CM L^{\top}) = 1 \) \cite{yeremin2000factorized}, while the KL
-divergence \( \KL{\N(\vec{0}, \CM)} {\N(\vec{0}, (L L^{\top})^{-1})}
-\) \cite{schafer2021sparse} computes factors of the precision, \( L
+Proposed functionals which compute inverse Cholesky factors \( L \) of
+the covariance matrix, i.e. \( L \chol(\CM) \approx \Id \), include the
+Kaporin condition number \( (\trace(L \CM L^{\top})/N)^N/\det(L \CM
+L^{\top}) \) \cite{kaporin1990alternative} and the Frobenius norm \(
+\norm{\Id - L \chol(\CM)}_{\FRO} \) additionally subject to the constraint
+\( \diag(L \CM L^{\top}) = 1 \) \cite{yeremin2000factorized}, while the
+KL divergence \( \KL{\N(\vec{0}, \CM)} {\N(\vec{0}, (L L^{\top})^{-1})}
+\) \cite{schafer2021sparse} factors the precision matrix, i.e. \( L
 L^{\top} \approx \CM^{-1} \).
 
-As observed in \cite{schafer2021sparse}, factors of the precision are often
-much sparser than factors of the covariance, because the precision encodes
-conditional independence while the covariance encodes marginal independence.
+As observed in \cite{schafer2021sparse}, factors of the precision matrix
+are often much sparser than factors of the covariance matrix, because the
+precision encodes conditional independence while the covariance encodes
+marginal independence.
 The same phenomenon is observed by \cite{spantini2018inference}
 working with the more general transport maps.
 Covariance matrices arising from kernel functions are often fully
-dense, but the approximate factors of their precision can be
-sparse if the ordering and sparsity pattern are chosen carefully.
+dense, but the approximate factors of their precisions can be
+sparse if their ordering and sparsity pattern are chosen carefully.
 
 \subsection{Ordering and sparsity pattern}
 \label{subsec:ordering}
 
-Although in this work we focus on constructing sparsity
-patterns, a good ordering is critical since the sparsity for
-a point can only include points after it in the ordering.
+Although in this work we primarily focus on constructing
+sparsity patterns, the chosen ordering critically affects
+the accuracy of lower triangular sparsity patterns.
 Vecchia originally proposed ordering points lexicographically, which is
 most natural in a one-dimensional setting \cite{vecchia1988estimation}.
 More recent work finds that in higher dimensions, exploiting
 space-covering orderings leads to significantly better
 approximation quality \cite{guinness2018permutation}.
-We specifically use the maximum-minimum (maximin) ordering
+Specifically, we use the maximum-minimum (maximin) ordering
 \cite{guinness2018permutation}, which has become popular for the
 Vecchia approximation \cite{katzfuss2021general} and Cholesky
 factorization \cite{schafer2020compression, schafer2021sparse,
@@ -442,9 +443,8 @@ Vecchia also originally proposed to select the sparsity set by Euclidean
 distance \cite{vecchia1988estimation}, which, unlike the lexicographic
 ordering, still remains widely used \cite{schafer2020compression,
 schafer2021sparse, katzfuss2022scalable}.
-Instead, we show how to select the sparsity pattern to directly
-optimize the objective \( \Loss \) \cref{eq:generic_obj} in an
-end-to-end manner by decomposing the KL divergence along each column.
+Instead, we will select the sparsity pattern to directly
+optimize the accuracy \( \Loss \) \cref{eq:generic_obj}.
 
 \subsection{Review of KL-minimization}
 \label{subsec:kl}
@@ -489,52 +489,27 @@ We enforce the convention that \( i \) is the first entry
 of \( s_i \), also implying that \( L \) is of full rank.
 Plugging the optimal \( L \) \cref{eq:L_col} back into the KL divergence
 \cref{eq:kl}, we obtain the objective as a function of the sparsity pattern.
+See \cref{app:kl_L} for details; importantly,
+the order of the KL divergence matters.
 \begin{align}
   \label{eq:obj_chol}
   2 \KL*{\N(\vec{0}, \CM)}{\N(\vec{0}, (L L^{\top})^{-1})} &=
     \sum_{i = 1}^N
       \left [
-        \log \left (
-          (\vec{e}_1^{\top} \CM_{s_i, s_i}^{-1} \vec{e}_1)^{-1}
-        \right )
+        \log \left ( \CM_{i, i \mid s_i \setminus \{ i \}} \right ) -
+        \log \left ( \CM_{i, i \mid i + 1:} \right )
       \right ]
-      - \logdet(\CM)
 \end{align}
-See \cref{app:kl_L} for details. In particular, it is important
-which direction the KL divergence is taken or cancellation
-of the \( \trace(\CM_2^{-1} \CM_1) \) term may not occur.
 
-In order to pick a sparsity pattern that minimizes the KL divergence
-\cref{eq:obj_chol}, we can ignore the constant \( \logdet(\CM) \) and minimize
-over each column independently, as each term \( (\vec{e}_1^{\top} \CM_{s_i,
-s_i}^{-1} \vec{e}_1)^{-1} \) in the sum depends only on \( s_i \).
-To do so, we recall that conditioning in
-covariance is marginalization in precision.
-% TODO: move this derivation to the appendix
-For
-\( \CM =
-    \begin{pmatrix}
-      \CM_{1, 1} & \CM_{1, 2} \\
-      \CM_{2, 1} & \CM_{2, 2}
-    \end{pmatrix}
-\),
-\begin{align}
-  \label{eq:inverse_cond}
-  \CM_{1, 1 \mid 2} &= \left ( \CM^{-1} \right )_{1, 1}^{-1} \\
-  \shortintertext{
-    Viewing \( (\vec{e}_1^{\top} \CM_{s_i, s_i}^{-1} \vec{e}_1)^{-1} =
-    \left (\CM_{s_i, s_i}^{-1} \right )_{1, 1}^{-1} \) as a marginalization
-    of \( \CM_{s_i, s_i}^{-1} \) to apply \cref{eq:inverse_cond},
-  }
-  \label{eq:L_cond_var}
-  (\vec{e}_1^{\top} \CM_{s_i, s_i}^{-1} \vec{e}_1)^{-1}
-         &= \CM_{i, i \mid s_i \setminus \{ i \}}
-\end{align}
-So minimizing the KL divergence of a sparse Cholesky factor is equivalent
-to independently minimizing over each column the variance of the \( i \)th
-variable, conditional on the selected entries \( s_i \) (excluding itself).
-Decomposition into independent regression problems was also observed
-in \cite{katzfuss2022scalable} for lower triangular transport maps.
+This sum is the accumulated \emph{difference} in posterior variance for a
+series of independent regression problems: each to predict the \( i \)th
+variable given a subset of the variables after it in the ordering. The error
+\( \log \left ( \CM_{i, i \mid s_i \setminus \{ i \}} \right ) \) made when
+restricted to the variables in the sparsity pattern \( s_i \) is compared
+to the ground truth \( \log \left ( \CM_{i, i \mid i + 1:} \right ) \).
+A similar decomposition of the KL divergence into independent
+regression problems was observed in equation (5) of
+\cite{katzfuss2022scalable} for lower triangular transport maps.
 
 \subsubsection{Aggregated sparsity pattern}
 \label{subsubsec:aggregated}
@@ -557,76 +532,38 @@ aggregated selected entries excluding the entries that violate lower
 triangularity, \( s_k \defeq \{ j \in s_{\tilde{i}} : j \succeq k \} \).
 Assuming every entry of \( \tilde{s} \) is after every index in \( \tilde{i}
 \), then \( s_k = \tilde{s} \cup \{ j \in \tilde{i} : j \succeq k \} \).
-This condition is guaranteed if the aggregated columns
-are adjacent in the ordering, for example; we defer
-handling the general case to \cref{subsubsec:partial}.
-We now simplify the KL divergence on aggregated indices
-with the conditional chain rule of log determinants.
-Using the same blocking as \cref{eq:inverse_cond},
-% TODO: move this derivation to the appendix
+This condition is guaranteed if the aggregated columns are adjacent in the
+ordering, for example; we defer handling the general case to the next section.
+The KL divergence \cref{eq:obj_chol} restricted to
+the contribution from the group \( \tilde{i} \) is
 \begin{align}
-  \label{eq:det_chain}
-  \logdet(\CM) &= \logdet(\CM_{1, 1}) + \logdet(\CM_{2, 2 \mid 1})
-\end{align}
-The KL divergence objective \cref{eq:obj_chol} restricted
-to the contribution from the group \( \tilde{i} \) is
-\begin{align}
-  \sum_{i \in \tilde{i}} \log(\CM_{i \mid s_i \setminus \{ i \} }) &=
-    \log(\CM_{i_1 \mid \tilde{s}}) +
-    \log(\CM_{i_2 \mid \tilde{s} \cup \{ i_1 \}}) + \dotsb +
-    \log(\CM_{i_m \mid \tilde{s} \cup \tilde{i}}) \\
-  \shortintertext{
-    where we write \( \CM_j \defeq \CM_{j, j} \).
-    Combining the first two terms by the chain rule \cref{eq:det_chain},
-  }
-  &= \logdet(\CM_{\{ i_1, i_2 \} \mid \tilde{s}}) +
-     \log(\CM_{i_3 \mid \tilde{s} \cup \{ i_1, i_2 \}}) + \dotsb +
-     \log(\CM_{i_m \mid \tilde{s} \cup \tilde{i}}) \\
-  \shortintertext{
-    Proceeding by induction, we are able to
-    reduce the entire sum to the single term
-  }
   \label{eq:obj_mult}
-  &= \logdet(\CM_{\tilde{i}, \tilde{i} \mid \tilde{s}})
+  \sum_{i \in \tilde{i}}
+    \log \left (\CM_{i \mid s_i \setminus \{ i \} } \right ) &=
+    \logdet(\CM_{\tilde{i}, \tilde{i} \mid \tilde{s}})
 \end{align}
-So the suitable generalization of the conditional variance
-in \cref{eq:obj_chol} to aggregated columns is the log
-determinant of the covariance matrix of the columns,
-conditional on (well-behaved) selected entries.
-We briefly discuss what happens in the general case.
+So the generalization of the posterior variance in \cref{eq:obj_chol}
+to aggregated columns is the log determinant of their covariance
+matrix, conditional on (well-behaved) selected entries.
+We briefly discuss what happens when
+selected entries are \emph{between} columns.
 
 \subsubsection{Nonadjacent or partial aggregation}
 \label{subsubsec:partial}
 
-\begin{figure}[t]
-  \centering
-  \input{figures/partial_factor.tex}
-  \caption{
-    Illustration of the Cholesky factorization of
-    a partially conditioned covariance matrix.
-    Here \textcolor{darksilver}{grey} denotes fully unconditional,
-    \textcolor{darklightblue}{blue} denotes fully conditional, and the
-    \textcolor{silver!50!lightblue}{mixed color} denotes interaction
-    between the two.
-    Surprisingly, such a matrix factors into a ``pure'' Cholesky
-    factor by ``gluing'' the prefix of the fully unconditional
-    factor with the suffix of the fully conditional factor.
-  }
-  \label{fig:partial_factor}
-\end{figure}
-
-Let the random variables corresponding to the indices \( i_1,
-\dotsc, i_m \) be collected in a vector \( \vec{y} = [y_1, \dotsc,
+Let the random variables corresponding to the indices \( \tilde{i} = \{
+i_1, \dotsc, i_m \} \) be collected in a vector \( \vec{y} = [y_1, \dotsc,
 y_m]^{\top} \) with joint density \( \vec{y} \sim \N(\vec{0}, \CM) \).
 We select an index \( k \) that conditions all but the first \( p \)
-variables (recall that the indices are sorted in decreasing order, so
-if \( k \) conditions a variable, it conditions all those afterwards).
-After this partial conditioning the variables become \( \vec{y}_{\parallel
-k} \defeq y_1, \dotsc, y_p, y_{p + 1 \mid k}, \dotsc, y_{m \mid k} \)
-and the covariance matrix \( \Cov[\vec{y}_{\parallel k}] \) becomes
+variables (recall that the indices are sorted w.r.t \( \succ \), so if
+\( k \) conditions a variable, it conditions all those afterwards).
+After this partial conditioning, the variables become \( \vec{y}_{\parallel
+k} \defeq [y_1, \dotsc, y_p, y_{p + 1 \mid k}, \dotsc, y_{m \mid k}]^{\top}
+\) and the covariance matrix \( \Cov[\vec{y}_{\parallel k}] \) becomes
 \begin{align}
   \label{eq:chol_partial}
-  \CM_{\tilde{i}, \tilde{i} \parallel k} &=
+  \CM_{\tilde{i}, \tilde{i} \parallel k} &\defeq
+  \Cov[\vec{y}_{\parallel k}] =
   \begin{pmatrix}
     L_{:p} L_{:p}^{\top} &
     L_{:p} {L'}_{p + 1:}^{\top} \\
@@ -642,55 +579,20 @@ and the covariance matrix \( \Cov[\vec{y}_{\parallel k}] \) becomes
     {L'}_{p + 1:}
   \end{pmatrix}^{\top}
 \end{align}
-where \( L = \chol(\CM) \) and \( L' = \chol(\CM_{:,
-: \mid k}) \) (see \cref{fig:partial_factor} for an
-illustration and \cref{app:partial} for details).
-% TODO: move this derivation to the appendix
-Armed with this representation, we equate the log
-determinant of \( \CM_{\tilde{i}, \tilde{i} \parallel
-k} \) to the KL divergence in \cref{eq:obj_chol}.
-Recalling that the determinant of a triangular
-matrix is the product of its diagonal entries,
+where \( L = \chol(\CM) \) and \( L' = \chol(\CM_{:, : \mid k}) \).
+See \cref{fig:partial_factor} for an
+illustration and \cref{app:partial} for details.
+Armed with this representation, we compute \(
+\logdet(\CM_{\tilde{i}, \tilde{i} \parallel k}) \):
 \begin{align}
-  \nonumber
-  \frac{1}{2} \logdet(\CM_{\tilde{i}, \tilde{i} \parallel k}) &=
-  \underbrace{
-    \log(L_{1, 1}) + \dotsb + \log(L_{p, p})
-  }_{\text{the same}} +
-  \underbrace{
-    \log({L'}_{p + 1, p + 1}) + \dotsb + \log({L'}_{m, m})
-  }_{\text{conditioned}}
-\end{align}
-Comparing to the KL divergence \cref{eq:obj_chol} and
-recalling that \( k \) is added to \( s_i \) if \( i > p \),
-\begin{align}
-  \sum_{i = 1}^m \log \left ( \CM_{i, i \mid s_i \setminus \{ i \}} \right )
-  &= \underbrace{
-      \log \left ( \CM_{1, 1 \mid s_1 \setminus \{ 1 \}} \right ) + \dotsb +
-      \log \left ( \CM_{p, p \mid s_p \setminus \{ p \}} \right )
-     }_\text{the same} + \\
-  \nonumber
-  % disgusting hack, do properly later --- looks good enough to me, though
-  & \hphantom{=} \: \,
-  \underbrace{
-    \log \left (
-      \CM_{p + 1, p + 1 \mid s_{p + 1} \setminus \{ p + 1 \}}
-    \right ) + \dotsb +
-    \log \left ( \CM_{m, m \mid s_m \setminus \{ m \}} \right )
-  }_\text{conditioned}
-  \shortintertext{
-    Since \( L_{i, i} \) (and \( {L'}_{i, i} \)) is the square root
-    of the conditional variance of the \( i \)th variable from the
-    statistical perspective in \cref{eq:chol}, we have \( 2 \log(L_{i,
-    i}) = \log(\CM_{i, i \mid s_i \setminus \{ i \}}) \) and so
-  }
   \label{eq:partial_kl}
-  \logdet(\CM_{\tilde{i}, \tilde{i} \parallel k}) &=
-    \sum_{i = 1}^m \log \left ( \CM_{i, i \mid s_i \setminus \{ i \}} \right )
+  \sum_{i \in \tilde{i}}
+    \log \left (\CM_{i \mid s_i \setminus \{ i \} } \right ) &=
+    \logdet(\CM_{\tilde{i}, \tilde{i} \parallel k})
 \end{align}
-Like the aggregated case in \cref{subsubsec:aggregated},
-minimizing the log determinant of the \emph{partially} conditioned
-covariance matrix is the same as minimizing the KL divergence.
+Like the aggregated case \cref{eq:obj_mult}, minimizing the log determinant
+of the \emph{partially} conditioned covariance matrix \cref{eq:chol_partial}
+is the same as minimizing the KL divergence \cref{eq:obj_chol}.
 
 In every case we have considered, picking the right sparsity pattern
 to minimize KL divergence reduces to selecting the points \( s_i \)
@@ -698,8 +600,8 @@ out of the possible candidates \( i + 1, \dotsc, N \) that most reduce
 predictive error at point(s) of interest.
 In the next section, we develop such a selection
 algorithm for directed inference in Gaussian processes.
-We apply this algorithm for sparsity selection
-of Cholesky factors in \cref{sec:chol_select}.
+We apply this algorithm for sparsity selection of
+sparse Cholesky factors in \cref{sec:chol_select}.
 
 \section{Greedy selection for directed inference}
 \label{sec:select}
@@ -731,8 +633,8 @@ In directed Gaussian process regression we are given \( N \) points of
 training data and predict at a target point with unknown value by selecting
 the \( s \) points most ``informative'' to the target, \(s \ll N \).
 From KL-minimization, the criterion for informativity
-should be to minimize the variance of the target point
-conditional on the selected points \cref{eq:L_cond_var}.
+should be to minimize the variance of the target point,
+conditional on the selected points \cref{eq:obj_chol}.
 The variance objective was first described by \cite{cohn1996neural} for optimal
 experimental design and later applied to directed Gaussian process inference
 by \cite{gramacy2014local} who refer to it as the active learning Cohn (ALC)
@@ -1771,11 +1673,11 @@ USA.
 
 \section{Derivations in KL-minimization}
 
-\subsection{Reduction for optimal factor}
+\subsection{KL divergence of optimal factor}
 \label{app:kl_L}
 
-We wish to compute the KL divergence between \( \CM \) and the optimal
-sparse approximate Cholesky factor \( L \) computed from \cref{eq:L_col}.
+We wish to compute the KL divergence between \( \CM \) and the optimal sparse
+Cholesky factor \( L \) computed from the closed-form \cref{eq:L_col}.
 From \cref{eq:kl} and letting \( \Delta = 2
 \KL*{\N(\vec{0}, \CM)}{\N(\vec{0}, (L L^{\top})^{-1})} \),
 \begin{align}
@@ -1810,11 +1712,10 @@ From \cref{eq:kl} and letting \( \Delta = 2
   }
   \Delta &= -\logdet(L L^{\top}) - \logdet(\CM)
   \shortintertext{
-    Computing the determinant of a triangular matrix as the
-    product of its diagonal entries and plugging in the
-    definition \cref{eq:L_col} for the diagonal entries,
+    Computing the log determinant of a triangular matrix as
+    the sum of the log of its diagonal entries and plugging in
+    the definition \cref{eq:L_col} for the diagonal entries,
   }
-  &= -2 \sum_{i = 1}^N \left [ \log(L_{i, i}) \right ] - \logdet(\CM) \\
   &= -\sum_{i = 1}^N
     \left [ \log(\vec{e}_1^{\top} \CM_{s_i, s_i}^{-1} \vec{e}_1) \right ]
     - \logdet(\CM) \\
@@ -1827,19 +1728,36 @@ From \cref{eq:kl} and letting \( \Delta = 2
     \right ]
     - \logdet(\CM)
   \shortintertext{
-    Applying \cref{eq:L_cond_var} to turn each term \(
-    (\vec{e}_1^{\top} \CM_{s_i, s_i}^{-1} \vec{e}_1)^{-1} \)
-    into a variance \( \CM_{i, i \mid s_i \setminus \{ i \}} \),
+    Now we use that conditioning in
+    covariance is marginalization in precision:
   }
-  &= \sum_{i = 1}^N
+  \label{eq:inverse_cond}
+  \CM_{1, 1 \mid 2} &= \left ( \CM^{-1} \right )_{1, 1}^{-1}
+  \qquad \qquad \text{for }
+  \CM =
+    \begin{pmatrix}
+      \CM_{1, 1} & \CM_{1, 2} \\
+      \CM_{2, 1} & \CM_{2, 2}
+    \end{pmatrix}
+  \shortintertext{
+    Transforming the marginalization \( (\vec{e}_1^{\top} \CM_{s_i, s_i}^{-1}
+    \vec{e}_1)^{-1} = \left (\CM_{s_i, s_i}^{-1} \right )_{1, 1}^{-1} =
+    \CM_{i, i \mid s_i \setminus \{ i \}} \) by \cref{eq:inverse_cond},
+  }
+  \Delta &= \sum_{i = 1}^N
     \left [
       \log \left ( \CM_{i, i \mid s_i \setminus \{ i \}} \right )
     \right ]
     - \logdet(\CM) \\
+  \shortintertext{Now we use the chain rule of log determinants,
+    using the same blocking as \cref{eq:inverse_cond}:}
+  \label{eq:det_chain}
+  \logdet(\CM) &= \logdet(\CM_{1, 1}) + \logdet(\CM_{2, 2 \mid 1}) \\
   \shortintertext{
-    Expanding the log determinant by the chain rule \cref{eq:det_chain},
+    Repeatedly expanding the log determinant by
+    \cref{eq:det_chain}, working from back to front,
   }
-  &= \sum_{i = 1}^N
+  \Delta &= \sum_{i = 1}^N
       \log \left ( \CM_{i, i \mid s_i \setminus \{ i \}} \right ) -
     \sum_{i = 1}^N
       \log \left ( \CM_{i, i \mid i + 1:} \right ) \\
@@ -1849,19 +1767,6 @@ From \cref{eq:kl} and letting \( \Delta = 2
       \log \left ( \CM_{i, i \mid i + 1:} \right )
     \right ]
 \end{align}
-We can interpret this sum as the accumulated \emph{difference} in error for
-a series of independent prediction problems: each to predict the \( i \)th
-variable given a subset of the variables after it in the ordering, \( i + 1,
-i + 2, \dotsc, N \).
-The left term \( \log \left ( \CM_{i, i \mid s_i \setminus \{ i \}} \right )
-\) is restricted to the variables in the sparsity pattern \( s_i \), while the
-right term \( \log \left ( \CM_{i, i \mid i + 1:} \right ) \) is unconstrained.
-As a result, the left term will necessarily be greater than the
-right, and the goal is to minimize the accumulated deviation.
-Thus, the KL divergence measures the maintenance of predictive accuracy after
-forcing conditional independence (sparsity) on the original distribution.
-This independent regression problem interpretation of the KL
-divergence is also given in equation 5 of \cite{katzfuss2022scalable}.
 
 The asymmetry of KL divergence implies the order of the matrices matters as
 well as whether both matrices have been inverted or not. This seems to imply
@@ -1879,37 +1784,65 @@ From a statistical perspective the KL divergence can interpreted as the
 likelihood-ratio test, so the asymmetry in order corresponds to the asymmetry
 between the null and alternative hypotheses \cite{eguchi2006interpreting}.
 
-\subsection{Partial updates in the selection algorithm}
+\subsection{Aggregated KL divergence}
+\label{app:kl_agg}
+
+In the aggregated Cholesky factorization setting of
+\cref{subsubsec:aggregated}, we have indices \( \tilde{i} = \{i_1,
+\dotsc, i_m \} \) such that \( i_1 \succ \dotsb \succ i_m \).
+Let the selected entries be \( \tilde{s} \); we assume every selected entry is
+after (w.r.t \( \succ \)) every index in \( \tilde{i} \) so that the sparsity
+pattern for the \( k \)th column is \( s_k = \tilde{s} \cup \{ j \in \tilde{i}
+: j \succeq k \} \).
+The KL divergence \cref{eq:obj_chol} restricted to
+the contribution from the group \( \tilde{i} \) is
+\begin{align}
+  \sum_{i \in \tilde{i}} \log(\CM_{i \mid s_i \setminus \{ i \} }) &=
+    \log(\CM_{i_1 \mid \tilde{s}}) +
+    \log(\CM_{i_2 \mid \tilde{s} \cup \{ i_1 \}}) + \dotsb +
+    \log(\CM_{i_m \mid \tilde{s} \cup \tilde{i}}) \\
+  \shortintertext{
+    where we write \( \CM_j \defeq \CM_{j, j} \).
+    Combining the first two terms by the chain rule \cref{eq:det_chain},
+  }
+  &= \logdet(\CM_{\{ i_1, i_2 \} \mid \tilde{s}}) +
+     \log(\CM_{i_3 \mid \tilde{s} \cup \{ i_1, i_2 \}}) + \dotsb +
+     \log(\CM_{i_m \mid \tilde{s} \cup \tilde{i}}) \\
+  \shortintertext{
+    Proceeding by induction, we are able to
+    reduce the entire sum to the single term
+  }
+  &= \logdet(\CM_{\tilde{i}, \tilde{i} \mid \tilde{s}})
+\end{align}
+
+\subsection{Partial KL divergence}
 \label{app:partial}
 
-We have the collection of Gaussian random variables \( \vec{y} = [y_1, \dotsc,
-y_m]^{\top} \) corresponding to the ordered column indices \( i_1 \succ
-\dotsb \succ i_m \) in the context of aggregated Cholesky factorization.
-We then select an index \( k \) that conditions the variables, but ignores
-the first \( p \) variables (the indices are sorted in decreasing order,
-so if \( k \) conditions a variable, it conditions everything afterwards).
-After this partial conditioning we denote the updated variables as
-\( \vec{y}_{\parallel k} \defeq y_1, \dotsc, y_p, y_{p + 1 \mid k},
-\dotsc, y_{m \mid k} \) and wish to compute the covariance matrix \(
-\Cov[\vec{y}_{\parallel k}] \).
-We know the original variables \( \vec{y} \) have joint density multivariate
-Gaussian according to some covariance matrix \( \CM \), \( \vec{y} \sim
-\N(\vec{0}, \CM) \), and the fully conditional variables \( \vec{y}_{\mid k}
-\) have closed-form posterior distribution according to \cref{eq:cond_cov},
-\( \vec{y}_{\mid k} \sim \N(\vec{\mean}, \CM - \CM_{:, k} \CM_{k, k}^{-1}
-\CM_{k, :}) \) for some posterior mean \( \vec{\mean} \).
-For unconditioned \( y_i \) and \( y_j \),
-their covariance is simply \( \CM_{i, j} \).
-Similarly, for conditioned \( y_{i \mid k} \) and \( y_{j
-\mid k} \), their covariance is \( \CM_{i, j \mid k} \).
+In the partial aggregated Cholesky factorization setting of
+\cref{subsubsec:partial}, we have a collection of random variables \( \vec{y} =
+[y_1, \dotsc, y_m]^{\top} \) corresponding to the ordered column indices \( i_1
+\succ \dotsb \succ i_m \) grouped in \( \tilde{i} = \{ i_1, \dotsc, i_m \} \).
+We select an index \( k \) that conditions all but the first \( p \) variables;
+we denote the updated variables as \( \vec{y}_{\parallel k} \defeq [y_1,
+\dotsc, y_p, y_{p + 1 \mid k}, \dotsc, y_{m \mid k}]^{\top} \) and wish to
+compute their covariance \( \Cov[\vec{y}_{\parallel k}] \).
+The original variables \( \vec{y} \) have joint density multivariate
+Gaussian, \( \vec{y} \sim \N(\vec{0}, \CM) \) for some covariance
+matrix \( \CM \), and the fully conditional variables \( \vec{y}_{\mid
+k} \) have posterior distribution according to \cref{eq:cond_cov}, \(
+\vec{y}_{\mid k} \sim \N(\vec{\mean}, \CM - \CM_{:, k} \CM_{k, k}^{-1}
+\CM_{k, :}) \) for some
+posterior mean \( \vec{\mean} \).
+For unconditioned \( y_i \) and \( y_j \), their covariance is simply
+\( \CM_{i, j} \); similarly, for conditioned \( y_{i \mid k} \) and
+\( y_{j \mid k} \), their covariance is \( \CM_{i, j \mid k} \).
 The only unknown is the covariance between unconditioned
 \( y_i \) and conditioned \( y_{j \mid k} \).
 Taking the Cholesky factorization of both covariance matrices,
 let \( L = \chol(\CM) \) and \( L' = \chol(\CM_{:, : \mid k}) \).
-We can then view \( \vec{y} \) as \( L \vec{z} \), where \( \vec{z}
-\) is distributed according to standard normal, \( \N(\vec{0}, \Id) \).
-Similarly, \( \vec{y}_{\mid k} = L' \vec{z} + \vec{\mean} \).
-By definition,
+We can then view \( \vec{y} \) as \( L \vec{z} \) for \( \vec{z} \sim
+\N(\vec{0}, \Id) \) and \( \vec{y}_{\mid k} = L' \vec{z} + \vec{\mean} \).
+By definition of covariance,
 \begin{align}
   \Cov[y_i, y_{j \mid k}] &=
     \E[(y_i - \E[y_i])(y_{j \mid k} - \E[y_{j \mid k}])] \\
@@ -1929,7 +1862,10 @@ By definition,
   }
   &= L_{i, 1} {L'}_{j, 1} + \dotsb + L_{i, m} {L'}_{j, m} \\
   &= L_i \cdot {L'}_j
-  \shortintertext{Thus, the new covariance matrix can be written as}
+  \shortintertext{
+    Thus, the new covariance matrix factors into
+    two Cholesky factors ``glued'' together:
+  }
   \Cov[\vec{y}_{\parallel k}] &=
   \begin{pmatrix}
     L_{:p} L_{:p}^{\top} &
@@ -1946,6 +1882,65 @@ By definition,
     {L'}_{p + 1:}
   \end{pmatrix}^{\top}
 \end{align}
+which is illustrated in \cref{fig:partial_factor}.
+Armed with this representation, we equate the log determinant of \(
+\CM_{\tilde{i}, \tilde{i} \parallel k} \defeq \Cov[\vec{y}_{\parallel
+k}] \) to the KL divergence in \cref{eq:obj_chol}.
+Recalling that the determinant of a triangular
+matrix is the product of its diagonal entries,
+\begin{align}
+  \nonumber
+  \frac{1}{2} \logdet(\CM_{\tilde{i}, \tilde{i} \parallel k}) &=
+  \underbrace{
+    \log(L_{1, 1}) + \dotsb + \log(L_{p, p})
+  }_{\text{the same}} +
+  \underbrace{
+    \log({L'}_{p + 1, p + 1}) + \dotsb + \log({L'}_{m, m})
+  }_{\text{conditioned}}
+\end{align}
+Comparing to the KL divergence \cref{eq:obj_chol} and
+recalling that \( k \) is added to \( s_i \) if \( i > p \),
+\begin{align}
+  \sum_{i = 1}^m \log \left ( \CM_{i, i \mid s_i \setminus \{ i \}} \right )
+  &= \underbrace{
+      \log \left ( \CM_{1, 1 \mid s_1 \setminus \{ 1 \}} \right ) + \dotsb +
+      \log \left ( \CM_{p, p \mid s_p \setminus \{ p \}} \right )
+     }_\text{the same} + \\
+  \nonumber
+  % disgusting hack, do properly later --- looks good enough to me, though
+  & \hphantom{=} \: \,
+  \underbrace{
+    \log \left (
+      \CM_{p + 1, p + 1 \mid s_{p + 1} \setminus \{ p + 1 \}}
+    \right ) + \dotsb +
+    \log \left ( \CM_{m, m \mid s_m \setminus \{ m \}} \right )
+  }_\text{conditioned}
+  \shortintertext{
+    Since \( L_{i, i} \) (and \( {L'}_{i, i} \)) is the square root
+    of the posterior variance of the \( i \)th variable from the
+    statistical perspective in \cref{eq:chol}, we have \( 2 \log(L_{i,
+    i}) = \log(\CM_{i, i \mid s_i \setminus \{ i \}}) \) and so
+  }
+  \logdet(\CM_{\tilde{i}, \tilde{i} \parallel k}) &=
+    \sum_{i = 1}^m \log \left ( \CM_{i, i \mid s_i \setminus \{ i \}} \right )
+\end{align}
+
+\begin{figure}[t]
+  \centering
+  \input{figures/partial_factor.tex}
+  \caption{
+    Illustration of the Cholesky factorization of
+    a partially conditioned covariance matrix.
+    Here \textcolor{darksilver}{grey} denotes fully unconditional,
+    \textcolor{darklightblue}{blue} denotes fully conditional, and the
+    \textcolor{silver!50!lightblue}{mixed color} denotes interaction
+    between the two.
+    Surprisingly, such a matrix factors into a ``pure'' Cholesky
+    factor by ``gluing'' the prefix of the fully unconditional
+    factor with the suffix of the fully conditional factor.
+  }
+  \label{fig:partial_factor}
+\end{figure}
 
 \subsection{Aggregated computation of sparsity entries}
 \label{app:L_mult}
