@@ -97,17 +97,11 @@ motivating the search for faster, approximate algorithms.
 
 \paragraph{Existing work}
 
-\todo{I would put knothe rosenblatt, FSAI, and sparse Cholesky
-factorization into the Vecchia paragraph and use the ``existing work''
-paragraph to disucuss other approaches such as inducing points,
-wavelet method, h matrices, fast multiplol, random features, Nystrom
-approximation, sparse Cholesky of covariance, etc.}
 TODO
 
 \paragraph{Vecchia approximation}
 
-\todo{I would make this one integrated section on
-Vecchia, FSAI, KL-Cholesky, and transport maps}
+\todo{I wonder if we should change the title to sparse inverse-cholesky factors, or something on that line?}
 The Vecchia approximation \cite{vecchia1988estimation} decomposes the
 joint distribution into the product of univariate densities, each
 density conditional only on a subset of those prior in the ordering.
@@ -133,7 +127,6 @@ for embarrassingly parallel algorithms for regression and factorization.
 
 \paragraph{Ordering and sparsity selection by geometry}
 
-\todo{Might want to add a quick comment explaining the maximin ordering here?}
 The chosen ordering and sparsity pattern significantly
 affect the quality of the resulting factor.
 Vecchia originally proposed ordering points lexicographically
@@ -141,6 +134,7 @@ Vecchia originally proposed ordering points lexicographically
 orderings like the maximum-minimum ordering \cite{guinness2018permutation}
 which has become popular \cite{schafer2020compression, schafer2021sparse,
 katzfuss2021general, kang2021correlationbased, katzfuss2022scalable}.
+\todo{I would add a remark here hat comments on the relationship to multiscale analysis and wavelets}
 After choosing an ordering, following Vecchia's recommendation the sparsity
 set is often formed by selecting the closest points by Euclidean distance
 \cite{vecchia1988estimation, schafer2020compression, schafer2021sparse,
@@ -149,7 +143,8 @@ This choice is often justified by the \emph{screening effect},
 or the observation that conditional on points near the point of
 interest, far away points are almost conditionally independent
 \cite{stein2002screening, stein20112010}.
-For example, popular kernel functions like the Mat{\'e}rn family decay
+\todo{Could mention the rigorous results, as well}
+\todo{This sentence should contain mention of the conditioning}For example, popular kernel functions like the Mat{\'e}rn family decay
 exponentially with increasing distance (see \cref{fig:screening}).
 However, selecting by distance ignores the conditional
 effect of adding points to the sparsity set.
@@ -261,12 +256,6 @@ provided in the appendix and supplementary material.
   }
   \label{fig:screening}
 \end{figure}
-
-\Ftodo{``specific'' and ``intuitively'' are fluff, meaning that they
-don't really add information. In order to achieve crisp, high-quality
-academic writing, it is important to try to those fluff words as much
-as possible. It's normal to add them out of reflex initially, so it
-requires active postprocessing.}
 
 \section{Sparse Cholesky factorization by KL-minimization}
 \label{sec:chol}
