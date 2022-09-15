@@ -1,10 +1,10 @@
 \begin{tikzpicture}[baseline, scale=0.75]
-  \begin{semilogyaxis}[
+  \begin{loglogaxis}[
     grid={major},
     % title={Time with increasing \( \rho \)
     %   (\( N = 65536, \rho_s = 2, \lambda = 1.5 \))},
-    xlabel={\( \rho \)},
-    ylabel={\( \log_{10} \) Wall-Clock Time (seconds)},
+    xlabel={\( \log_{10} \) Nonzeros (nnz)},
+    ylabel={\( \log_{10} \) Wall-clock time (seconds)},
     % legend entries={KL, KL (agg.), select, select (agg.)},
     % legend pos={north west},
   ]
@@ -12,5 +12,5 @@
   \addplot table {figures/cg/rho_time_tot_KL_agg.csv};
   \addplot table {figures/cg/rho_time_tot_select.csv};
   \addplot table {figures/cg/rho_time_tot_select_agg.csv};
-  \end{semilogyaxis}
+  \end{loglogaxis}
 \end{tikzpicture}
