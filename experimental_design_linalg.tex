@@ -51,18 +51,20 @@
   greedy selection algorithm that maximizes mutual information with
   target points, conditional on all points previously selected.
   For selecting \( k \) points out of \( N \), the naive time
-  complexity is \( \BigO(N k^4) \), but by maintaining a
-  partial Cholesky factor we reduce this to \( \BigO(N k^2) \).
-  Furthermore, for multiple (\( m \)) targets we achieve a time complexity
-  of \( \BigO(N k^2 + N m^2 + m^3) \) which is maintained in the setting of
+  complexity is \( \mathcal{O}(N k^4) \), but by maintaining a
+  partial Cholesky factor we reduce this to \( \mathcal{O}(N k^2) \).
+  Furthermore, for multiple (\( m \)) targets we achieve a time complexity of
+  \( \mathcal{O}(N k^2 + N m^2 + m^3) \) which is maintained in the setting of
   aggregated Cholesky factorization where a selected point need not condition
   every target.
   We directly apply the selection algorithm to image
-  classification and recovery of sparse Cholesky
-  factors, improving upon \( k \)-th nearest neighbors.
-  By minimizing Kullback-Leibler divergence, we apply the
-  algorithm to Cholesky factorization, Gaussian process
-  regression, and preconditioning with the conjugate gradient.
+  classification and recovery of sparse Cholesky factors.
+  % TODO: qualify these claims with numerical experiments
+  By minimizing Kullback-Leibler divergence, we apply the algorithm to
+  Cholesky factorization, Gaussian process regression, and preconditioning
+  with the conjugate gradient, improving over \( k \)-nearest neighbors
+  particularly in high dimensional, unusual, or otherwise messy geometries
+  with non-isotropic kernel functions.
 \end{abstract}
 
 % REQUIRED
@@ -268,11 +270,11 @@ function or kernel function \( \K(\vec{x}, \vec{x}') \), which we will
 denote as \( f(\vec{x}) \sim \GP(\mean(\vec{x}), \K(\vec{x}, \vec{x}'))
 \), if for any finite set of points \( X = \{ \vec{x}_i \}_{i = 1}^N \),
 \( f(X) \sim \N(\vec{\mean}, \CM) \), where \( \mean_i = \mu(\vec{x}_i)
-\) and \( \CM_{ij} = \K(\vec{x}_i, \vec{x}_j) \).
+\) and \( \CM_{i, j} = \K(\vec{x}_i, \vec{x}_j) \).
 
 In many applications of Gaussian processes, we
 wish to infer unknown data given known data.
-Given the training dataset \( \mathcal{D} = \{ (\vec{x}_i, y_i) \}{i =
+Given the training dataset \( \mathcal{D} = \{ (\vec{x}_i, y_i) \}_{i =
 1}^N \) where the inputs \( \vec{x}_i \in \Reals^D \) are collected in the
 matrix \( X_\Train = [\vec{x}_1, \dotsc, \vec{x}_N]^{\top} \in \Reals^{N
 \times D} \) and the measurements at those points are collected in the
@@ -449,7 +451,7 @@ We compare these distributions by the KL divergence as \cite{schafer2021sparse}
 does, specializing the generic optimization problem \cref{eq:generic_obj} to
 \begin{align}
   \label{eq:L_obj}
-  L \defeq \argmin_{\hat{L} \in S} \,
+  L \defeq \argmin_{\hat{L} \in \SpSet} \,
     \KL*{\N(\vec{0}, \CM)}
         {\N(\vec{0}, (\hat{L} \hat{L}^{\top})^{-1})}
 \end{align}
@@ -662,7 +664,8 @@ The decrease in the variance of \( y_\Pred \) after
 selecting \( k \) is given by \( u_\Pred^2 \), or
 \begin{align}
   \label{eq:obj_gp}
-  u_\Pred^2 = \frac{\CM_{\Pred, k \mid \I}^2}{\CM_{k, k \mid \I}}
+  u_\Pred^2
+  = \frac{\CM_{\Pred, k \mid \I}^2}{\CM_{k, k \mid \I}}
   = \frac{\Cov[y_\Pred, y_k \mid \I]^2}{\Var[y_k \mid \I]}
   = \Var[y_\Pred \mid \I] \Corr[y_\Pred, y_k \mid \I]^2
 \end{align}
@@ -844,11 +847,10 @@ Using the partial selection algorithm (\cref{subsec:partial_select})
 instead on unmodified grouping and candidate sets
 significantly improves the approximation quality.
 
-We still compute the entries of \( L \) by Equation \cref{eq:L_col}.
-Because the sparsity patterns for columns in the same group are subsets of
-each other, we can efficiently compute the group's entries together in the
-time complexity for a single column (see \cref{app:L_mult} or Algorithm 3.2
-of \cite{schafer2021sparse}).
+Because the sparsity patterns for columns in the same group are subsets
+of each other, we can efficiently compute the group's entries in \( L \)
+\cref{eq:L_col} together in the time complexity for a single column (see
+\cref{app:L_mult} or Algorithm 3.2 of \cite{schafer2021sparse}).
 If each group has \( m \) points, both the multiple-target and
 partial algorithms have time complexity \( \BigO(C s^2 + C m^2
 + m^3) \) to select \( s \) points out of \( C \) candidates.
@@ -858,10 +860,10 @@ simplifying to \( \BigO(\frac{N C s^2}{m}) \) assuming \( m = \BigO(s) \),
 a \( m \) times improvement over non-aggregated factorization.
 Better time complexity yields denser and thereby
 more accurate factors in the same amount of time.
-Inheriting the downside of the multiple-target selection algorithm,
-the aggregated factor is less efficient at reducing the KL divergence
-per nonzero since the sparsity pattern is shared between all columns
-in the group, not tailored to any particular column.
+Inheriting the primary downside of the multiple-target selection algorithm,
+the aggregated factor is less efficient at reducing the KL divergence per
+nonzero since the sparsity pattern is shared between all columns in the
+group, not tailored to any particular column.
 
 \subsection{Allocating nonzeros by global greedy selection}
 \label{subsec:global_greedy}
@@ -916,9 +918,7 @@ variance, so exactly one term in the KL divergence \cref{eq:obj_chol} changes:
     \CM_{\Pred, \Pred \mid \I} -
       \frac{\CM_{\Pred, k \mid \I}^2}{\CM_{k, k \mid \I}}
   \right ) \CM_{\Pred, \Pred \mid \I}^{-1} &=
-    \argmax_k \left (
-      \frac{\CM_{\Pred, k \mid \I}^2}{\CM_{k, k \mid \I}}
-    \right ) \CM_{\Pred, \Pred \mid \I}^{-1}
+    \argmax_k \; \Corr[y_\Pred, y_k \mid \I]^2
 \end{align}
 where the new objective \cref{eq:global_obj} is easily computed as
 the original objective \cref{eq:obj_gp} divided by the target's
@@ -1885,7 +1885,7 @@ Factoring the joint covariance matrix \( \CM \) blocked as
     \textcolor{darkorange}{\CM_{2, 1} \CM_{1, 1}^{-1}} & \Id
   \end{pmatrix}
   \begin{pmatrix}
-    \textcolor{darkorange}{\chol(\CM_{1, 1})} & 0 \\
+    \chol(\CM_{1, 1}) & 0 \\
     0 & \chol(\textcolor{lightblue}{
       \CM_{2, 2} - \CM_{2, 1} \CM_{1, 1}^{-1} \CM_{1, 2}
     })
