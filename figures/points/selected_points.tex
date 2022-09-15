@@ -7,6 +7,11 @@
     % force axis box to have exactly the right dimensions, ignoring labels
     scale only axis=true,
   ]
+  % consistent size bounding box
+  \draw [white, line width=0] (-0.1, -0.1) -- (-0.1,  1.1);
+  \draw [white, line width=0] ( 1.1, -0.1) -- ( 1.1,  1.1);
+  \draw [white, line width=0] (-0.1, -0.1) -- (-1.1, -0.1);
+  \draw [white, line width=0] (-0.1,  1.1) -- (-1.1,  1.1);
   \addplot [only marks, mark size=1, silver]    table
     {figures/points/all_points.csv};
   \addplot [only marks, mark size=2, lightblue] table

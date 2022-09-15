@@ -7,7 +7,7 @@
     L_{:, i} \gets
     \K(X, X_k) - L_{:, :i - 1} L_{k, :i - 1}^{\top}
   \)
-  \STATE \( L_{:, i} \gets \frac{L{:, i}}{\sqrt{L_{k, i}}} \)
+  \STATE \( L_{:, i} \gets \frac{L_{:, i}}{\sqrt{L_{k, i}}} \)
   \FOR{\( j \in \{ 1, \dotsc, N \} \)}
     \STATE \( \CM_{j, j} \gets \CM_{j, j} - L_{j, i}^2 \)
   \ENDFOR
