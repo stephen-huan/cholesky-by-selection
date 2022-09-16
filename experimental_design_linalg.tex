@@ -135,19 +135,25 @@ Vecchia originally proposed ordering points lexicographically
 \cite{vecchia1988estimation}, but more recent work exploits space-covering
 orderings like the maximum-minimum ordering \cite{guinness2018permutation}
 which has become popular \cite{schafer2020compression, schafer2021sparse,
-katzfuss2021general, kang2021correlationbased, katzfuss2022scalable}.
+katzfuss2021general, kang2021correlationbased, katzfuss2022scalable}
 \todo{I would add a remark here hat comments on the relationship to multiscale analysis and wavelets}
+and has rigorous approximation guarantees from results in
+numerical homogenization and operator-adapted wavelets
+\cite{owhadi2019operatoradapted, schafer2020compression}.
 After choosing an ordering, following Vecchia's recommendation the sparsity
 set is often formed by selecting the closest points by Euclidean distance
 \cite{vecchia1988estimation, schafer2020compression, schafer2021sparse,
 katzfuss2022scalable}.
-This choice is often justified by the \emph{screening effect},
-or the observation that conditional on points near the point of
-interest, far away points are almost conditionally independent
-\cite{stein2002screening, stein20112010}.
+This choice is often justified by the \emph{screening effect}, or the
+observation that conditional on points near the point of interest, far away
+points are almost conditionally independent for many popular kernel functions
+\cite{stein2002screening, stein20112010} (see \cref{fig:screening}).
 \todo{Could mention the rigorous results, as well}
-\todo{This sentence should contain mention of the conditioning}For example, popular kernel functions like the Mat{\'e}rn family decay
-exponentially with increasing distance (see \cref{fig:screening}).
+\todo{This sentence should contain mention of the conditioning}
+Methods exploiting the screening effect achieve state of the art \( \epsilon
+\)-accuracy in time complexity \( \BigO(N \log^{2d} (N/\epsilon)) \) using \(
+\BigO(N \log^{ d} (N/\epsilon)) \) nonzero entries of the covariance matrix
+\cite{schafer2021sparse}.
 However, selecting by distance ignores the conditional
 effect of adding points to the sparsity set.
 Imagine that the closest point to the point
@@ -156,6 +162,21 @@ Conditional on the original point, the
 duplicates provide no additional information.
 But these redundant points are still just as
 close to the target, so they are still added.
+
+\begin{figure}[t]
+  \centering
+  \input{figures/screening/uncond.tex}%
+  \input{figures/screening/cond.tex}
+  \caption{
+    An illustration of the screening effect with the Mat{\'e}rn kernel with
+    length scale \( \ell = 1 \) and smoothness \( \nu = 1/2 \).
+    The first panel shows the \textcolor{lightblue}{unconditional
+    correlation} with the point at (0, 0).
+    The second panel shows the \textcolor{seagreen}{conditional correlation}
+    after conditioning on the four points in \textcolor{orange}{orange}.
+  }
+  \label{fig:screening}
+\end{figure}
 
 \paragraph{Conditional selection}
 
