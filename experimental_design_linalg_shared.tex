@@ -61,8 +61,17 @@
 % make marks not follow the style of lines
 \tikzset{every mark/.append style={solid}}
 
+% cache tikz graphics
+\usepgfplotslibrary{external}
+\tikzexternalize
+\tikzsetexternalprefix{external/}
+
 % Custom commands:
 % \newcommand*{\todo}[1]{{\color{red} #1}}
+% prevent todo from being externalized
+\renewcommand{\todo}[2][]{
+  \tikzexternaldisable\@todo[#1]{#2}\tikzexternalenable
+}
 \newcommand*{\Ftodo}[1]{\todo[color=lightblue]{Florian: #1}}
 \newcommand*{\Stodo}[1]{\todo[color=seagreen]{Stephen: #1}}
 

@@ -246,17 +246,21 @@ provided in the appendix and supplementary material.
 
 \begin{figure}[t]
   \centering
-  \input{figures/screening/uncond.tex}%
-  \input{figures/screening/cond.tex}
+  \input{figures/kernel/points_1.tex}%
+  \input{figures/kernel/points_2.tex}%
+  \input{figures/kernel/points_3.tex}%
+  \input{figures/kernel/points_4.tex}
   \caption{
-    An illustration of the screening effect with the Mat{\'e}rn kernel with
-    length scale \( \ell = 1 \) and smoothness \( \nu = \frac{1}{2} \).
-    The first panel shows the unconditional
-    correlation with the point at (0, 0).
-    The second panel shows the conditional correlation after
-    conditioning on the four points in \textcolor{orange}{orange}.
+    The first panel shows selecting the \( k \)-\textcolor{seagreen}{nearest
+    neighbors} to the \textcolor{orange}{center point} out
+    of a dense grid of \textcolor{silver}{candidates}.
+    The next panels show selection by greedily maximizing
+    conditional mutual information with the center point for a Mat{\'e}rn
+    kernel with length scale \( \ell = 1 \) and increasing smoothness \(
+    \nu \), from right to left: \( \nu = 1/2, 3/2, 5/2 \).
+    The full selections are found at \url{https://youtu.be/lyJf3S5ThjQ}.
   }
-  \label{fig:screening}
+  \label{fig:cond_select}
 \end{figure}
 
 \section{Sparse Cholesky factorization by KL-minimization}
