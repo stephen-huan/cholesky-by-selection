@@ -1145,9 +1145,9 @@ matrices like \cite{kyng2016approximate} is more appropriate.
 We empirically verify that conditional sparsity selection
 produces more accurate sparse Cholesky factors than
 selection by Euclidean distance at the same density.
-We sample \( N \) points uniformly at random from the unit cube
-\( [0, 1]^3 \) and use a Mat{\'e}rn kernel with smoothness
-\( \nu = \frac{5}{2} \) and length scale \( \ell = 1 \).
+We take \( N \) points on a slightly perturbed regular
+grid in \( [0, 1]^2 \) and use a Mat{\'e}rn kernel with
+smoothness \( \nu = 5/2 \) and length scale \( \ell = 1 \).
 
 As a baseline for comparison, we use the single-column and aggregated variants
 of the KL-minimization framework of \cite{schafer2021sparse}, which orders
@@ -1194,20 +1194,17 @@ computational efficiency in downstream tasks.
 The conditional selection methods achieve significantly better
 KL divergence compared to their unconditional counterparts for
 the same number of sparsity entries as \cref{fig:chol_rho} shows.
-Part of that improvement is from keeping the number of nonzeros per column
-constant as \( k \)-NN is also significantly more accurate than the baseline;
-\cite{kang2021correlationbased} also observes significantly better accuracy
-from \( k \)-NN for irregularly spaced points.
-The conditional methods achieve better accuracy per unit
-time cost than their unconditional counterparts, but
-the simple method of \( k \)-NN remains hard to beat.
+However, they do not achieve better accuracy per unit time cost than
+their unconditional counterparts from the increased cost of selection.
+As noted in \cite{gramacy2015speeding}, the simple method of
+\( k \)-NN remains hard to beat without specialized tricks.
 
 Finally, we experiment with increasing the size of the candidate set \(
 \rho_s \) \emph{without} increasing the density of the factor \( \rho \).
 Since the conditional selection methods scale linearly with the number of
 candidates, increasing \( \rho_s \) is much cheaper than increasing \( \rho \).
 As shown in \cref{fig:chol_s}, increasing \( \rho_s \)
-has diminishing returns past \( \rho_s \approx 4 \).
+has diminishing returns past \( \rho_s \approx 2 \).
 
 \pgfplotsset{
   cycle list={
