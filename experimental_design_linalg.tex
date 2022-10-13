@@ -250,20 +250,20 @@ maintaining a global priority queue shared between all columns.
 
 This paper is organized as follows.
 In \cref{sec:chol}, we show how minimizing KL divergence to compute sparse
-Cholesky factors reduces to solving independent regression problems and
-extend this result to adjacent and nonadjacent aggregated factorization in
-\cref{subsec:kl}.
+Cholesky factors reduces to solving independent regression problems.
 In \cref{sec:select}, we develop greedy algorithms to select
 the sparsity pattern independently for each regression problem.
-In \cref{sec:chol_select}, we combine the greedy selection algorithms with
+In \cref{sec:chol_select}, we combine the greedy selection algorithm with
 KL minimization to yield algorithms for sparse Cholesky factorization.
+In \cref{sec:extensions} we extend these results to
+adjacent and nonadjacent aggregated factorization.
 In \cref{sec:experiments}, we present numerical experiments applying our method
 to image classification, recovery of \textit{a priori} sparse Cholesky factors,
 Cholesky factorization, Gaussian process regression, and preconditioning with
 the conjugate gradient.
 In \cref{sec:conclusion}, we summarize our results.
-Proofs and details on implementing our algorithms are
-provided in the appendix and supplementary material.
+Proofs and algorithmic details are provided
+in the appendix and supplementary material.
 
 \begin{figure}[t]
   \centering
@@ -526,98 +526,13 @@ A similar decomposition of the KL divergence into independent
 regression problems was observed in Equation (5) of
 \cite{katzfuss2022scalable} for lower triangular transport maps.
 
-\subsubsection{Aggregated sparsity pattern}
-\label{subsubsec:aggregated}
-
-We now derive a similar decomposition of the KL divergence
-if the same sparsity pattern is reused for multiple columns,
-known as aggregated or supernodal Cholesky factorization.
-Aggregation can lead to substantial time
-and space savings \cite{schafer2021sparse}.
-For this section we focus on a single group \( \tilde{i}
-= \{i_1, \dotsc, i_m \} \) composed from aggregating the
-column indices \( i_1 \succ i_2 \succ \dotsb \succ i_m \).
-Let \( \tilde{i} \) have aggregated selected entries \(
-s_{\tilde{i}} \) satisfying \( s_{\tilde{i}} \supseteq \tilde{i}
-\) to guarantee that the Cholesky factor has full rank.
-Let \( \tilde{s} \defeq s_{\tilde{i}} \setminus \tilde{i} \)
-be the selected entries excluding the columns in the group.
-The sparsity pattern for the \( k \)th column in the group is then the
-aggregated selected entries excluding the entries that violate lower
-triangularity, \( s_k \defeq \{ j \in s_{\tilde{i}} : j \succeq k \} \).
-Assuming every entry of \( \tilde{s} \) is after every index in \( \tilde{i}
-\), then \( s_k = \tilde{s} \cup \{ j \in \tilde{i} : j \succeq k \} \).
-This condition is guaranteed if the aggregated columns are adjacent in the
-ordering, for example; we defer handling the general case to the next section.
-The KL divergence \cref{eq:obj_chol} restricted to
-the contribution from the group \( \tilde{i} \) is
-\begin{align}
-  \label{eq:obj_mult}
-  \sum_{i \in \tilde{i}}
-    \log \left (\CM_{i, i \mid s_i \setminus \{ i \} } \right ) &=
-    \logdet(\CM_{\tilde{i}, \tilde{i} \mid \tilde{s}})
-\end{align}
-from \cref{app:kl_agg}.
-Thus, the generalization of the posterior variance
-\cref{eq:obj_chol} to aggregated columns is their log
-determinant conditional on (well-behaved) selected entries.
-We briefly discuss what happens when
-selected entries are \emph{between} columns.
-
-\subsubsection{Nonadjacent or partial aggregation}
-\label{subsubsec:partial}
-
-Let the random variables corresponding to the indices \( \tilde{i} = \{
-i_1, \dotsc, i_m \} \) be collected in a vector \( \vec{y} = [y_1, \dotsc,
-y_m]^{\top} \) with joint density \( \vec{y} \sim \N(\vec{0}, \CM) \).
-We select an index \( k \) that conditions all but the first \( p \)
-variables (recall that the indices are sorted w.r.t \( \succ \), so if
-\( k \) conditions a variable, it conditions all those afterwards).
-After this partial conditioning, the variables become \( \vec{y}_{\parallel
-k} \defeq [y_1, \dotsc, y_p, y_{p + 1 \mid k}, \dotsc, y_{m \mid k}]^{\top}
-\) and the covariance matrix \( \Cov[\vec{y}_{\parallel k}] \) becomes
-\begin{align}
-  \label{eq:chol_partial}
-  \CM_{\tilde{i}, \tilde{i} \parallel k} &\defeq
-  \Cov[\vec{y}_{\parallel k}] =
-  \begin{pmatrix}
-    L_{:p} L_{:p}^{\top} &
-    L_{:p} {L'}_{p + 1:}^{\top} \\
-    {L'}_{p + 1:} L_{:p}^{\top} &
-    {L'}_{p + 1:} {L'}_{p + 1:}^{\top}
-  \end{pmatrix} =
-  \begin{pmatrix}
-    L_{:p} \\
-    {L'}_{p + 1:}
-  \end{pmatrix}
-  \begin{pmatrix}
-    L_{:p} \\
-    {L'}_{p + 1:}
-  \end{pmatrix}^{\top}
-\end{align}
-where \( L = \chol(\CM) \) and \( L' = \chol(\CM_{:, : \mid k}) \).
-See \cref{fig:partial_factor} for an
-illustration and \cref{app:partial} for details.
-Armed with this representation, we compute \(
-\logdet(\CM_{\tilde{i}, \tilde{i} \parallel k}) \):
-\begin{align}
-  \label{eq:partial_kl}
-  \sum_{i \in \tilde{i}}
-    \log \left (\CM_{i, i \mid s_i \setminus \{ i \} } \right ) &=
-    \logdet(\CM_{\tilde{i}, \tilde{i} \parallel k})
-\end{align}
-Like the aggregated case \cref{eq:obj_mult}, minimizing the log determinant
-of the \emph{partially} conditioned covariance matrix \cref{eq:chol_partial}
-is the same as minimizing the KL divergence \cref{eq:obj_chol}.
-
-In every case we have considered, picking the right sparsity pattern
-to minimize KL divergence reduces to selecting the points \( s_i \)
-out of the possible candidates \( i + 1, \dotsc, N \) that most reduce
-predictive error at point(s) of interest.
+Thus, picking the right sparsity pattern to minimize KL divergence reduces
+to selecting the points \( s_i \) out of the possible candidates \( i + 1,
+\dotsc, N \) that most reduce predictive error at point(s) of interest.
 In the next section, we develop such a selection
 algorithm for directed inference in Gaussian processes.
-We apply this algorithm for sparsity selection of
-sparse Cholesky factors in \cref{sec:chol_select}.
+We apply this algorithm for sparsity selection of sparse Cholesky factors
+in \cref{sec:chol_select} and extend it in \cref{sec:extensions}.
 
 \section{Greedy selection for directed inference}
 \label{sec:select}
@@ -717,6 +632,155 @@ Although the precision algorithm uses less memory than the
 Cholesky algorithm, the Cholesky algorithm is preferred
 for ease of implementation and better performance.
 
+\section{Greedy selection for global approximation by KL-minimization}
+\label{sec:chol_select}
+
+\begin{figure}[t]
+  \centering
+  \input{figures/cholesky_factor.tex}%
+  \qquad
+  \input{figures/points/selected_points.tex}
+  \caption{
+    For a column of a Cholesky factor in isolation, the
+    \textcolor{orange}{target} point is the \textcolor{orange}{diagonal}
+    entry, \textcolor{lightblue}{candidates} are \textcolor{lightblue}{below}
+    it, and the \textcolor{seagreen}{selected} entries are added to
+    the \textcolor{seagreen}{sparsity pattern}.
+    Points violating lower triangularity are
+    shown in \textcolor{darksilver}{grey}.
+    Thus, sparsity selection in Cholesky factorization
+    (left panel) is analogous to training point selection
+    in directed Gaussian process regression (right panel).
+  }
+  \label{fig:select_chol}
+\end{figure}
+
+Directed Gaussian process regression infers the
+\emph{local} distribution at points of interest.
+We turn our attention to \emph{global} approximation of the entire Gaussian
+process; given a kernel function \( \K(\vec{x}, \vec{x}') \) and a set of \(
+N \) points \( \{ \vec{x}_i \}_{i = 1}^N \) we have the covariance matrix \(
+\CM_{ij} = K(\vec{x}_i, \vec{x}_j) \) for which we seek a sparse approximate
+Cholesky factor \( L \) of the precision, \( L L^{\top} \approx \CM^{-1} \).
+We first order the points by the reverse-maximin ordering described in
+\cref{subsec:ordering} and then straightforwardly apply the selection
+algorithm developed in \cref{sec:select} to form the sparsity pattern.
+For the \( i \)th column of \( L \), the target point is the \( i \)th point
+in the ordering, the candidate points are those satisfying lower triangularity
+(after the target in the ordering), and running the selection algorithm for
+the desired number of nonzeros entries picks out indices which we add to the
+sparsity set \( s_i \); this process is illustrated in \cref{fig:select_chol}.
+Finally, we compute the values of the selected nonzero
+indices by the closed-form expression \cref{eq:L_col}.
+Both sparsity selection and computing entries are
+embarrassingly parallel over \( L \)'s columns.
+
+Using the single-target selection algorithm from \cref{subsec:greedy_select}
+has time complexity \( \BigO(N C s^2) \) to select \( s \)
+nonzero entries out of \( C \) candidates for \( N \) columns.
+Computing the corresponding values \( \CM_{s_i, s_i}^{-1}
+\vec{e}_1 \) has time complexity \( \BigO(N s^3) \).
+Sparsity selection has the same complexity as entry computation
+if the number of candidates \( C \) is \( \BigO(s) \), suggesting
+the need to limit the number of candidates considered.
+In practice, we pick the candidate set to be the nearest neighbors
+of the point of interest as \cite{gramacy2014local} does;
+specifically, we use the framework of \cite{schafer2021sparse}
+which considers all points within a radius proportional to the
+length scale from the reverse-maximin ordering \cref{eq:maximin}.
+
+\section{Extensions}
+\label{sec:extensions}
+
+Here we consider extensions of the basic single-column
+method to aggregated (or supernodal) Cholesky factorization
+and to determining the number of nonzeros per column.
+Numerical experiments are presented in \cref{sec:experiments}.
+
+\subsection{Aggregated sparsity pattern}
+\label{subsec:aggregated}
+
+We now derive a similar decomposition of the KL divergence
+if the same sparsity pattern is reused for multiple columns,
+known as aggregated or supernodal Cholesky factorization.
+Aggregation can lead to substantial time
+and space savings \cite{schafer2021sparse}.
+For this section we focus on a single group \( \tilde{i}
+= \{i_1, \dotsc, i_m \} \) composed from aggregating the
+column indices \( i_1 \succ i_2 \succ \dotsb \succ i_m \).
+Let \( \tilde{i} \) have aggregated selected entries \(
+s_{\tilde{i}} \) satisfying \( s_{\tilde{i}} \supseteq \tilde{i}
+\) to guarantee that the Cholesky factor has full rank.
+Let \( \tilde{s} \defeq s_{\tilde{i}} \setminus \tilde{i} \)
+be the selected entries excluding the columns in the group.
+The sparsity pattern for the \( k \)th column in the group is then the
+aggregated selected entries excluding the entries that violate lower
+triangularity, \( s_k \defeq \{ j \in s_{\tilde{i}} : j \succeq k \} \).
+Assuming every entry of \( \tilde{s} \) is after every index in \( \tilde{i}
+\), then \( s_k = \tilde{s} \cup \{ j \in \tilde{i} : j \succeq k \} \).
+This condition is guaranteed if the aggregated columns are adjacent in the
+ordering, for example; we defer handling the general case to the next section.
+The KL divergence \cref{eq:obj_chol} restricted to
+the contribution from the group \( \tilde{i} \) is
+\begin{align}
+  \label{eq:obj_mult}
+  \sum_{i \in \tilde{i}}
+    \log \left (\CM_{i, i \mid s_i \setminus \{ i \} } \right ) &=
+    \logdet(\CM_{\tilde{i}, \tilde{i} \mid \tilde{s}})
+\end{align}
+from \cref{app:kl_agg}.
+Thus, the generalization of the posterior variance
+\cref{eq:obj_chol} to aggregated columns is their log
+determinant conditional on (well-behaved) selected entries.
+We briefly discuss what happens when
+selected entries are \emph{between} columns.
+
+\subsubsection{Nonadjacent or partial aggregation}
+\label{subsubsec:partial}
+
+Let the random variables corresponding to the indices \( \tilde{i} = \{
+i_1, \dotsc, i_m \} \) be collected in a vector \( \vec{y} = [y_1, \dotsc,
+y_m]^{\top} \) with joint density \( \vec{y} \sim \N(\vec{0}, \CM) \).
+We select an index \( k \) that conditions all but the first \( p \)
+variables (recall that the indices are sorted w.r.t \( \succ \), so if
+\( k \) conditions a variable, it conditions all those afterwards).
+After this partial conditioning, the variables become \( \vec{y}_{\parallel
+k} \defeq [y_1, \dotsc, y_p, y_{p + 1 \mid k}, \dotsc, y_{m \mid k}]^{\top}
+\) and the covariance matrix \( \Cov[\vec{y}_{\parallel k}] \) becomes
+\begin{align}
+  \label{eq:chol_partial}
+  \CM_{\tilde{i}, \tilde{i} \parallel k} &\defeq
+  \Cov[\vec{y}_{\parallel k}] =
+  \begin{pmatrix}
+    L_{:p} L_{:p}^{\top} &
+    L_{:p} {L'}_{p + 1:}^{\top} \\
+    {L'}_{p + 1:} L_{:p}^{\top} &
+    {L'}_{p + 1:} {L'}_{p + 1:}^{\top}
+  \end{pmatrix} =
+  \begin{pmatrix}
+    L_{:p} \\
+    {L'}_{p + 1:}
+  \end{pmatrix}
+  \begin{pmatrix}
+    L_{:p} \\
+    {L'}_{p + 1:}
+  \end{pmatrix}^{\top}
+\end{align}
+where \( L = \chol(\CM) \) and \( L' = \chol(\CM_{:, : \mid k}) \).
+See \cref{fig:partial_factor} for an
+illustration and \cref{app:partial} for details.
+Armed with this representation, we compute \(
+\logdet(\CM_{\tilde{i}, \tilde{i} \parallel k}) \):
+\begin{align}
+  \label{eq:partial_kl}
+  \sum_{i \in \tilde{i}}
+    \log \left (\CM_{i, i \mid s_i \setminus \{ i \} } \right ) &=
+    \logdet(\CM_{\tilde{i}, \tilde{i} \parallel k})
+\end{align}
+Like the aggregated case \cref{eq:obj_mult}, minimizing the log determinant
+of the \emph{partially} conditioned covariance matrix \cref{eq:chol_partial}
+is the same as minimizing the KL divergence \cref{eq:obj_chol}.
+
 \subsection{Supernodes and blocked selection}
 \label{subsec:mult_select}
 
@@ -792,64 +856,7 @@ the asymptotic time and space complexities of the multiple-target algorithm
 by also storing a partial Cholesky factor, the details are provided in
 \cref{subsec:partial_select} and \cref{alg:select_partial}.
 
-\section{Greedy selection for global approximation by KL-minimization}
-\label{sec:chol_select}
-
-\begin{figure}[t]
-  \centering
-  \input{figures/cholesky_factor.tex}%
-  \qquad
-  \input{figures/points/selected_points.tex}
-  \caption{
-    For a column of a Cholesky factor in isolation, the
-    \textcolor{orange}{target} point is the \textcolor{orange}{diagonal}
-    entry, \textcolor{lightblue}{candidates} are \textcolor{lightblue}{below}
-    it, and the \textcolor{seagreen}{selected} entries are added to
-    the \textcolor{seagreen}{sparsity pattern}.
-    Points violating lower triangularity are
-    shown in \textcolor{darksilver}{grey}.
-    Thus, sparsity selection in Cholesky factorization
-    (left panel) is analogous to training point selection
-    in directed Gaussian process regression (right panel).
-  }
-  \label{fig:select_chol}
-\end{figure}
-
-Directed Gaussian process regression infers the
-\emph{local} distribution at points of interest.
-We turn our attention to \emph{global} approximation of the entire Gaussian
-process; given a kernel function \( \K(\vec{x}, \vec{x}') \) and a set of \(
-N \) points \( \{ \vec{x}_i \}_{i = 1}^N \) we have the covariance matrix \(
-\CM_{ij} = K(\vec{x}_i, \vec{x}_j) \) for which we seek a sparse approximate
-Cholesky factor \( L \) of the precision, \( L L^{\top} \approx \CM^{-1} \).
-We first order the points by the reverse-maximin ordering described in
-\cref{subsec:ordering} and then straightforwardly apply our suite of selection
-algorithms developed in \cref{sec:select} to form the sparsity pattern.
-For the \( i \)th column of \( L \), the target point is the \( i \)th point
-in the ordering, the candidate points are those satisfying lower triangularity
-(after the target in the ordering), and running the selection algorithm for
-the desired number of nonzeros entries picks out indices which we add to the
-sparsity set \( s_i \); this process is illustrated in \cref{fig:select_chol}.
-Finally, we compute the values of the selected nonzero
-indices by the closed-form expression \cref{eq:L_col}.
-Both sparsity selection and computing entries are
-embarrassingly parallel over \( L \)'s columns.
-
-Using the single-target selection algorithm from \cref{subsec:greedy_select}
-has time complexity \( \BigO(N C s^2) \) to select \( s \)
-nonzero entries out of \( C \) candidates for \( N \) columns.
-Computing the corresponding values \( \CM_{s_i, s_i}^{-1}
-\vec{e}_1 \) has time complexity \( \BigO(N s^3) \).
-Sparsity selection has the same complexity as entry computation
-if the number of candidates \( C \) is \( \BigO(s) \), suggesting
-the need to limit the number of candidates considered.
-In practice, we pick the candidate set to be the nearest neighbors
-of the point of interest as \cite{gramacy2014local} does;
-specifically, we use the framework of \cite{schafer2021sparse}
-which considers all points within a radius proportional to the
-length scale from the reverse-maximin ordering \cref{eq:maximin}.
-
-\subsection{Aggregated sparsity pattern}
+\subsection{Aggregated Cholesky}
 
 In an aggregated sparsity pattern, columns are partitioned into groups and
 selecting an index for a group \( \tilde{i} \) adds it to the sparsity
@@ -1278,7 +1285,7 @@ the empirical coverage of the 90\% posterior prediction intervals
 averaged over all realizations, and the average root mean square
 error (RMSE) of the posterior means.
 The log determinant is equivalent to the KL divergence by the
-discussion in \cref{subsubsec:aggregated}, so the results are
+discussion in \cref{subsec:aggregated}, so the results are
 nearly identical to Cholesky factorization (\cref{subsec:chol_exp}).
 We find that coverage is extremely accurate for all
 methods (within \( 0.1\% \) for \( \rho \geq 2 \)).
@@ -1593,7 +1600,7 @@ factor \( L \) computed from the closed-form expression \cref{eq:L_col}.
 \label{app:kl_agg}
 
 In the aggregated Cholesky factorization setting of
-\cref{subsubsec:aggregated}, we have indices \( \tilde{i} = \{i_1,
+\cref{subsec:aggregated}, we have indices \( \tilde{i} = \{i_1,
 \dotsc, i_m \} \) such that \( i_1 \succ \dotsb \succ i_m \).
 Let the selected entries be \( \tilde{s} \); we assume every selected entry is
 after (w.r.t \( \succ \)) every index in \( \tilde{i} \) so that the sparsity
@@ -1751,7 +1758,7 @@ k}] \) of the updated variables \( \vec{y}_{\parallel k} \).
 
 We wish to compute the entries of the sparse Cholesky factor
 \( L_{s_i, i} \) according to \cref{eq:L_col} in the aggregated
-sparsity setting of \cref{subsubsec:aggregated}.
+sparsity setting of \cref{subsec:aggregated}.
 Recall that we have aggregated the column indices \( i_1 \succ
 \dotsb \succ i_m \) into \( \tilde{i} = \{ i_1, \dotsc, i_m \} \)
 and \( s_{\tilde{i}} \) denotes the aggregated sparsity pattern.
