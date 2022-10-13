@@ -9,3 +9,4 @@
 *.thm
 # tikzexternalize
 external/
+*.auxlock
