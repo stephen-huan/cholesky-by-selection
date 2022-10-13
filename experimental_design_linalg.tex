@@ -1408,10 +1408,10 @@ methods even if they are slower to form the preconditioner.
 Our conditional variance objective for point selection \cref{eq:obj_gp} was
 first described in \cite{cohn1996neural} for optimal experimental design,
 and has subsequently been named the active learning Cohn (ALC) technique.
-\cite{gramacy2014local} and the follow-up work \cite{gramacy2015speeding} apply
-ALC to directed Gaussian process inference, yielding an algorithm equivalent
-to our \cref{alg:select_prec} (described in \cref{subsec:greedy_select}) for a
-single point of interest.
+\cite{gramacy2014local} and the follow-up works \cite{gramacy2015speeding,
+sun2019emulating} apply ALC to directed Gaussian process inference, yielding
+an algorithm equivalent to ours described in \cref{subsec:greedy_select} for
+a single point of interest.
 We note that their definition of conditional variance in Equation (5) is
 analogous to our \cref{eq:cond_cov}, equating their conditional variance
 objective in Equation (8) to our \cref{eq:obj_gp} (the connection is
@@ -1424,9 +1424,11 @@ direct parallelization of the single-target algorithm over each target.
 They mention that the \texttt{laGP} function in their
 \texttt{R} package jointly considers multiple target
 points, but without providing details on this procedure.
-We generalize ALC to multiple prediction points through their posterior
-log determinant \cref{eq:greedy_mult} and provide an explicit
-\cref{alg:select_mult_chol} described in \cref{subsec:mult_select}.
+\cite{sun2019emulating} proposes a ``joint'' or ``path'' ALC by taking
+the average reduction in posterior variance over target points.
+Instead, we generalize ALC to multiple prediction points through
+their posterior log determinant \cref{eq:greedy_mult} and provide
+an explicit algorithm described in \cref{subsec:mult_select}.
 In addition, integration of the algorithm into Cholesky factorization
 (\cref{sec:chol_select}) provides a global approximation of the
 Gaussian process (\cref{subsec:gp_exp}).
