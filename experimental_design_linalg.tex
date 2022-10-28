@@ -1322,6 +1322,16 @@ counterparts as a result of their superior accuracy at the same sparsity.
 \subsection{Preconditioning for conjugate gradient}
 \label{subsec:cg_exp}
 
+\pgfplotsset{
+  cycle list={
+    {very thick, lightblue, style=dashed,         mark=*},
+    {very thick, seagreen,  style=dashdotted,     mark=o},
+    {very thick, silver,    style=densely dotted, mark=triangle*},
+    {very thick, orange,    style=solid,          mark=square*},
+    {very thick, rust,      style=dotted,         mark=square},
+  }
+}
+
 \begin{figure}[t]
   \centering
   \input{figures/cg/n_iter-res.tex}%
