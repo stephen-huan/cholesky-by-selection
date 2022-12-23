@@ -608,7 +608,7 @@ selecting \( k \) is given by \( u_\Pred^2 \), or
   u_\Pred^2
   = \frac{\CM_{\Pred, k \mid \I}^2}{\CM_{k, k \mid \I}}
   = \frac{\Cov[y_\Pred, y_k \mid \I]^2}{\Var[y_k \mid \I]}
-  = \Var[y_\Pred \mid \I] \Corr[y_\Pred, y_k \mid \I]^2
+  = \Corr[y_\Pred, y_j \mid \I]^2 \Var[y_\Pred \mid \I]
 \end{align}
 To compute the objective \cref{eq:obj_gp} for each candidate index
 \( j \), we start with the unconditional variance \( \CM_{j, j} \)
