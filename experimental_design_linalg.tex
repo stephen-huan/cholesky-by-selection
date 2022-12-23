@@ -1269,12 +1269,37 @@ computed efficiently from sparse submatrices of the factor.
 See subsection 4.2.1, Appendix D.1, or Algorithm D.1
 of \cite{schafer2021sparse} for additional details.
 
-We sample \( 2^{16} \) points uniformly at random from the unit
-cube \( [0, 1]^3 \) and randomly partition them into 90\% training
-points (\( N = 58982 \)) and 10\% prediction points (\( m = 6554 \)).
-We use a Mat{\'e}rn kernel with smoothness \( \nu =
-5/2 \) and length scale \( \ell = 1 \) and draw \(
-10^3 \) realizations from the resulting Gaussian process.
+\begin{figure}[t]
+  \centering
+  \input{figures/sarcos/sarcos.tex}
+  \caption{
+    The first 5,000 points of the SARCOS training
+    data, visualizing the first two features.
+  }
+  \label{fig:sarcos}
+\end{figure}
+
+We use the SARCOS dataset \cite{rasmussen2006gaussian} generated from
+an inverse dynamics problem on a 7 degrees-of-freedom robotic arm.
+Given 7 joint positions, velocities and accelerations for 21 features
+in total, the goal is to infer the torque of just the first joint.
+The dataset is available online at \url{https://gaussianprocess.org/gpml/data/}
+and consists of 44,484 training points and 4,449
+testing points which we then preprocess as follows.
+
+We only use the first 3 features of the data and
+remove the 73 duplicate points this projection causes.
+Since the provided testing points overlap significantly with the training
+points, we ignore the original testing points and instead randomly partition
+the 44,411 remaining training points into 90\% training points (\( N = 39,969
+\)) and 10\% prediction points (\( m = 4,442 \)).
+Since the robot arm moves smoothly, the geometry of the dataset consists
+of relatively continuous overlapping paths as shown in \cref{fig:sarcos}.
+We then use a Mat{\'e}rn kernel with smoothness \( \nu = 3/2 \) and length
+scale \( \ell = 1 \) and draw \( 10^3 \) realizations from the resulting
+Gaussian process for the target variable, ignoring the original objective
+to ensure that the target variable is exactly Gaussian.
+
 We consider three accuracy metrics for Gaussian process regression:
 the log determinant of the posterior prediction covariance matrix,
 the empirical coverage of the 90\% posterior prediction intervals
@@ -1282,24 +1307,18 @@ averaged over all realizations, and the average root mean square
 error (RMSE) of the posterior means.
 The log determinant is equivalent to the KL divergence by the
 discussion in \cref{subsec:aggregated}, so the results are
-nearly identical to Cholesky factorization (\cref{subsec:chol_exp}).
+similar to Cholesky factorization (\cref{subsec:chol_exp}).
 We find that coverage is extremely accurate for all
-methods (within \( 0.1\% \) for \( \rho \geq 2 \)).
+methods (within \( 0.1\% \) for \( \rho > 2 \)).
 Finally, the RMSE is shown in \cref{fig:gp_rho}.
-Unlike the KL divergence, aggregated variants are nearly
-indistinguishable in RMSE from their non-aggregated counterparts.
+
 Despite an increased cost to select points, the conditional methods have
 better accuracy per unit computational cost than their unconditional
 counterparts as a result of their superior accuracy at the same sparsity.
-
-\pgfplotsset{
-  cycle list={
-    {very thick, lightblue, style=dashed,         mark=*},
-    {very thick, seagreen,  style=dashdotted,     mark=o},
-    {very thick, orange,    style=solid,          mark=square*},
-    {very thick, rust,      style=dotted,         mark=square},
-  }
-}
+However, the simpler method of \( k \)-NN also
+achieves comparable accuracy per unit time cost.
+As noted in \cite{gramacy2015speeding}, the simple method of
+\( k \)-NN remains hard to beat without specialized tricks.
 
 \begin{figure}[t]
   \centering
