@@ -1184,26 +1184,19 @@ In all experiments we use \(\lambda = 1.5 \)
 as recommended by \cite{schafer2021sparse}.
 
 As \cref{fig:chol_n} shows, the KL divergence and computational
-time increases linearly with the number of points for all methods.
-Conditional methods are more accurate than their unconditional counterparts and
-aggregated variants are both more accurate and faster than their non-aggregated
-counterparts; however the aggregated factors are denser, which may impact their
-computational efficiency in downstream tasks.
+time increase linearly with the number of points for all methods.
+Conditional methods are more accurate than their unconditional
+counterparts and the denser aggregated variants are both more
+accurate and faster than their non-aggregated counterparts.
 
 The conditional selection methods achieve significantly better
 KL divergence compared to their unconditional counterparts for
 the same number of sparsity entries as \cref{fig:chol_rho} shows.
-However, they do not achieve better accuracy per unit time cost than
-their unconditional counterparts from the increased cost of selection.
-As noted in \cite{gramacy2015speeding}, the simple method of
-\( k \)-NN remains hard to beat without specialized tricks.
-
-Finally, we experiment with increasing the size of the candidate set \(
-\rho_s \) \emph{without} increasing the density of the factor \( \rho \).
-Since the conditional selection methods scale linearly with the number of
-candidates, increasing \( \rho_s \) is much cheaper than increasing \( \rho \).
-As shown in \cref{fig:chol_s}, increasing \( \rho_s \)
-has diminishing returns past \( \rho_s \approx 2 \).
+However, they do not achieve better accuracy per
+unit time cost from the increased cost of selection.
+Aggregation results in better accuracy per unit time cost but worse accuracy
+per nonzero entry, which may impact their computational efficiency in
+downstream tasks which depend on factor density like preconditioning.
 
 \pgfplotsset{
   cycle list={
@@ -1241,20 +1234,6 @@ has diminishing returns past \( \rho_s \approx 2 \).
     The number of points is \( N = 2^{16} \).
   }
   \label{fig:chol_rho}
-\end{figure}
-
-\begin{figure}[t]
-  \centering
-  \input{figures/cholesky/s_kl_div.tex}%
-  \input{figures/cholesky/s_time.tex}
-  \caption{
-    We vary the size of the candidate set, \( \rho_s \),
-    with the density of the factor fixed at \( \rho = 4 \)
-    and the number of points fixed at \( N = 2^{16} \).
-    The left panel shows KL divergence with an increasing number of candidates
-    considered and the right panel shows the corresponding increases in time.
-  }
-  \label{fig:chol_s}
 \end{figure}
 
 \subsection{Gaussian process regression}
@@ -1340,16 +1319,6 @@ As noted in \cite{gramacy2015speeding}, the simple method of
 
 \subsection{Preconditioning for conjugate gradient}
 \label{subsec:cg_exp}
-
-\pgfplotsset{
-  cycle list={
-    {very thick, lightblue, style=dashed,         mark=*},
-    {very thick, seagreen,  style=dashdotted,     mark=o},
-    {very thick, silver,    style=densely dotted, mark=triangle*},
-    {very thick, orange,    style=solid,          mark=square*},
-    {very thick, rust,      style=dotted,         mark=square},
-  }
-}
 
 \begin{figure}[t]
   \centering
