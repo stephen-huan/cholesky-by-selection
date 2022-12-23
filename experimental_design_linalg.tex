@@ -59,12 +59,10 @@
   every target.
   We directly apply the selection algorithm to image
   classification and recovery of sparse Cholesky factors.
-  % TODO: qualify these claims with numerical experiments
-  By minimizing Kullback-Leibler divergence, we apply the algorithm to
-  Cholesky factorization, Gaussian process regression, and preconditioning
-  with the conjugate gradient, improving over \( k \)-nearest neighbors
-  particularly in high dimensional, unusual, or otherwise messy geometries
-  with non-isotropic kernel functions.
+  By minimizing Kullback-Leibler divergence, we apply the algorithm to Cholesky
+  factorization, Gaussian process regression, and preconditioning with the
+  conjugate gradient, improving over \( k \)-nearest neighbors particularly in
+  high dimensional, unusual, or otherwise messy geometries.
 \end{abstract}
 
 % REQUIRED
@@ -584,6 +582,9 @@ variance incentives the often contradictory demands of being near the target
 point (nearby points have higher covariance), but away from previously
 selected points (to avoid redundancy); the resulting spread-out selections
 are illustrated in \cref{fig:selection}.
+Even for isotropic kernels like the Mat{\'e}rn family, the
+resulting conditional selections can be unusual and seemly
+non-isotropic which is demonstrated in \cref{fig:cond_select}.
 
 \subsection{A greedy approach}
 \label{subsec:greedy_select}
