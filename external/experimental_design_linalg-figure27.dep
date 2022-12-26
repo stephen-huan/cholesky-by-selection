@@ -1,0 +1,5 @@
+external/experimental_design_linalg-figure27.pdf: figures/cg/rho_iter_KL.csv
+external/experimental_design_linalg-figure27.pdf: figures/cg/rho_iter_KL_agg.csv
+external/experimental_design_linalg-figure27.pdf: figures/cg/rho_iter_select-KNN.csv
+external/experimental_design_linalg-figure27.pdf: figures/cg/rho_iter_select.csv
+external/experimental_design_linalg-figure27.pdf: figures/cg/rho_iter_select_agg.csv
