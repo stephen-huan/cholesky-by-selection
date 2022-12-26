@@ -1,5 +1,5 @@
 % SIAM Article Template
-\documentclass[review,onefignum,onetabnum]{siamart220329}
+\documentclass[review,onefignum,onetabnum]{siamonline220329}
 
 % Information that is shared between the article and the supplement
 % (title and author information, macros, packages, etc.) goes into
@@ -265,10 +265,17 @@ in the appendix and supplementary material.
 
 \begin{figure}[t]
   \centering
-  \input{figures/kernel/points_1.tex}%
-  \input{figures/kernel/points_2.tex}%
-  \input{figures/kernel/points_3.tex}%
-  \input{figures/kernel/points_4.tex}
+  % \input{figures/kernel/points_1.tex}%
+  % \input{figures/kernel/points_2.tex}%
+  % \input{figures/kernel/points_3.tex}%
+  % \input{figures/kernel/points_4.tex}
+  \includegraphics{figures/precompiled/points_1.pdf}%
+  \quad
+  \includegraphics{figures/precompiled/points_2.pdf}%
+  \quad
+  \includegraphics{figures/precompiled/points_3.pdf}%
+  \quad
+  \includegraphics{figures/precompiled/points_4.pdf}%
   \caption{
     The first panel shows selecting the \( k \)-\textcolor{seagreen}{nearest
     neighbors} to the \textcolor{orange}{center point} out
@@ -404,7 +411,7 @@ Kaporin condition number \( (\trace(L \CM L^{\top})/N)^N/\det(L \CM
 L^{\top}) \) \cite{kaporin1990alternative} and the Frobenius norm \(
 \norm{\Id - L \chol(\CM)}_{\FRO} \) additionally subject to the constraint
 \( \diag(L \CM L^{\top}) = 1 \) \cite{yeremin2000factorized}, while the
-KL divergence \( \KL{\N(\vec{0}, \CM)} {\N(\vec{0}, (L L^{\top})^{-1})}
+KL divergence \\ \( \KL{\N(\vec{0}, \CM)} {\N(\vec{0}, (L L^{\top})^{-1})}
 \) \cite{schafer2021sparse} factors the precision matrix, i.e. \( L
 L^{\top} \approx \CM^{-1} \).
 
@@ -676,7 +683,7 @@ indices by the closed-form expression \cref{eq:L_col}.
 Both sparsity selection and computing entries are
 embarrassingly parallel over \( L \)'s columns.
 
-Using the single-target selection algorithm from \cref{subsec:greedy_select}
+Using the single-target algorithm from \cref{subsec:greedy_select}
 has time complexity \( \BigO(N C s^2) \) to select \( s \)
 nonzero entries out of \( C \) candidates for \( N \) columns.
 Computing the corresponding values \( \CM_{s_i, s_i}^{-1}

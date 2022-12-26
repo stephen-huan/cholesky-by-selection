@@ -62,16 +62,16 @@
 \tikzset{every mark/.append style={solid}}
 
 % cache tikz graphics
-\usepgfplotslibrary{external}
-\tikzexternalize
-\tikzsetexternalprefix{external/}
+% \usepgfplotslibrary{external}
+% \tikzexternalize
+% \tikzsetexternalprefix{external/}
 
 % Custom commands:
 % \newcommand*{\todo}[1]{{\color{red} #1}}
 % prevent todo from being externalized
-\renewcommand{\todo}[2][]{
-  \tikzexternaldisable\@todo[#1]{#2}\tikzexternalenable
-}
+% \renewcommand{\todo}[2][]{
+%   \tikzexternaldisable\@todo[#1]{#2}\tikzexternalenable
+% }
 \newcommand*{\Ftodo}[1]{\todo[color=lightblue]{Florian: #1}}
 \newcommand*{\Stodo}[1]{\todo[color=seagreen]{Stephen: #1}}
 
@@ -79,13 +79,13 @@
 \newcommand*{\Reals}{\mathbb{R}}
 \newcommand*{\Naturals}{\mathbb{N}}
 
-\makeatletter
-\renewcommand*{\paragraph}{%
-  \@startsection{paragraph}{4}%
-  {\z@}{1.0ex \@plus .5ex \@minus .2ex}{-.7em}%
-  {\normalfont\normalsize\bfseries}%
-}
-\makeatother
+% \makeatletter
+% \renewcommand*{\paragraph}{%
+%   \@startsection{paragraph}{4}%
+%   {\z@}{1.0ex \@plus .5ex \@minus .2ex}{-.7em}%
+%   {\normalfont\normalsize\bfseries}%
+% }
+% \makeatother
 
 % From https://tex.stackexchange.com/questions/198771/align-in-substack
 \makeatletter
