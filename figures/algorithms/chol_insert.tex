@@ -2,7 +2,7 @@
   \REQUIRE \( \Order, \prec, i, k, L, X, \K(\cdot, \cdot) \)
   \ENSURE \( L, \Order \)
 
-  \STATE Find \( p \) by \cref{alg:insert_index} for \( j = k \)
+  \STATE Find \( p \) by \cref{alg:insert_index} for \( j = k \).
   \STATE \( \Order \gets \{ \Order_{:p - 1}, j, \Order_{p:} \} \)
   \STATE \( \vec{u} \gets \K(X, X_k) - L_{:, :i - 1} L_{k, :i - 1}^{\top} \)
   \STATE \( \vec{u} \gets \vec{u}/\sqrt{L_{k, i}} \)
