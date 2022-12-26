@@ -1,0 +1,5 @@
+external/experimental_design_linalg-figure24.pdf: figures/cg/nnz_nnz_KL.csv
+external/experimental_design_linalg-figure24.pdf: figures/cg/nnz_nnz_KL_agg.csv
+external/experimental_design_linalg-figure24.pdf: figures/cg/nnz_nnz_select-KNN.csv
+external/experimental_design_linalg-figure24.pdf: figures/cg/nnz_nnz_select.csv
+external/experimental_design_linalg-figure24.pdf: figures/cg/nnz_nnz_select_agg.csv

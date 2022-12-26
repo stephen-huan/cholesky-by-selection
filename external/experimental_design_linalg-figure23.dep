@@ -1,0 +1,5 @@
+external/experimental_design_linalg-figure23.pdf: figures/cg/n_iter-res_KL.csv
+external/experimental_design_linalg-figure23.pdf: figures/cg/n_iter-res_KL_agg.csv
+external/experimental_design_linalg-figure23.pdf: figures/cg/n_iter-res_select-KNN.csv
+external/experimental_design_linalg-figure23.pdf: figures/cg/n_iter-res_select.csv
+external/experimental_design_linalg-figure23.pdf: figures/cg/n_iter-res_select_agg.csv

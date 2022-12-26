@@ -1,0 +1,5 @@
+external/experimental_design_linalg-figure22.pdf: figures/gp/rho_time_KL_loss.csv
+external/experimental_design_linalg-figure22.pdf: figures/gp/rho_time_KL_agg_loss.csv
+external/experimental_design_linalg-figure22.pdf: figures/gp/rho_time_select-KNN_loss.csv
+external/experimental_design_linalg-figure22.pdf: figures/gp/rho_time_select_loss.csv
+external/experimental_design_linalg-figure22.pdf: figures/gp/rho_time_select_agg_loss.csv
