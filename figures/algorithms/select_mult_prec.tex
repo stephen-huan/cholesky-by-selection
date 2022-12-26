@@ -43,7 +43,8 @@
     \)
     \STATE \( \I \gets \I \cup \{ k \} \)
     \STATE \( -\I \gets -\I \setminus \{ k \} \)
-    \STATE \( \vec{v} \gets \CM_{\I, \I}^{-1} \K(X_{\I - \{ k \}}, X_k) \)
+    \STATE \( \vec{v} \gets \CM_{\I, \I}^{-1}
+      \K(X_{\I \setminus \{ k \}}, X_k) \)
     \STATE \(
       \CM_{\I, \I}^{-1} \gets
       \begin{pmatrix}
@@ -67,7 +68,7 @@
     \STATE \(
       \CM_{:, k \mid \I} \gets
       \CM_{:, k} -
-      \K(X, X_{\I - \{ k \}}) \vec{v}
+      \K(X, X_{\I \setminus \{ k \}}) \vec{v}
     \)
     \STATE \(
       \CM_{:, k \mid \I, \Pred} \gets
