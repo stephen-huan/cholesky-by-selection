@@ -45,9 +45,9 @@
   Previous work in constructing sparse transport maps or sparse approximate
   inverse Cholesky factors of such matrices by minimizing Kullback-Leibler
   divergence recovers the Vecchia approximation for Gaussian processes.
-  However, these methods often rely only on geometry to construct the
-  sparsity pattern, ignoring the conditional effect of adding an entry.
-  In this work, we construct the sparsity pattern by leveraging a
+  These methods rely only on the geometry of the evaluation points to construct the
+  sparsity pattern.
+  In this work, we instead construct the sparsity pattern by leveraging a
   greedy selection algorithm that maximizes mutual information with
   target points, conditional on all points previously selected.
   For selecting \( k \) points out of \( N \), the naive time
@@ -57,7 +57,7 @@
   \( \mathcal{O}(N k^2 + N m^2 + m^3) \) which is maintained in the setting of
   aggregated Cholesky factorization where a selected point need not condition
   every target.
-  We directly apply the selection algorithm to image
+  We apply the selection algorithm to image
   classification and recovery of sparse Cholesky factors.
   By minimizing Kullback-Leibler divergence, we apply the algorithm to Cholesky
   factorization, Gaussian process regression, and preconditioning with the
@@ -79,12 +79,12 @@
 
 \paragraph{The problem}
 
-Gaussian processes enjoy widespread application in spatial
+Gaussian processes are widely used in spatial
 statistics and geostatistics \cite{rue2005gaussian}, machine
 learning through kernel methods \cite{rasmussen2006gaussian},
 optimal experimental design \cite{mutny2022experimental}, and
 sensor placement \cite{krause2008nearoptimal}.
-However, Gaussian process statistics from \( N \) data points requires
+Applying Gaussian process statistics to sets of \( N \) data points requires
 computing with the covariance matrix \( \CM \in \Reals^{N \times N} \)
 to obtain quantities such as \( \CM \vec{v} \), \( \CM^{-1} \vec{v} \),
 \( \logdet(\CM) \).
@@ -96,34 +96,28 @@ matrices are required across computational mathematics,
 motivating the search for faster, approximate algorithms.
 
 \paragraph{Existing work}
+Numerous methods have been proposed for fast approximate Gaussian process statistics. 
+Popular methods are based on low-rank approximation \cite{smola2000sparse,williams2000using,fine2001efficient,bach2002kernel,fowlkes2004spectral,chen2022randomly}, 
+sparse approximations \cite{furrer2006covariance}, or combinations thereof \cite{schwaighofer2002transductive,quinonero-candela2005unifying,banerjee2008gaussian,sang2012full}.
+These approximations can be viewed as imposing different (conditional) independence structures on the Gaussian process. 
+Multiscale-versions of these ideas lead to wavelets \cite{beylkin1991fast,gines1998lu} and various structured matrix factorizations \cite{hackbusch2000sparse,hackbusch2002data,chandrasekaran2006fast,xia2010fast,li2012new,ambikasaran2013mathcal,ambikasaran2015fast,ho2016hierarchical,schafer2020compression}.
+Alternative approaches are based on the fast Fourier transform \cite{graham2018analysis,stein2002fast} or random feature maps \cite{rahimi2007random}.
 
-TODO
+
 
 \paragraph{Vecchia approximation}
 
-\todo{I wonder if we should change the title to sparse inverse-cholesky factors, or something on that line?}
-The Vecchia approximation \cite{vecchia1988estimation} decomposes the
-joint distribution into the product of univariate densities, each
-density conditional only on a subset of those prior in the ordering.
-If an ordering and sparsity pattern are fixed, then the entries
-of the resulting sparse approximate Cholesky factor can be computed
-by optimizing a chosen objective, for example, minimizing the
-Kullback-Leibler (KL) divergence \cite{schafer2021sparse} is a
-natural objective for Gaussian process regression.
-Independently of the Vecchia approximation, within the context of factorized
-sparse approximate inverse (FSAI) preconditioners, the Kaporin condition number
-\cite{kaporin1990alternative} and the Frobenius norm with an additional Jacobi
-scaling constraint \cite{yeremin2000factorized} have also been proposed.
-These three objectives actually converge to the same closed-form expression
-for the entries of the resulting Cholesky factor, equivalent to one
-used to compute the Vecchia approximation \cite{schafer2021sparse}.
-In addition, the KL divergence is used to compute Knothe-Rosenblatt transport
+The Vecchia approximation \cite{vecchia1988estimation} decomposes a Gaussian distribution into the product of univariate densities, each
+of which depends on a subset of the previous variables.
+This amounts to a sparse approximation of the inverse-Cholesky factor of the covariance matrix \cite{katzfuss2021general}.
+Other works derive the same approximation as the optimal Cholesky factor for a given ordering and sparsity pattern:
+Kaporin minimizes the $K$-condition number \cite{kaporin1990alternative}, Yeremin et al. the Frobenius norm subject to a diagonal scaling constraint \cite{yeremin2000factorized}, and Sch{\"a}fer et al. the Kullback-Leibler (KL) divergence \cite{schafer2021sparse}.
+The KL divergence is also used to compute Knothe-Rosenblatt transport
 maps \cite{marzouk2016introduction}, generalizing Cholesky factors to
 non-Gaussian distributions while preserving triangularity and sparsity
-\cite{spantini2018inference} and often applied to simulation and sampling
-problems \cite{marzouk2016introduction, katzfuss2022scalable}.
-Finally, exploiting the independence of the Vecchia approximation allows
-for embarrassingly parallel algorithms for regression and factorization.
+\cite{spantini2018inference}. 
+A method for the Bayesian estimation of such transport maps is proposed by \cite{katzfuss2022scalable}.
+A common feature of the above methods is that the columns of the Cholesky factors can be computed independently and in parallel.
 
 \paragraph{Ordering and sparsity selection by geometry}
 
@@ -132,12 +126,12 @@ affect the quality of the resulting factor.
 Vecchia originally proposed ordering points lexicographically
 \cite{vecchia1988estimation}, but more recent work exploits space-covering
 orderings like the maximum-minimum ordering \cite{guinness2018permutation}
-which has become popular \cite{schafer2020compression, schafer2021sparse,
-katzfuss2021general, kang2021correlationbased, katzfuss2022scalable}
-\todo{I would add a remark here hat comments on the relationship to multiscale analysis and wavelets}
-and has rigorous approximation guarantees from results in
+also used by \cite{schafer2020compression, schafer2021sparse,
+katzfuss2021general, kang2021correlationbased, katzfuss2022scalable}.
+Cholesky factorization in the maximum-minimum ordering is closely related to 
 numerical homogenization and operator-adapted wavelets
-\cite{owhadi2019operatoradapted, schafer2020compression}.
+\cite{owhadi2019operatoradapted}. 
+For covariance functions that are Green's functions of elliptic PDEs, this allows proving the exponential accuracy of the resulting approximation \cite{schafer2020compression}.
 After choosing an ordering, following Vecchia's recommendation the sparsity
 set is often formed by selecting the closest points by Euclidean distance
 \cite{vecchia1988estimation, schafer2020compression, schafer2021sparse,
@@ -146,20 +140,12 @@ This choice is often justified by the \emph{screening effect}, or the
 observation that conditional on points near the point of interest, far away
 points are almost conditionally independent for many popular kernel functions
 \cite{stein2002screening, stein20112010} (see \cref{fig:screening}).
-\todo{Could mention the rigorous results, as well}
-\todo{This sentence should contain mention of the conditioning}
-Methods exploiting the screening effect achieve state of the art \( \epsilon
+Methods exploiting and quantifying the screening effect achieve state-of-the-art \( \epsilon
 \)-accuracy in time complexity \( \BigO(N \log^{2d} (N/\epsilon)) \) using \(
 \BigO(N \log^{ d} (N/\epsilon)) \) nonzero entries of the covariance matrix
 \cite{schafer2021sparse}.
 However, selecting by distance ignores the conditional
 effect of adding points to the sparsity set.
-Imagine that the closest point to the point
-of interest is duplicated multiple times.
-Conditional on the original point, the
-duplicates provide no additional information.
-But these redundant points are still just as
-close to the target, so they are still added.
 
 \begin{figure}[t]
   \centering
@@ -178,10 +164,6 @@ close to the target, so they are still added.
 
 \paragraph{Conditional selection}
 
-\todo{We should start with something like ``In this work we propose
-a conditional...'' or so. That is, first make it clear that applying
-conditional selection is the main contribution of the present work
-and then relate it to all the other approaches / techniques.}
 Instead of adding points to the sparsity pattern by distance, we propose
 greedily selecting points that maximize mutual information with the
 point of interest, conditional on all points previously selected.
@@ -192,10 +174,10 @@ seeger2003fast}.
 Similar algorithms have also been developed in the context of
 sensor placement \cite{krause2008nearoptimal, clark2018greedy}
 and experimental design \cite{mutny2022experimental} where it is
-assumed the target phenomena is modeled by a Gaussian process or
+assumed the target phenomenon is modeled by a Gaussian process or
 is otherwise linearly dependent on the selected measurements.
 However, these works often focus on global approximation of the entire process,
-e.g. through sparse approximation of the likelihood or covariance matrix
+e.g., through sparse approximation of the likelihood or covariance matrix
 \cite{liu2020when, chalupka2012framework, quinonero-candela2005unifying}.
 In contrast \cite{wada2013gaussian} uses inference \emph{directed} towards
 a point of interest, selecting the active (sparsity) set by the kernel
@@ -205,36 +187,29 @@ use the more sophisticated active learning Cohn (ALC) objective,
 yielding an algorithm equivalent to ours for a single point of interest.
 Our proposed algorithm can also be viewed as a variant of orthogonal matching
 pursuit (OMP) \cite{tropp2007signal, tropp2006algorithms}, a workhorse
-algorithm in compressive sensing which seeks to approximate a target signal
+algorithm in compressive sensing, which seeks to approximate a target signal
 as the sparse linear combination from a given collection of signals.
 
 \paragraph{Main results}
-
-\todo{Want to start a one-sentence description of our contributions, something
-like ``We propose...''. We should first fully describe what we are doing
-(greedy selection, integration into the KL framework etc.). We want to start
-talking about technical things like the computational costs and the improvement
-only afterward, once we have established what it is that we are accelerating.}
 Our main contribution is a selection algorithm that
 greedily maximizes mutual information with point(s) of
 interest, conditional on all points previously selected.
 We use this algorithm to select the sparsity pattern of sparse approximate
 Cholesky factors of precision matrices in the KL-minimization framework of
-\cite{schafer2021sparse}, yielding more accurate factors at the same density
-compared to nearest neighbors.
-The final algorithm extends kernel-based selection \cite{wada2013gaussian,
-kang2021correlationbased} to account for conditioning and extends directed
-Gaussian process regression \cite{gramacy2014local, gramacy2015speeding} to
-multiple points as well as global approximation.
-For a single target point, direct computation of the mutual information
-criterion would have time complexity \( \BigO(N k^4) \) to select \( k
-\) points out of \( N \), but by maintaining a partial Cholesky factor
-we reduce the complexity to \( \BigO(N k^2) \).
+\cite{schafer2021sparse}, improving the approximation accuracy attainable with a given number of nonzero entries.
+Our method extends kernel-based selection \cite{wada2013gaussian,
+kang2021correlationbased} to account for conditioning. 
+It also extends directed Gaussian process regression \cite{gramacy2014local, gramacy2015speeding} by simultaneously targeting multiple prediction points and providing a global approximation of the Gaussian process.
+For a single target point, naive computation of the mutual information
+criterion has time complexity \( \BigO(N k^4) \) to select \( k
+\) points out of \( N \). 
+By maintaining a partial Cholesky factor we reduce the complexity to \( \BigO(N k^2) \).
 We extend the algorithm to maximize mutual information with \emph{multiple}
-targets, naturally taking advantage of the ``two birds with one stone'' effect.
+targets, re-using the same selections across multiple targets for efficiency while maintaining accuracy.
 For \( m \) target points we achieve a time complexity of \(
-\BigO(N k^2 + N m^2 + m^3) \), which for \( m \approx k \) is
-essentially \( m \) times faster than the single-target algorithm.
+\BigO(N k^2 + N m^2 + m^3) \). 
+If \( m \approx k \), this is
+\( m \) times faster than the single-target algorithm.
 In the setting of aggregated (or supernodal) Cholesky factorization where
 the sparsity patterns of multiple columns are determined simultaneously,
 a candidate entry may only condition a \emph{subset} of the targets.
@@ -294,7 +269,7 @@ in the appendix and supplementary material.
 
 Let \( \Theta \in \Reals^{N \times N} \) be a symmetric positive-definite
 matrix; we view \( \Theta \) as the covariance matrix of a Gaussian process.
-We say a function \( f(\vec{x}) \) is distributed according to a Gaussian
+We say that a function \( f(\vec{x}) \) is distributed according to a Gaussian
 process prior with mean function \( \mean(\vec{x}) \) and covariance
 function or kernel function \( \K(\vec{x}, \vec{x}') \), which we will
 denote as \( f(\vec{x}) \sim \GP(\mean(\vec{x}), \K(\vec{x}, \vec{x}'))
@@ -347,75 +322,69 @@ For Gaussian processes, the closed-form posterior distribution is
   \label{eq:cond_cov_notation}
   \CM_{I, J \mid \V_1, \V_2, \dotsc, \V_n} &\defeq
     \Cov[\vec{y}_\I, \vec{y}_\J \mid
-         \vec{y}_{\V_1 \cup \V_2 \cup \dotsb \cup \V_n}]
+         \vec{y}_{\V_1 \cup \V_2 \cup \dotsb \cup \V_n}].
   \shortintertext{
-    Although the final covariance matrix is invariant to the written order of
-    \( \V_1, \dotsc, \V_n \), a different order of conditioning means different
-    intermediate results in repeated application of \cref{eq:cond_cov}.
-    Letting \( W = \bigcup_{i = 1}^{n - 1} V_i \),
-    by the quotient rule of Schur complements:
+    We recursively compute \cref{eq:cond_cov_notation}; let \( W = \bigcup_{i = 1}^{n - 1} V_i \)
+    and by the quotient rule of Schur complements,
   }
   \label{eq:quotient_rule}
   \CM_{\I, \J \mid \V_1, \dotsc, \V_n} &=
     \CM_{\I,   \J   \mid W} -
     \CM_{\I,   \V_n \mid W}
     \CM_{\V_n, \V_n \mid W}^{-1}
-    \CM_{\V_n, \J   \mid W}
+    \CM_{\V_n, \J   \mid W}.
 \end{align}
+
 Calculating the posterior mean \cref{eq:cond_mean} and covariance
-\cref{eq:cond_cov} requires inverting the training covariance matrix.
-Often the Cholesky factorization is used instead of the direct
-inverse for improved numerical stability and performance.
-However, the time complexity of computing the Cholesky factorization
+\cref{eq:cond_cov} requires inverting the training covariance matrix, usually by means of Cholesky factorization.
+The time complexity of computing the Cholesky factorization
 is \( \BigO(N^3) \), which is prohibitive for large \( N \).
-Instead, we will enforce that \( L \) is
-\emph{sparse}, yielding an approximate factor.
+Thus, we aim to compute \emph{sparse} approximate Cholesky factors.
 
 \subsection{Vecchia approximation}
 \label{subsec:vecchia}
 
-Sparse factors naturally arise from the Vecchia approximation
-for Gaussian processes \cite{vecchia1988estimation}.
-Decomposing the joint likelihood \( \p \),
+The Vecchia approximation
+for Gaussian processes \cite{vecchia1988estimation} can be viewed as computing sparse approximate inverse-Cholesky factors of \( \CM \).
+It decomposes the joint likelihood \( \p \) as
 \begin{align}
   \label{eq:joint}
   \p(\vec{y}) &= \p(y_1) \p(y_2 \mid y_1) \p(y_3 \mid y_1, y_2) \dotsm
-    \p(y_N \mid y_1, y_2, \dotsc, y_{N - 1})
+    \p(y_N \mid y_1, y_2, \dotsc, y_{N - 1}).
   \shortintertext{
-    The key assumption is that many of the points are redundant
-    after conditioning on a carefully chosen subset of the points.
+    The key assumption is that many of the conditioning points are redundant.
     Letting \( i_1, \dotsc, i_N \) denote an ordering of the points and
     \( s_k \) the indices of points that condition the \( k \)th point
-    in the ordering, the Vecchia approximation proposes to approximate
+    in the ordering, the Vecchia approximation proposes replacing
     \cref{eq:joint} by the sparse approximation
   }
   \label{eq:vecchia}
   \p(\vec{y}) &\approx \p(y_{i_1}) \p(y_{i_2} \mid y_{s_2})
-    \p(y_{i_3} \mid y_{s_3}) \dotsm \p(y_{i_N} \mid y_{s_N})
+    \p(y_{i_3} \mid y_{s_3}) \dotsm \p(y_{i_N} \mid y_{s_N}).
 \end{align}
-Following \cref{eq:vecchia} if an elimination ordering \( \prec \) is fixed
-(a permutation of \( \{ 1, \dotsc, N \} \)) and a lower triangular sparsity
-pattern \( S \defeq \{ (i, j) : i \in s_j, i \succeq j \} \) is specified
-then all is needed is a functional criterion \( \Loss: \Reals^{N \times N}
-\to \Reals \) to specify the optimization problem
+The precision matrix of the resulting approximate density \cref{eq:vecchia} has a sparse Cholesky factor
+in the sense that the \( i \)th column of the factor has the sparsity pattern \( s_i \)
+when written in the given elimination ordering \cite{katzfuss2021general}.
+Another way to recover this Cholesky factor for a fixed  elimination ordering \( \prec \) 
+and lower triangular sparsity pattern \( S \defeq \{ (i, j) : i \in s_j, i \succeq j \} \)
+is to specify
+a functional criterion \( \Loss: \Reals^{N \times N}
+\to \Reals \) defining an optimization problem
+over candidate matrices satisfying the sparsity pattern, \( \SpSet \defeq \{ M \in \Reals^{N \times N} :
+M_{i, j} \neq 0 \Rightarrow (i, j) \in S \} \).
 \begin{align}
   \label{eq:generic_obj}
   L &\defeq \argmin_{\hat{L} \in \SpSet} \Loss(\hat{L})
 \end{align}
-where \( \SpSet \defeq \{ M \in \Reals^{N \times N} :
-M_{ij} \neq 0 \Rightarrow (i, j) \in S \} \) is the space
-of matrices satisfying the sparsity pattern \( S \).
-Proposed functionals which compute inverse Cholesky factors \( L \) of
-the covariance matrix, i.e. \( L \chol(\CM) \approx \Id \), include the
+Functionals include the
 Kaporin condition number \( (\trace(L \CM L^{\top})/N)^N/\det(L \CM
-L^{\top}) \) \cite{kaporin1990alternative} and the Frobenius norm \(
+L^{\top}) \) \cite{kaporin1990alternative}, the Frobenius norm \(
 \norm{\Id - L \chol(\CM)}_{\FRO} \) additionally subject to the constraint
-\( \diag(L \CM L^{\top}) = 1 \) \cite{yeremin2000factorized}, while the
-KL divergence \\ \( \KL{\N(\vec{0}, \CM)} {\N(\vec{0}, (L L^{\top})^{-1})}
-\) \cite{schafer2021sparse} factors the precision matrix, i.e. \( L
-L^{\top} \approx \CM^{-1} \).
+\( \diag(L \CM L^{\top}) = 1 \) \cite{yeremin2000factorized}, and the
+Kullback-Leiber (KL) divergence \( \KL{\N(\vec{0}, \CM)} {\N(\vec{0}, (L L^{\top})^{-1})}
+\) \cite{schafer2021sparse}. These three choices all recover the Vecchia approximation.
 
-As observed in \cite{schafer2021sparse}, factors of the precision matrix
+As observed in \cite{rue2005gaussian, schafer2021sparse}, factors of the precision matrix
 are often much sparser than factors of the covariance matrix, because the
 precision encodes conditional independence while the covariance encodes
 marginal independence.
@@ -483,7 +452,7 @@ does, specializing the generic optimization problem \cref{eq:generic_obj} to
   \label{eq:L_obj}
   L \defeq \argmin_{\hat{L} \in \SpSet} \,
     \KL*{\N(\vec{0}, \CM)}
-        {\N(\vec{0}, (\hat{L} \hat{L}^{\top})^{-1})}
+        {\N(\vec{0}, (\hat{L} \hat{L}^{\top})^{-1})}.
 \end{align}
 For multivariate Gaussians, the KL divergence
 has a closed-form expression given by
@@ -560,7 +529,8 @@ in \cref{sec:chol_select} and extend it in \cref{sec:extensions}.
     by Euclidean distance and the right by conditional variance.
     Euclidean distance prefers the two points right of the target.
     However, a more balanced view of the situation is obtained when picking
-    the slightly further but ultimately more informative point to the left,
+    the slightly farther but
+    more informative point to the left,
     reducing variance at the target and thereby reducing predictive error.
   }
   \label{fig:selection}
@@ -585,13 +555,12 @@ also used by \cite{krause2008nearoptimal} for sensor placement.
 
 In contrast to Euclidean distance \cite{vecchia1988estimation} or unconditional
 correlation \cite{wada2013gaussian, kang2021correlationbased}, conditional
-variance incentives the often contradictory demands of being near the target
+variance incentivizes the often contradictory demands of being near the target
 point (nearby points have higher covariance), but away from previously
 selected points (to avoid redundancy); the resulting spread-out selections
 are illustrated in \cref{fig:selection}.
 Even for isotropic kernels like the Mat{\'e}rn family, the
-resulting conditional selections can be unusual and seemly
-non-isotropic which is demonstrated in \cref{fig:cond_select}.
+selections can be anisotropic, as shown in \cref{fig:cond_select}.
 
 \subsection{A greedy approach}
 \label{subsec:greedy_select}
@@ -603,11 +572,11 @@ Let \( \I = \{ i_j \}_{j = 1}^t \subseteq \Train \) be
 the indices of previously selected training points.
 For a newly selected index \( k \), we condition the current
 covariance matrix on \( y_k \) according to the posterior
-\cref{eq:quotient_rule}, which we see is a rank-one downdate:
+\cref{eq:quotient_rule}, resulting in the rank-one downdate
 \begin{align}
   \label{eq:cond_select}
   \CM_{:, : \mid \I, k} &= \CM_{:, : \mid \I} - \vec{u} \vec{u}^{\top} &
-    \vec{u} &= \frac{\CM_{:, k \mid \I}}{\sqrt{\CM_{k, k \mid \I}}}
+    \vec{u} &= \frac{\CM_{:, k \mid \I}}{\sqrt{\CM_{k, k \mid \I}}}.
 \end{align}
 The decrease in the variance of \( y_\Pred \) after
 selecting \( k \) is given by \( u_\Pred^2 \), or
@@ -616,7 +585,7 @@ selecting \( k \) is given by \( u_\Pred^2 \), or
   u_\Pred^2
   = \frac{\CM_{\Pred, k \mid \I}^2}{\CM_{k, k \mid \I}}
   = \frac{\Cov[y_\Pred, y_k \mid \I]^2}{\Var[y_k \mid \I]}
-  = \Corr[y_\Pred, y_j \mid \I]^2 \Var[y_\Pred \mid \I]
+  = \Corr[y_\Pred, y_j \mid \I]^2 \Var[y_\Pred \mid \I].
 \end{align}
 To compute the objective \cref{eq:obj_gp} for each candidate index
 \( j \), we start with the unconditional variance \( \CM_{j, j} \)
@@ -636,9 +605,9 @@ The precision takes \( \BigO(s^2) \) space while the first
 \( \BigO(N s) \) space, always more memory (\( N > s \)).
 Both algorithms use \( \BigO(N) \) space
 to store the conditional (co)variances.
-Although the precision algorithm uses less memory than the
-Cholesky algorithm, the Cholesky algorithm is preferred
-for ease of implementation and better performance.
+The precision algorithm uses less memory than the
+Cholesky algorithm. 
+However, the Cholesky algorithm is easier to implement and roughly two times faster, which is why we use it in practice.
 
 \section{Greedy selection for global approximation by KL-minimization}
 \label{sec:chol_select}
@@ -655,7 +624,7 @@ for ease of implementation and better performance.
     it, and the \textcolor{seagreen}{selected} entries are added to
     the \textcolor{seagreen}{sparsity pattern}.
     Points violating lower triangularity are
-    shown in \textcolor{darksilver}{grey}.
+    not shown.
     Thus, sparsity selection in Cholesky factorization
     (left panel) is analogous to training point selection
     in directed Gaussian process regression (right panel).
@@ -665,13 +634,13 @@ for ease of implementation and better performance.
 
 Directed Gaussian process regression infers the
 \emph{local} distribution at points of interest.
-We turn our attention to \emph{global} approximation of the entire Gaussian
+We now turn our attention to \emph{global} approximation of the entire Gaussian
 process; given a kernel function \( \K(\vec{x}, \vec{x}') \) and a set of \(
 N \) points \( \{ \vec{x}_i \}_{i = 1}^N \) we have the covariance matrix \(
 \CM_{ij} = K(\vec{x}_i, \vec{x}_j) \) for which we seek a sparse approximate
 Cholesky factor \( L \) of the precision, \( L L^{\top} \approx \CM^{-1} \).
 We first order the points by the reverse-maximin ordering described in
-\cref{subsec:ordering} and then straightforwardly apply the selection
+\cref{subsec:ordering} and then apply the selection
 algorithm developed in \cref{sec:select} to form the sparsity pattern.
 For the \( i \)th column of \( L \), the target point is the \( i \)th point
 in the ordering, the candidate points are those satisfying lower triangularity
@@ -714,7 +683,7 @@ known as aggregated or supernodal Cholesky factorization.
 Aggregation can lead to substantial time
 and space savings \cite{schafer2021sparse}.
 For this section we focus on a single group \( \tilde{i}
-= \{i_1, \dotsc, i_m \} \) composed from aggregating the
+= \{i_1, \dotsc, i_m \} \) obtained by aggregating the
 column indices \( i_1 \succ i_2 \succ \dotsb \succ i_m \).
 Let \( \tilde{i} \) have aggregated selected entries \(
 s_{\tilde{i}} \) satisfying \( s_{\tilde{i}} \supseteq \tilde{i}
@@ -749,12 +718,13 @@ selected entries are \emph{between} columns.
 Let the random variables corresponding to the indices \( \tilde{i} = \{
 i_1, \dotsc, i_m \} \) be collected in a vector \( \vec{y} = [y_1, \dotsc,
 y_m]^{\top} \) with joint density \( \vec{y} \sim \N(\vec{0}, \CM) \).
-We select an index \( k \) that conditions all but the first \( p \)
+We select a random variable with index \( k \) and define \emph{partial} conditioning
+to mean that \( k \) conditions all but the first \( p \)
 variables (recall that the indices are sorted w.r.t \( \succ \), so if
 \( k \) conditions a variable, it conditions all those afterwards).
-After this partial conditioning, the variables become \( \vec{y}_{\parallel
+We denote the partial conditioning of \( y \) as \( \vec{y}_{\parallel
 k} \defeq [y_1, \dotsc, y_p, y_{p + 1 \mid k}, \dotsc, y_{m \mid k}]^{\top}
-\) and the covariance matrix \( \Cov[\vec{y}_{\parallel k}] \) becomes
+\) and its covariance matrix \( \Cov[\vec{y}_{\parallel k}] \) as
 \begin{align}
   \label{eq:chol_partial}
   \CM_{\tilde{i}, \tilde{i} \parallel k} &\defeq
@@ -783,7 +753,7 @@ Armed with this representation, we compute \(
   \label{eq:partial_kl}
   \sum_{i \in \tilde{i}}
     \log \left (\CM_{i, i \mid s_i \setminus \{ i \} } \right ) &=
-    \logdet(\CM_{\tilde{i}, \tilde{i} \parallel k})
+    \logdet(\CM_{\tilde{i}, \tilde{i} \parallel k}).
 \end{align}
 Like the aggregated case \cref{eq:obj_mult}, minimizing the log determinant
 of the \emph{partially} conditioned covariance matrix \cref{eq:chol_partial}
@@ -793,10 +763,10 @@ is the same as minimizing the KL divergence \cref{eq:obj_chol}.
 \label{subsec:mult_select}
 
 For multiple (\( m > 1 \)) target points, \cite{gramacy2014local} suggests
-simply independently applying the single-target algorithm to each target.
+independently applying the single-target algorithm to each target.
 Instead, we will use \emph{the same} selected points for \emph{all} the target
-points, essentially speeding up selection by a factor of \( m \), furthermore,
-the cost of computing the entries of the resulting Cholesky factor is reduced
+points, essentially speeding up selection by a factor of \( m \). 
+Furthermore, the cost of computing the entries of the resulting Cholesky factor is reduced
 by this aggregation.
 The primary downside is reduced accuracy per sparsity entry
 since each target no longer receives individual attention.
@@ -806,7 +776,7 @@ simultaneous effect on \emph{all} prediction points.
 In practice, this approach yields better accuracy
 per unit time than single-target selection.
 
-The first question is generalizing the objective for
+The first question is how to generalize the objective for
 a single target \cref{eq:obj_gp} to multiple targets.
 Continuing with KL-minimization \cref{eq:obj_mult}, the criterion
 should be to minimize the log determinant of the posterior
@@ -825,7 +795,7 @@ By application of the matrix determinant lemma
 \begin{align}
   \label{eq:greedy_mult}
   \logdet(\CM_{\Pred, \Pred \mid \I, k})  - \logdet(\CM_{\Pred, \Pred \mid \I})
-  &= \log(\CM_{    k,     k \mid \I, \Pred}) - \log(\CM_{    k,     k \mid \I})
+  &= \log(\CM_{    k,     k \mid \I, \Pred}) - \log(\CM_{    k,     k \mid \I}).
 \end{align}
 Equation \cref{eq:greedy_mult} swaps the roles of the targets
 and the candidate: the \emph{candidate} is now conditioned
@@ -836,7 +806,7 @@ we can compute the objective by maintaining a data structure for each term: one
 for \( \CM_{k, k \mid \I, \Pred} \) and the other
 for \( \CM_{k, k \mid \I} \).
 By the quotient rule \( \CM_{k, k \mid \I, \Pred} = \CM_{k,
-k \mid \Pred, \I} \) so we can condition on the prediction
+k \mid \Pred, \I} \), so we can condition on the prediction
 points \emph{before} any points have been selected.
 After this initialization, we repeatedly update both data structures after
 selecting the best candidate by the objective \cref{eq:greedy_mult}.
@@ -855,9 +825,10 @@ approach is preferred for simplicity and performance.
 
 \paragraph{Partial selection}
 
-The multiple-target algorithm implicitly assumes a candidate
-conditions \emph{every} target point, however, candidates
-can condition only a subset of the targets in the aggregated
+The multiple-target algorithm implicitly assumes that a candidate
+conditions \emph{every} target point. 
+However, candidates
+can also condition only a subset of the targets in the aggregated
 Cholesky factorization setting of \cref{subsubsec:partial}.
 Proper ``partial'' selection accounting for this structure is able to match
 the asymptotic time and space complexities of the multiple-target algorithm
@@ -867,8 +838,8 @@ by also storing a partial Cholesky factor, the details are provided in
 \subsection{Aggregated Cholesky}
 
 In an aggregated sparsity pattern, columns are partitioned into groups and
-selecting an index for a group \( \tilde{i} \) adds it to the sparsity
-pattern of every column in \( \tilde{i} \) satisfying lower triangularity.
+selecting an index for a group \( \tilde{i} \) adds it to the sparsity.
+
 We group columns by the framework of \cite{schafer2021sparse} which aggregates
 points that are close both geometrically as well as in the ordering.
 To select sparsity entries, the targets are all points in \( \tilde{i} \)
@@ -901,24 +872,24 @@ simplifying to \( \BigO(\frac{N C s^2}{m}) \) assuming \( m = \BigO(s) \),
 a \( m \) times improvement over non-aggregated factorization.
 Better time complexity yields denser and thereby
 more accurate factors in the same amount of time.
-Inheriting the primary downside of the multiple-target selection algorithm,
-the aggregated factor is less efficient at reducing the KL divergence per
-nonzero since the sparsity pattern is shared between all columns in the
-group, not tailored to any particular column.
+However, the sparsity pattern is no longer tailored to particular columns
+since it is shared within a group.
+This means the aggregated factor is less efficient at reducing the KL divergence per
+nonzero.
 
 \subsection{Allocating nonzeros by global greedy selection}
 \label{subsec:global_greedy}
 
-With a budget on the total number of nonzeros, one
-inevitably decides how many nonzeros each column gets.
+Given a budget on the total number of nonzeros, one
+must decide how many nonzeros to assign to each column.
 We recommend the simple strategy of distributing nonzeros as evenly as
 possible, maximizing computational efficiency since denser columns have
 an outsized impact on the computational time from the cubic scaling cost
 with the number of nonzeros.
 
 In inhomogeneous geometries where certain points benefit from
-more nonzeros than others, a principled way of distributing nonzeros might be
-to minimize KL divergence end-to-end like was done for sparsity selection.
+more nonzeros than others, a principled way of distributing nonzeros is to
+minimize KL divergence end-to-end like was done for sparsity selection.
 The \emph{local} greedy algorithms select the sparsity entry that
 minimizes prediction error at \emph{particular} columns of interest.
 In \emph{global} greedy selection, we pick from \emph{any} column the
@@ -942,14 +913,14 @@ compute exactly the difference in KL divergence.
 \label{subsubsec:single_column}
 
 Selecting an entry \( k \) for a single target only affects its conditional
-variance, so exactly one term in the KL divergence \cref{eq:obj_chol} changes:
+variance, so exactly one term in the KL divergence \cref{eq:obj_chol} changes,
 \begin{align}
   \argmin_k \left [
     \log(\CM_{\Pred, \Pred \mid \I, k}) - \log(\CM_{\Pred, \Pred \mid \I})
   \right ] &=
     \argmin_k \left (
       \CM_{\Pred, \Pred \mid \I, k}
-    \right ) \CM_{\Pred, \Pred \mid \I}^{-1}
+    \right ) \CM_{\Pred, \Pred \mid \I}^{-1}.
   \shortintertext{
     Using the original objective \cref{eq:obj_gp} to
     compute the change in variance from selecting \( k \),
@@ -1008,144 +979,6 @@ Code for all numerical experiments can be found at
 \href{https://github.com/stephen-huan/conditional-knn}
 {https://github.com/stephen-huan/conditional-knn}.
 
-\subsection{\textit{k}-nearest neighbors selection}
-\label{subsec:knn_exp}
-
-We compare \( k \)-nearest neighbors (\( k \)-NN) to our selection
-algorithm from \cref{subsec:greedy_select}, which we call conditional
-\( k \)-nearest neighbors (C\( k \)-NN), in the following toy example
-performing image classification.
-From the MNIST database of handwritten digits
-\cite{lecun1998gradientbased}, we randomly select \( N =
-10^3 \) training images and \( m = 10^2 \) testing images.
-We classify a test image by selecting \( k \) training
-images and taking the mode label of those images.
-For \( k \)-NN, we use the Euclidean distance and for C\(
-k \)-NN, we use a Mat{\'e}rn kernel with smoothness \( \nu
-= 3/2 \) and length scale \( \ell = 2^{10} \).
-Accuracy is the percentage of test images classified correctly.
-
-The accuracy of both methods decreases linearly with
-increasing \( k \) as shown in \cref{fig:mnist}.
-We hypothesize that nearby images are more likely to
-have the same label, so selecting more points increases
-the influence of further, differently labeled images.
-C\( k \)-NN remains more accurate than \( k \)-NN for every \( k >
-2 \), suggesting it consistently selects more informative images.
-We emphasize that conditioning alone causes the difference in accuracy:
-unconditional covariance decays monotonically with distance.
-
-\pgfplotsset{
-  cycle list={
-    {very thick, lightblue, style=dashed},
-    {very thick, orange,    style=solid},
-  }
-}
-
-\begin{figure}[t]
-  \centering
-  \input{figures/mnist/accuracy_k.tex}%
-  \input{figures/mnist/time_k.tex}
-  \caption{
-    We compare selection by Euclidean distance (\( k \)-NN) to
-    conditional selection (C\( k \)-NN) in image classification.
-    From the MNIST database \( N = 10^3 \) training images and \( m = 10^2
-    \) testing images are randomly chosen; each test image is classified by
-    the mode label of \( k \) selected images, and this process is repeated
-    \( 10^2 \) times for each value of \( k \).
-    (Left:) Accuracy with \( k \).
-    (Right:) the time to select \( k \) points using C\( k \)-NN seems to
-    scale linearly with \( k \) although it is quadratic asymptotically;
-    possibly resulting from applying highly optimized BLAS operations to
-    relatively small matrices.
-  }
-  \label{fig:mnist}
-\end{figure}
-
-\subsection{Recovery of sparse Cholesky factors}
-\label{subsec:recover_exp}
-
-Motivated by the similarity of the selection algorithm to orthogonal matching
-pursuit \cite{tropp2007signal}, we attempt to recover an \textit{a priori}
-sparse Cholesky factor \( L \) from its precision matrix \( Q = L L^{\top} \).
-To generate the nonzero entries of \( L \), for each column
-we pick \( s \) lower triangular indices uniformly at
-random and sample their values i.i.d. from \( \N(0, 1) \).
-We fill \( L \)'s diagonal with a ``large'' positive
-value 10 to ensure \( Q \) is well-conditioned.
-The selection algorithm is given \( s \) and either \(
-Q \) or the covariance matrix \( Q^{-1} \) depending on
-which results in higher accuracy in reconstructing \( L \).
-For a recovered sparsity pattern \( X \) and ground truth \( Y \) we report
-\( \card{X \cap Y}/\card{X \cup Y} \), the intersection over union (IOU).
-Using the KL divergence \cref{eq:L_obj} of the recovered
-Cholesky factor seems mostly equivalent to IOU.
-
-As shown in \cref{fig:recover_acc}, C\( k \)-NN maintains a near-perfect
-recovery accuracy much higher than the unconditional baselines.
-In the setting of noisy measurements, noise sampled i.i.d from
-\( \N(0, \var) \) is symmetrically added to each entry of \( Q
-\) (\( Q_{i, j} \) receives the same noise as \( Q_{j, i} \)).
-Accuracy degrades with increasing noise for all methods, but C\( k \)-NN
-is the most sensitive to noise as is shown in \cref{fig:recover_noise}.
-At high enough levels of noise \( Q \) can lose
-positive-definiteness, causing C\( k \)-NN to break down entirely.
-
-An important setting where \( Q \) (and possibly \( L \)) are known
-to be \textit{a priori} sparse is when solving Laplacian systems.
-In exploratory numerical experiments we found that the factors
-generated by our method were unreasonably dense compared the sparsity
-of the Laplacian matrix, a manifestation of \emph{fill-in}.
-We comment that our method is designed for \emph{dense} kernel matrices
-resulting from a set of points and a ``well-behaved'' kernel function.
-For solving sparse Laplacian systems, a method designed
-to exploit the sparsity and graph structure of Laplacian
-matrices like \cite{kyng2016approximate} is more appropriate.
-
-\pgfplotsset{
-  cycle list={
-    {very thick, silver,    style=densely dotted},
-    {very thick, lightblue, style=dashed},
-    {very thick, seagreen,  style=dashdotted},
-    {very thick, orange,    style=solid},
-  }
-}
-
-\begin{figure}[t]
-  \centering
-  \input{figures/recover/accuracy_n.tex}%
-  \input{figures/recover/accuracy_s.tex}
-  \caption{
-    We attempt to recover a sparse Cholesky factor \(
-    L \) of the precision matrix \( Q = L L^{\top} \).
-    ``C\( k \)-NN'' minimizes the conditional variance of the target
-    (diagonal) entry, ``corr.'' maximizes correlation with the target,
-    ``\( k \)-NN'' maximizes covariance with the target, and ``rand.''
-    samples entries uniformly at random.
-    All methods achieve their best accuracy given \( Q \) except
-    C\( k \)-NN which is given the covariance matrix \( Q^{-1} \).
-    (Left:) Varying the size of \( L \), fixed density \( s = 2^5 \).
-    (Right:) Varying \( s \), fixed size \( N = 2^8 \).
-    Accuracy starts to improve from the factor nearing fully dense.
-  }
-  \label{fig:recover_acc}
-\end{figure}
-
-\begin{figure}[t]
-  \centering
-  \input{figures/recover/accuracy_noise.tex}%
-  \input{figures/recover/accuracy_noise_cknn.tex}
-  \caption{
-    We add noise sampled i.i.d. from \( \N(0, \var)
-    \) to the measurements \( Q \) entrywise.
-    The left panel shows accuracy with varying noise for \( N
-    = 2^{10} \) columns and \( s = 2^5 \) nonzeros per column.
-    The right panel shows accuracy for the C\( k \)-NN method at
-    various noise levels for \( N = 2^8 \) and varying \( s \).
-  }
-  \label{fig:recover_noise}
-\end{figure}
-
 \subsection{Cholesky factorization}
 \label{subsec:chol_exp}
 
@@ -1163,8 +996,8 @@ forms the sparsity pattern by selecting all points within a radius of \( \rho
 \ell_i \) to the \( i \)th point, where \( \rho \geq 1 \) is a tuning parameter
 for density and \( \ell_i \) is the length scale from the reverse-maximin
 ordering.
-We also try selecting points by \( k \)-NN, where \(
-k \) is chosen to match the density of the baseline.
+We also try selecting points by \( k \)-nearest neighbors (\( k \)-NN), where \(
+k \) is chosen to match the number of nonzeros of the baseline.
 
 For our method, we run the baseline with a larger \( \rho' = \rho_s
 \cdot \rho \) to get an initial candidate set where \( \rho_s \)
@@ -1197,9 +1030,9 @@ Conditional methods are more accurate than their unconditional
 counterparts and the denser aggregated variants are both more
 accurate and faster than their non-aggregated counterparts.
 
-The conditional selection methods achieve significantly better
+\cref{fig:chol_rho} shows that the conditional selection methods achieve significantly better
 KL divergence compared to their unconditional counterparts for
-the same number of sparsity entries as \cref{fig:chol_rho} shows.
+the same number of entries of the sparsity set.
 However, they do not achieve better accuracy per
 unit time cost from the increased cost of selection.
 Aggregation results in better accuracy per unit time cost but worse accuracy
@@ -1268,7 +1101,7 @@ of \cite{schafer2021sparse} for additional details.
 
 We use the SARCOS dataset \cite{vijayakumar2000locally} generated from
 an inverse dynamics problem on a 7 degrees-of-freedom robotic arm.
-Given 7 joint positions, velocities and accelerations for 21 features
+Given 7 joint positions, velocities, and accelerations for 21 features
 in total, the goal is to infer the torque of just the first joint.
 The dataset is available online at \url{https://gaussianprocess.org/gpml/data/}
 and consists of 44,484 training points and 4,449
@@ -1370,17 +1203,17 @@ to \( N = 2^{16} \) points uniformly at random from the unit cube
 \( [0, 1]^3 \) and use a Mat{\'e}rn kernel with smoothness \( \nu
 = 1/2 \) and length scale \( \ell = 1 \).
 In exploratory numerical experiments, we found using higher smoothnesses
-like \( \nu = 5/2 \) led to extremely poor condition and
+like \( \nu = 5/2 \) led to extremely poor condition numbers and
 numerical instability (over thousands of iterations to converge).
 Increasing length scale also worsens the
 condition but to a less extreme extent.
-Rather than generate a right hand side \( \vec{y} \) directly, we first
+Rather than generate a right-hand side \( \vec{y} \) directly, we first
 sample a solution \( \vec{x} \sim \N(\vec{0}, \Id_N) \) and then compute
 \( \vec{y} = \CM \vec{x} \) so that \( \vec{y} \) is realistically smooth.
 When computing the preconditioner \( L \) by sparse Cholesky
 factorization, we use a candidate set size scaling factor of \(
 \rho_s = 2 \) and an aggregation parameter of \( \lambda = 1.5 \).
-We then run the conjugate gradient with \( L \) as a preconditioner
+We then run the conjugate gradient algorithm with \( L \) as a preconditioner
 until reaching a relative tolerance of \( 10^{-12} \).
 
 As shown in \cref{fig:cg_iter}, the conditional methods converge
@@ -1398,12 +1231,153 @@ than their non-aggregated counterparts due to barely reducing the number
 of iterations while producing significantly denser factors with slower
 matrix-vector products.
 The time-optimal density for conditional methods is sparser than
-their unconditional counterparts due to using less iterations at
+their unconditional counterparts due to using fewer iterations at
 the same sparsity and it being more expensive to select nonzeros.
 It is hard to directly compare the total computational time of the methods
-because simply increasing the number of iterations, e.g. by demanding better
-tolerance or by using matrices with worse condition, will prefer more accurate
+because simply increasing the number of iterations, e.g., by demanding better
+tolerance or by using matrices with worse condition numbers, will prefer more accurate
 methods even if they are slower to form the preconditioner.
+
+\pgfplotsset{
+  cycle list={
+    {very thick, lightblue, style=dashed},
+    {very thick, orange,    style=solid},
+  }
+}
+
+\begin{figure}[t]
+  \centering
+  \input{figures/mnist/accuracy_k.tex}%
+  \input{figures/mnist/time_k.tex}
+  \caption{
+    We compare selection by Euclidean distance (\( k \)-NN) to
+    conditional selection (C\( k \)-NN) in image classification.
+    From the MNIST database \( N = 10^3 \) training images and \( m = 10^2
+    \) testing images are randomly chosen; each test image is classified by
+    the mode label of \( k \) selected images, and this process is repeated
+    \( 10^2 \) times for each value of \( k \).
+    (Left:) Accuracy with \( k \).
+    (Right:) the time to select \( k \) points using C\( k \)-NN seems to
+    scale linearly with \( k \) although it is quadratic asymptotically;
+    possibly resulting from applying highly optimized BLAS operations to
+    relatively small matrices.
+  }
+  \label{fig:mnist}
+\end{figure}
+
+\subsection{\textit{k}-nearest neighbors selection}
+\label{subsec:knn_exp}
+
+We compare \( k \)-nearest neighbors (\( k \)-NN) to our selection
+algorithm from \cref{subsec:greedy_select}, which we call conditional
+\( k \)-nearest neighbors (C\( k \)-NN), in the following toy example
+performing image classification.
+From the MNIST database of handwritten digits
+\cite{lecun1998gradientbased}, we randomly select \( N =
+10^3 \) training images and \( m = 10^2 \) testing images.
+We classify a test image by selecting \( k \) training
+images and taking the mode label of those images.
+For \( k \)-NN, we use the Euclidean distance and for C\(
+k \)-NN, we use a Mat{\'e}rn kernel with smoothness \( \nu
+= 3/2 \) and length scale \( \ell = 2^{10} \).
+Accuracy is the percentage of test images classified correctly.
+
+The accuracy of both methods decreases linearly with
+increasing \( k \) as shown in \cref{fig:mnist}.
+We hypothesize that nearby images are more likely to
+have the same label, so selecting more points increases
+the influence of further, differently labeled images.
+C\( k \)-NN remains more accurate than \( k \)-NN for every \( k >
+2 \), suggesting it consistently selects more informative images.
+We emphasize that conditioning alone causes the difference in accuracy:
+unconditional covariance decays monotonically with distance.
+
+\pgfplotsset{
+  cycle list={
+    {very thick, silver,    style=densely dotted},
+    {very thick, lightblue, style=dashed},
+    {very thick, seagreen,  style=dashdotted},
+    {very thick, orange,    style=solid},
+  }
+}
+
+\begin{figure}[t]
+  \centering
+  \input{figures/recover/accuracy_n.tex}%
+  \input{figures/recover/accuracy_s.tex}
+  \caption{
+    We attempt to recover a sparse Cholesky factor \(
+    L \) of the precision matrix \( Q = L L^{\top} \).
+    ``C\( k \)-NN'' minimizes the conditional variance of the target
+    (diagonal) entry, ``corr.'' maximizes correlation with the target,
+    ``\( k \)-NN'' maximizes covariance with the target, and ``rand.''
+    samples entries uniformly at random.
+    All methods achieve their best accuracy given \( Q \) except
+    C\( k \)-NN which is given the covariance matrix \( Q^{-1} \).
+    (Left:) Varying the size of \( L \), fixed density \( s = 2^5 \).
+    (Right:) Varying \( s \), fixed size \( N = 2^8 \).
+    Accuracy starts to improve from the factor nearing fully dense.
+  }
+  \label{fig:recover_acc}
+\end{figure}
+
+\begin{figure}[t]
+  \centering
+  \input{figures/recover/accuracy_noise.tex}%
+  \input{figures/recover/accuracy_noise_cknn.tex}
+  \caption{
+    We add noise sampled i.i.d. from \( \N(0, \var)
+    \) to the measurements \( Q \).
+    The left panel shows accuracy with varying noise for \( N
+    = 2^{10} \) columns and \( s = 2^5 \) nonzeros per column.
+    The right panel shows accuracy for the C\( k \)-NN method at
+    various noise levels for \( N = 2^8 \) and varying \( s \).
+  }
+  \label{fig:recover_noise}
+\end{figure}
+
+\subsection{Recovery of sparse Cholesky factors}
+\label{subsec:recover_exp}
+
+Motivated by the similarity of the selection algorithm to orthogonal matching
+pursuit \cite{tropp2007signal}, we attempt to recover an \textit{a priori}
+sparse Cholesky factor \( L \) from its precision matrix \( Q = L L^{\top} \).
+To generate the nonzero entries of \( L \), for each column
+we pick \( s \) lower triangular indices uniformly at
+random and sample their values i.i.d. from \( \N(0, 1) \).
+We fill \( L \)'s diagonal with a ``large'' positive
+value 10 to ensure \( Q \) is well-conditioned.
+The selection algorithm is given \( s \) and either \(
+Q \) or the covariance matrix \( Q^{-1} \) depending on
+which results in higher accuracy in reconstructing \( L \).
+For a recovered sparsity pattern \( X \) and ground truth \( Y \) we report
+\( \card{X \cap Y}/\card{X \cup Y} \), the intersection over union (IOU).
+Using the KL divergence \cref{eq:L_obj} of the recovered
+Cholesky factor seems mostly equivalent to IOU.
+
+As shown in \cref{fig:recover_acc}, C\( k \)-NN maintains a near-perfect
+recovery accuracy much higher than the unconditional baselines.
+In the setting of noisy measurements, noise sampled i.i.d from
+\( \N(0, \var) \) is symmetrically added to each entry of \( Q
+\) (\( Q_{i, j} \) receives the same noise as \( Q_{j, i} \)).
+Accuracy degrades with increasing noise for all methods, but C\( k \)-NN
+is the most sensitive to noise as is shown in \cref{fig:recover_noise}.
+At high enough levels of noise \( Q \) can lose
+positive-definiteness, causing C\( k \)-NN to break down entirely.
+
+An important setting where \( Q \) (and possibly \( L \)) are known
+to be \textit{a priori} sparse is when solving Laplacian systems.
+In exploratory numerical experiments we found that the factors
+generated by our method were unreasonably dense compared the sparsity
+of the Laplacian matrix, a manifestation of \emph{fill-in}.
+We comment that our method is designed for \emph{dense} kernel matrices
+resulting from a set of points and a ``well-behaved'' kernel function.
+For solving sparse Laplacian systems, a method designed
+to exploit the sparsity and graph structure of Laplacian
+matrices like \cite{kyng2016approximate} is more appropriate.
+
+\section{Comparisons and conclusion}
+\label{sec:conclusion}
 
 \subsection{Comparison to other methods}
 \label{subsec:compare}
@@ -1464,10 +1438,9 @@ essentially recovers \cite{schafer2021sparse} and that using
 the correlation objective \cref{eq:obj_gp} without conditioning
 on selected points recovers \cite{kang2021correlationbased}.
 
-\section{Conclusions}
-\label{sec:conclusion}
+\subsection{Conclusion}
 
-In this work, we develop a algorithm for directed Gaussian process
+In this work, we develop an algorithm for directed Gaussian process
 regression which greedily selects training points that maximize
 mutual information with a target point, conditional on all points
 previously selected to avoid redundancy.
@@ -1480,15 +1453,15 @@ be extended to the settings of multiple-target and partial conditioning
 corresponding to aggregated (or supernodal) Cholesky factorization.
 Finally, global selection gives a principled way of
 distributing nonzeros over columns of the Cholesky factor.
-We support these claims by extensive numerical
+We support these claims through extensive numerical
 experimentation in a variety of problems.
 
 \section*{Acknowledgments}
 \todo{add more funding information}
-This research was supported in part through research cyberinfrastructure
+This research was supported in part by research cyberinfrastructure
 resources and services provided by the Partnership for an Advanced Computing
 Environment (PACE) at the Georgia Institute of Technology, Atlanta, Georgia,
-USA.
+USA. HO acknowledges support from the Air Force Office of Scientific Research under MURI award number FA9550-20-1-0358 (Machine Learning and Physics-Based Modeling and Simulation) and the Department of Energy under the MMICCs SEA-CROGS award.
 
 \bibliographystyle{siamplain}
 \bibliography{references}
@@ -1513,7 +1486,7 @@ factor \( L \) computed from the closed-form expression \cref{eq:L_col}.
   \CM)}{\N(\vec{0}, (L L^{\top})^{-1})} \) for brevity of notation,
   \begin{align}
     \label{eq:kl_L}
-    \Delta &= \trace(L L^{\top} \CM) - \logdet(L L^{\top}) - \logdet(\CM) - N
+    \Delta &= \trace(L L^{\top} \CM) - \logdet(L L^{\top}) - \logdet(\CM) - N.
     \shortintertext{
       Focusing on the term \( \trace(L L^{\top} \CM) = \trace(L^{\top} \CM L)
       \) by the cyclic property of trace and using the sparsity of \( L \) by
@@ -1536,12 +1509,13 @@ factor \( L \) computed from the closed-form expression \cref{eq:L_col}.
       \frac{\vec{e}_1^{\top} \CM_{s_i, s_i}^{-1}
             \CM_{s_i, s_i} \CM_{s_i, s_i}^{-1}
             \vec{e}_1}{\vec{e}_1^{\top} \CM_{s_i, s_i}^{-1} \vec{e}_1}
-    = \sum_{i = 1}^N 1 = N
+    = \sum_{i = 1}^N 1 = N,
     \shortintertext{
-      exactly the Jacobi scaling constraint \( \diag(L^{\top} \CM L) = 1 \).
+      exactly the constraint \( \diag(L^{\top} \CM L) = 1 \)
+      from \cref{subsec:vecchia}.
       Substituting back into \cref{eq:kl_L},
     }
-    \Delta &= -\logdet(L L^{\top}) - \logdet(\CM)
+    \Delta &= -\logdet(L L^{\top}) - \logdet(\CM).
     \shortintertext{
       Computing the log determinant of a triangular matrix as
       the sum of the log of its diagonal entries and plugging in
@@ -1557,10 +1531,10 @@ factor \( L \) computed from the closed-form expression \cref{eq:L_col}.
           (\vec{e}_1^{\top} \CM_{s_i, s_i}^{-1} \vec{e}_1)^{-1}
         \right )
       \right ]
-      - \logdet(\CM)
+      - \logdet(\CM).
     \shortintertext{
       Now we use that conditioning in
-      covariance is marginalization in precision:
+      covariance is marginalization in precision,
     }
     \label{eq:inverse_cond}
     \CM_{1, 1 \mid 2} &= \left ( \CM^{-1} \right )_{1, 1}^{-1}
@@ -1569,7 +1543,7 @@ factor \( L \) computed from the closed-form expression \cref{eq:L_col}.
       \begin{pmatrix}
         \CM_{1, 1} & \CM_{1, 2} \\
         \CM_{2, 1} & \CM_{2, 2}
-      \end{pmatrix}
+      \end{pmatrix}.
     \shortintertext{
       Transforming the marginalization \( (\vec{e}_1^{\top} \CM_{s_i, s_i}^{-1}
       \vec{e}_1)^{-1} = \left (\CM_{s_i, s_i}^{-1} \right )_{1, 1}^{-1} =
@@ -1579,11 +1553,11 @@ factor \( L \) computed from the closed-form expression \cref{eq:L_col}.
       \left [
         \log \left ( \CM_{i, i \mid s_i \setminus \{ i \}} \right )
       \right ]
-      - \logdet(\CM) \\
+      - \logdet(\CM). \\
     \shortintertext{Now we use the chain rule of log determinants,
-      using the same blocking as \cref{eq:inverse_cond}:}
+      using the same blocking as \cref{eq:inverse_cond},}
     \label{eq:det_chain}
-    \logdet(\CM) &= \logdet(\CM_{1, 1}) + \logdet(\CM_{2, 2 \mid 1}) \\
+    \logdet(\CM) &= \logdet(\CM_{1, 1}) + \logdet(\CM_{2, 2 \mid 1}). \\
     \shortintertext{
       Repeatedly expanding the log determinant by
       \cref{eq:det_chain}, working from back to front,
@@ -1596,7 +1570,7 @@ factor \( L \) computed from the closed-form expression \cref{eq:L_col}.
       \left [
         \log \left ( \CM_{i, i \mid s_i \setminus \{ i \}} \right ) -
         \log \left ( \CM_{i, i \mid i + 1:} \right )
-      \right ]
+      \right ].
   \end{align}
 \end{proof}
 
@@ -1624,12 +1598,12 @@ pattern for the \( k \)th column is \( s_k = \tilde{s} \cup \{ j \in \tilde{i}
     }
     &= \logdet(\CM_{\{ i_1, i_2 \} \mid \tilde{s}}) +
       \log(\CM_{i_3 \mid \tilde{s} \cup \{ i_1, i_2 \}}) + \dotsb +
-      \log(\CM_{i_m \mid \tilde{s} \cup \tilde{i}}) \\
+      \log(\CM_{i_m \mid \tilde{s} \cup \tilde{i}}). \\
     \shortintertext{
       Proceeding by induction, we are able to
       reduce the entire sum to the single term
     }
-    &= \logdet(\CM_{\tilde{i}, \tilde{i} \mid \tilde{s}})
+    &= \logdet(\CM_{\tilde{i}, \tilde{i} \mid \tilde{s}}).
   \end{align}
 \end{proof}
 
@@ -1681,20 +1655,20 @@ k}] \) of the updated variables \( \vec{y}_{\parallel k} \).
       \E[(y_i - \E[y_i])(y_{j \mid k} - \E[y_{j \mid k}])]
       = \E[(L_i \vec{z}) ({L'}_j \vec{z} + \mu_j - \mu_j)] \\
     &= \E[(L_{i, 1} z_1 + \dotsb + L_{i, m} z_m)
-          ({L'}_{j, 1} z_1 + \dotsb + {L'}_{j, m} z_m)]
+          ({L'}_{j, 1} z_1 + \dotsb + {L'}_{j, m} z_m)].
     \shortintertext{
       For \( i \neq j \), \( \E[z_i z_j] = \E[z_i] \E[z_j] = 0 \)
-      since \( z_i \) is independent of \( z_j \) and has mean 0.
+      since \( z_i \) is independent of \( z_j \) and has mean 0,
     }
     &= L_{i, 1} {L'}_{j, 1} \E[z_1^2] + \dotsb +
-       L_{i, m} {L'}_{j, m} \E[z_m^2]
+       L_{i, m} {L'}_{j, m} \E[z_m^2].
     \shortintertext{
-      For any \( i \), \( \E[z_i^2] = \Var[z_i] + \E[z_i]^2 = 1 + 0 = 1 \).
+      For any \( i \), \( \E[z_i^2] = \Var[z_i] + \E[z_i]^2 = 1 + 0 = 1 \),
     }
-    &= L_{i, 1} {L'}_{j, 1} + \dotsb + L_{i, m} {L'}_{j, m} = L_i^{\top} {L'}_j
+    &= L_{i, 1} {L'}_{j, 1} + \dotsb + L_{i, m} {L'}_{j, m} = L_i^{\top} {L'}_j.
     \shortintertext{
       Thus, the new covariance matrix factors into
-      two Cholesky factors ``glued'' together:
+      two Cholesky factors ``glued'' together,
     }
     \Cov[\vec{y}_{\parallel k}] &=
     \begin{pmatrix}
@@ -1726,7 +1700,7 @@ k}] \) of the updated variables \( \vec{y}_{\parallel k} \).
     }_{\text{the same}} +
     \underbrace{
       \log({L'}_{p + 1, p + 1}) + \dotsb + \log({L'}_{m, m})
-    }_{\text{conditioned}}
+    }_{\text{conditioned}}.
   \end{align}
   Comparing to the KL divergence \cref{eq:obj_chol} and
   recalling that \( k \) is added to \( s_i \) if \( i > p \),
@@ -1742,7 +1716,7 @@ k}] \) of the updated variables \( \vec{y}_{\parallel k} \).
         \CM_{p + 1, p + 1 \mid s_{p + 1} \setminus \{ p + 1 \}}
       \right ) + \dotsb +
       \log \left ( \CM_{m, m \mid s_m \setminus \{ m \}} \right )
-    }_\text{conditioned}
+    }_\text{conditioned}.
     \shortintertext{
       Since \( L_{i, i} \) (and \( {L'}_{i, i} \)) is the square root
       of the posterior variance of the \( i \)th variable from the
@@ -1751,7 +1725,7 @@ k}] \) of the updated variables \( \vec{y}_{\parallel k} \).
     }
     \logdet(\CM_{\tilde{i}, \tilde{i} \parallel k}) &=
       \sum_{i = 1}^m
-        \log \left ( \CM_{i, i \mid s_i \setminus \{ i \}} \right )
+        \log \left ( \CM_{i, i \mid s_i \setminus \{ i \}} \right ).
   \end{align}
 \end{proof}
 
@@ -1776,7 +1750,7 @@ the precision of the aggregated sparsity pattern and let \( k \) be the \(
 i \)th column's index in \( s_{\tilde{i}} \).
 Because \( s_{\tilde{i}} \) is sorted according to \(
 \prec \), the sparsity pattern for the \( i \)th column
-\( s_i \) is exactly the entries \( k \) and after.
+\( s_i \) is exactly the entries \( k \) and after,
 \begin{align}
   \label{eq:L_precision}
   L_{s_i, i}
@@ -1830,7 +1804,7 @@ gain} between two collections of random variables \(
 \begin{align}
   \label{eq:info}
   \MI[\vec{y}_\Pred;\vec{y}_\Train] &\defeq \entropy[\vec{y}_\Pred] -
-    \entropy[\vec{y}_\Pred \mid \vec{y}_\Train]
+    \entropy[\vec{y}_\Pred \mid \vec{y}_\Train].
 \end{align}
 Maximizing the mutual information is equivalent to minimizing the
 conditional entropy since the entropy of \( \vec{y}_\Pred \) is constant.
@@ -1852,7 +1826,7 @@ so the expected mean squared error of the estimator \( \text{MSE}
   = \E[\E[(\vec{y}_\Pred - \E[\vec{y}_\Pred \mid \vec{y}_\Train])^2
           \mid \vec{y}_\Train]]
   = \E[\Var[\vec{y}_\Pred \mid \vec{y}_\Train]]
-  = \Var[\vec{y}_\Pred \mid \vec{y}_\Train]
+  = \Var[\vec{y}_\Pred \mid \vec{y}_\Train],
 \end{align}
 from the quirk that the posterior covariance \cref{eq:cond_cov}
 does not depend on observing  \( \vec{y}_\Train \).
@@ -1874,9 +1848,9 @@ information \cref{eq:info} to the EV-VE identity \cref{eq:eve},
 \end{align}
 On the left hand side, \textcolor{darkorange}{variance}
 is monotone with \textcolor{darkorange}{entropy}.
-On the right hand side, the \textcolor{lightblue}{conditional
+On the right-hand side, the \textcolor{lightblue}{conditional
 variance} is monotone with \textcolor{lightblue}{conditional entropy}.
-Because the two terms on the right hand side add to a constant, minimizing
+Because the two terms on the right-hand side add to a constant, minimizing
 the \textcolor{lightblue}{conditional variance} is equivalent to maximizing
 the \textcolor{rust}{variance of conditional expectation}, which, by process
 of elimination, corresponds to the \textcolor{rust}{mutual information}.
@@ -1983,7 +1957,7 @@ the Schur complement \textcolor{lightblue}{\( \CM_{2, 2} - \CM_{2, 1} \CM_{1,
   \begin{pmatrix}
     \Id & \textcolor{darkorange}{\CM_{1, 1}^{-1} \CM_{1, 2}} \\
     0 & \Id
-  \end{pmatrix}
+  \end{pmatrix}.
   \shortintertext{Inverting both sides of the equation and multiplying,}
   \CM^{-1} &=
   \begin{pmatrix}
@@ -2013,7 +1987,7 @@ the Schur complement \textcolor{lightblue}{\( \CM_{2, 2} - \CM_{2, 1} \CM_{1,
     - \textcolor{lightblue}{\CM_{2, 2 \mid 1}^{-1}} \textcolor{darkorange} {
       \left (\CM_{2, 1} \CM_{1, 1}^{-1} \right )
     } & \textcolor{lightblue}{\CM_{2, 2 \mid 1}^{-1}}
-  \end{pmatrix}
+  \end{pmatrix}.
   \shortintertext{
     In the context of adding a new entry \( k \) to the
     matrix, \( \CM_{1, 1} = \CM_{\I, \I} \), \( \CM_{1, 2}
@@ -2044,11 +2018,11 @@ selecting an index \( k \), or to compute \( \CM_{\Pred, \Pred \mid \I, k}^{-1}
 \), which is a rank-one update to the covariance matrix (but not necessarily
 the precision matrix) from \cref{eq:cond_select}.
 We can directly apply the Sherman–Morrison–Woodbury
-formula which states that:
+formula which states that
 \begin{align}
   \CM_{1, 1 \mid 2}^{-1} &= \CM_{1, 1}^{-1} +
     \left (\CM_{1, 1}^{-1} \CM_{1, 2} \right ) \CM_{2, 2 \mid 1}^{-1}
-    \left (\CM_{2, 1} \CM_{1, 1}^{-1} \right )
+    \left (\CM_{2, 1} \CM_{1, 1}^{-1} \right ).
   \shortintertext{
     Expanding the Schur complement from the
     posterior covariance \cref{eq:cond_cov},
@@ -2057,14 +2031,14 @@ formula which states that:
     \CM_{1, 1} - \CM_{1, 2} \CM_{2, 2}^{-1} \CM_{2, 1}
   \right )^{-1} &= \CM_{1, 1}^{-1} +
     \left (\CM_{1, 1}^{-1} \CM_{1, 2} \right ) \CM_{2, 2 \mid 1}^{-1}
-    \left (\CM_{2, 1} \CM_{1, 1}^{-1} \right )
+    \left (\CM_{2, 1} \CM_{1, 1}^{-1} \right ).
   \shortintertext{
     For brevity of notation, define the vectors \( \vec{u}
     \defeq \CM_{1, 2} \) and \( \vec{v} \defeq \CM_{1,
-    1}^{-1} \CM_{1, 2} = \CM_{1, 1}^{-1} \vec{u} \).
+    1}^{-1} \CM_{1, 2} = \CM_{1, 1}^{-1} \vec{u} \),
   }
   (\CM_{1, 1} - \CM_{2, 2}^{-1} \vec{u} \vec{u}^{\top})^{-1} &=
-    \CM_{1, 1}^{-1} + \CM_{2, 2 \mid 1}^{-1} \vec{v} \vec{v}^{\top}
+    \CM_{1, 1}^{-1} + \CM_{2, 2 \mid 1}^{-1} \vec{v} \vec{v}^{\top}.
   \shortintertext{
     So we see that a rank-one update to \( \CM_{1, 1} \) then
     inverting is a rank-one update to \( \CM_{1, 1}^{-1} \).
@@ -2096,24 +2070,24 @@ compute the log determinant after we add an index \( k \) to \( \I \),
 that is, to compute \( \logdet(\CM_{\Pred, \Pred \mid \I, k}) \).
 \begin{proof}[Proof of Equation \cref{eq:greedy_mult}]
   From the posterior \cref{eq:cond_select}, selecting a new
-  point is a rank-one downdate on the current covariance matrix:
+  point is a rank-one downdate on the current covariance matrix,
   \begin{align}
     \nonumber
     \logdet(\CM_{\Pred, \Pred \mid \I, k})
     &= \logdet \left ( \CM_{\Pred, \Pred \mid \I} -
         \frac{\CM_{\Pred, k \mid \I} \CM_{\Pred, k \mid \I}^{\top}}
               {\CM_{k, k \mid \I}}
-      \right ) \\
+      \right ). \\
     \shortintertext{Applying the matrix determinant lemma,}
     &= \logdet(\CM_{\Pred, \Pred \mid \I}) +
       \log \left ( 1 -
         \frac{\CM_{\Pred, k \mid \I}^{\top} \CM_{\Pred, \Pred \mid \I}^{-1}
               \CM_{\Pred, k \mid \I}
               }{\CM_{k, k \mid \I}}
-      \right )
+      \right ).
     \shortintertext{
       Focusing on the second term, we can turn
-      the quadratic form into condtioning.
+      the quadratic form into condtioning,
     }
     &= \logdet(\CM_{\Pred, \Pred \mid \I}) +
       \log \left (
@@ -2121,15 +2095,15 @@ that is, to compute \( \logdet(\CM_{\Pred, \Pred \mid \I, k}) \).
               \CM_{k, \Pred \mid \I} \CM_{\Pred, \Pred \mid \I}^{-1}
               \CM_{\Pred, k \mid \I}
               }{\CM_{k, k \mid \I}}
-      \right )
+      \right ).
     \shortintertext{
       By the quotient rule \cref{eq:quotient_rule},
-      we combine the conditioning.
+      we combine the conditioning,
     }
     &= \logdet(\CM_{\Pred, \Pred \mid \I}) +
       \log \left (
        \frac{\CM_{k, k \mid \I, \Pred}}{\CM_{k, k \mid \I}}
-      \right )
+      \right ).
   \end{align}
 \end{proof}
 
@@ -2209,16 +2183,15 @@ the conditional covariances of each candidate with each target.
 \paragraph{Cholesky approach}
 (\cref{alg:select_mult_chol}).
 The Cholesky approach storing two partial Cholesky factors is considerably
-simpler than the explicit precision approach from the symmetry of the
-factors and the lack of explicitly computing conditional covariances.
+simpler than the explicit precision approach.
 We first add each prediction point to one Cholesky factor by
 left-looking (\cref{alg:chol_update}) exactly as in the single-target
 algorithm, for a time complexity of \( \BigO((N + m) m^2) \).
 Whenever a candidate is selected, both Cholesky factors are updated in time \(
-\BigO((N + m)(m + s)) \) dominated by updating the initialized Cholesky factor.
+\BigO((N + m)(m + s)) \) dominated by updating the Cholesky factor conditioned on prediction points.
 The desired covariances \( \vec{u} \) and \( \vec{u}_\Pred \) are directly
 read off the columns of the Cholesky factors and both conditional variances
-\( \CM_{j, j \mid I} \) and \( \CM_{j, j \mid I, \Pred} \) are computed like
+\( \CM_{j, j \mid I} \) and \( \CM_{j, j \mid I, \Pred} \) are computed like in
 the precision approach.
 For \( s \) points selected, the total time
 complexity is \( \BigO(N s^2 + N m^2 + m^3) \).
@@ -2232,14 +2205,13 @@ the joint covariance matrix of training and prediction points.
 \label{subsec:partial_select}
 
 We now compute the log determinant of the target covariance matrix
-if a selected index \( k \) only conditions \emph{suffixes} of
-the target points, skipping the first \( p \) targets, say.
+if a selected index \( k \) only conditions a subset of the target points, skipping the first \( p \) targets.
 Following the suggestive form of the target covariance matrix
 \cref{eq:chol_partial}, we maintain a Cholesky factor \( L \)
 taking from the factor of the joint covariance matrix \( \CM \)
 only the \( \card{I} + m \) columns corresponding to selected
 points and target points, sorted w.r.t \( \succ \).
-Inserting the index \( k \) into its proper column in \( L \),
+After inserting the index \( k \) into its proper column in \( L \), the updated \( L \) becomes
 \begin{align}
   \label{eq:chol_partial_update}
   L &\gets
@@ -2252,15 +2224,15 @@ where \( L' \) is the Cholesky factor of the covariance matrix
 conditional on \( k \) and the updated form of \( L \) after insertion
 is derived from the statistical perspective in \cref{eq:chol}.
 
-To account for this insertion, the first \( p \) columns \( L_{:, :p}
-\) are unchanged, the newly inserted column \( \vec{u} \) of the form
-\cref{eq:cond_select} can be computed as usual with left-looking (see
-\cref{alg:chol_update}), and the remaining columns \( {L'}_{:, p + 1:}
-\) are from the Cholesky factor of \( \CM \) after a rank-one downdate
-by \( \vec{u} \), allowing the updated factor \( {L'}_{:, p + 1:} \) to
-be efficiently computed from the original factor \( L_{:, p + 1:} \).
+To compute this insertion, we immediately see that the first \( p \) columns \( L_{:, :p}
+\) are unchanged. We compute the newly inserted column \( \vec{u} \) of the form
+\cref{eq:cond_select} as usual with left-looking (see
+\cref{alg:chol_update}). Finally, we can efficiently compute the remaining columns \( {L'}_{:, p + 1:}
+\) from the original factor \( L_{:, p + 1:} \) by observing that the  updated factor \( {L'}_{:, p + 1:} \)
+is identical to the Cholesky factor of \( \CM \) after a rank-one downdate
+by \( \vec{u} \).
 Specifically we adapt Lemma 1 of \cite{krause2015more} to make
-no assumption on the row ordering of \( L \), in order to
+no assumption on the row ordering of \( L \) in order to
 implement the downdate in-place (see \cref{alg:chol_insert}).
 For a Cholesky factor of size \( R \times C \), the time
 complexity of the downdate is \( \BigO(R C) \) compared
@@ -2269,10 +2241,11 @@ to \( \BigO(R C^2) \) if recomputed from scratch.
 For \( N \) candidates, \( m \) targets, and a budget of \( s \) points to
 select, the Cholesky factor \( L \) has size \( (N + m) \times (s + m) \).
 When adding a new index \( k \) that ignores the first \( p \) targets, the
-first \( p \) columns of \( L \) are correspondingly ignored, the new column \(
-\vec{u} \) is computed with left-looking in time \( \BigO((N + m) p) \), and
-the columns past \( p \) are updated with downdating in time \( \BigO((N + m)
+first \( p \) columns of \( L \) are correspondingly ignored. We compute the new column \(
+\vec{u} \) with left-looking in time \( \BigO((N + m) p) \). Finally, we update
+the columns past \( p \) with downdating in time \( \BigO((N + m)
 (s + m - p)) \) for a total time complexity of \( \BigO(s(N + m)(s + m)) \).
+
 With the factor \( L \) in hand, we discuss
 actually computing the log determinant objective
 \cref{eq:partial_kl} after adding a candidate index \( j \).
@@ -2280,10 +2253,10 @@ We directly compute each individual target point's variance,
 conditional on \( j \) as well as previously selected points, and
 simply add these variances together to get the overall objective.
 
-We proceed by induction on the columns of \( L \), assuming we know
-the candidate's variance conditional on all points prior; starting
-at the first column we know the candidate's unconditional variance.
-We proceed to the next column by reading the requisite
+We proceed by induction on the columns of \( L \). 
+Starting at the first column, we know the candidate's unconditional variance.
+Assuming we know the candidate's variance conditional on all points prior,
+we proceed to the next column by reading the requisite
 statistical quantities from \( L \) \cref{eq:chol_partial_update}
 and conditioning \cref{eq:quotient_rule}.
 For the \( i \)th column,
@@ -2310,11 +2283,11 @@ complexity of the multiple-target algorithm.
 However, the downdate of the Cholesky factor is implemented with
 repeated BLAS level-one \texttt{daxpy} operations while the bulk of
 left-looking takes place in a BLAS level-two \texttt{dgemv} operation.
-Higher level operations often have better constant-factor
+Higher-level operations often have better constant-factor
 performance for the same asymptotic time complexity.
 In addition, the objective for the partial selection algorithm is
 more complicated to compute than its multiple-target counterpart.
-Psuedocode for the algorithm is provided in
+Pseudocode for the algorithm is provided in
 \cref{alg:select_partial} to \cref{alg:chol_insert}.
 
 \begin{figure}[th!]
