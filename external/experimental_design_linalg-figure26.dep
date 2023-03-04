@@ -1,5 +1,0 @@
-external/experimental_design_linalg-figure26.pdf: figures/cg/rho_time_tot_KL.csv
-external/experimental_design_linalg-figure26.pdf: figures/cg/rho_time_tot_KL_agg.csv
-external/experimental_design_linalg-figure26.pdf: figures/cg/rho_time_tot_select-KNN.csv
-external/experimental_design_linalg-figure26.pdf: figures/cg/rho_time_tot_select.csv
-external/experimental_design_linalg-figure26.pdf: figures/cg/rho_time_tot_select_agg.csv
