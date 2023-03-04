@@ -25,7 +25,7 @@
   \)
   \FOR{\( i \in \{ 1, \dotsc, m \} \)}
     \STATE Update \( L_\Pred \) and \( \diag(\CM_{\Train, \Train
-      \mid \I, \Pred}) \) with \( k = N + i \) by \cref{alg:chol_update}.
+      \mid \I, \Pred}) \) \\ with \( k = N + i \) by \cref{alg:chol_update}.
   \ENDFOR
   \WHILE{\( \card{-\I} > 0 \) and \( \card{\I} < s \)}
     \STATE \(
@@ -38,7 +38,7 @@
     \STATE Update \( L \) and \( \diag(\CM_{\Train, \Train
       \mid \I}) \) \\ by \cref{alg:chol_update}.
     \STATE Update \( L_\Pred \) and \( \diag(\CM_{\Train, \Train \mid \I,
-      \Pred}) \) with \( i = \card{\I} + m \) by \cref{alg:chol_update}.
+      \Pred}) \) \\ with \( i = \card{\I} + m \) by \cref{alg:chol_update}.
   \ENDWHILE
   \RETURN \( \I \)
 \end{algorithmic}
