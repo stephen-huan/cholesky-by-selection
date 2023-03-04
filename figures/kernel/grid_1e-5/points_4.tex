@@ -4,15 +4,15 @@
     height={0.25\linewidth},
     axis lines={none},
     scale only axis=true,
-    % legend entries={{}, \( k \)-NN},
+    % legend entries={{}, \( \nu = \frac{5}{2} \)},
     % legend pos={north east},
     legend style={at={(0.9, 0.9)}, anchor=north east},
   ]
   \addplot [only marks, mark size=0.6, silver]   table
-    {figures/kernel/points.csv};
+    {figures/kernel/grid_1e-5/points.csv};
   \addplot [only marks, mark size=0.6, seagreen] table
-    {figures/kernel/selected_1.csv};
+    {figures/kernel/grid_1e-5/selected_4.csv};
   \addplot [only marks, mark size=0.6, orange]   table
-    {figures/kernel/target.csv};
+    {figures/kernel/grid_1e-5/target.csv};
   \end{axis}
 \end{tikzpicture}
