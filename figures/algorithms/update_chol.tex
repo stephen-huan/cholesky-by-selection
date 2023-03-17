@@ -1,0 +1,25 @@
+\begin{algorithmic}[1]
+  \REQUIRE \(
+    X = \begin{pmatrix} X_\Train \\ X_\Pred \end{pmatrix},
+    \K(\cdot, \cdot), \I, \CM_{:, : \mid \I}, L, k
+  \)
+  % \ENSURE \( \I \)
+
+  \STATE \( \I \gets \I \cup \{ k \} \)
+  \STATE \( i \gets \card{\I} \)
+  \STATE \( L_{:, i} \gets \K(X, X_k) \)
+  \STATE \( L_{:, i} \gets L_{:, i} - L_{:, :i - 1} L_{k, :i - 1}^{\top} \)
+  \STATE \( L_{:, i} \gets \frac{L{:, i}}{\sqrt{L_{k, i}}} \)
+  \FOR{\( j \in \Train \setminus \I \)}
+    \STATE \(
+      \CM_{j, j \mid \I} \gets
+      \CM_{j, j \mid \I} -
+      L_{j, i}^2
+    \)
+    \STATE \(
+      \CM_{j, \Pred \mid \I} \gets
+      \CM_{j, \Pred \mid \I} -
+      L_{j, i} L_{N + 1, i}
+    \)
+  \ENDFOR
+\end{algorithmic}

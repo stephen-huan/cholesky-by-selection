@@ -618,12 +618,33 @@ To compute the objective \cref{eq:obj_gp} for each candidate index
 \( j \), we start with the unconditional variance \( \CM_{j, j} \)
 and covariance \( \CM_{\Pred, j} \), updating these quantities when
 an index \( k \) is selected by Equation \cref{eq:cond_select}.
-We have two efficient strategies to compute \( \vec{u} \): either by
-maintaining the precision of selected entries \( \CM_{\I, \I}^{-1} \)
-(\cref{alg:select_prec}) or by storing only the \( \card{I} \) columns
-corresponding to selected points from the Cholesky factor of the joint
-covariance matrix \( \CM \) (\cref{alg:select_chol}); both methods are
-detailed in \cref{app:select}.
+We have two efficient strategies to compute \( \vec{u} \) (as shown in
+\cref{fig:alg_update}): either by maintaining the precision of selected
+entries \( \CM_{\I, \I}^{-1} \) (\cref{alg:select_prec}) or by storing only
+the \( \card{I} \) columns corresponding to selected points from the Cholesky
+factor of the joint covariance matrix \( \CM \) (\cref{alg:select_chol});
+both methods are detailed in \cref{app:select}.
+
+\begin{figure}[th!]
+  \centering
+  \begin{minipage}[t]{0.49\textwidth}
+    \begin{algorithm}[H]
+      \caption{Point selection update \\ by explicit precision}
+      \label{alg:update_prec}
+      \input{figures/algorithms/update_prec.tex}
+    \end{algorithm}
+  \end{minipage}
+  \hfill
+  \begin{minipage}[t]{0.49\textwidth}
+    \begin{algorithm}[H]
+      \caption{Point selection update \\ by Cholesky factorization}
+      \label{alg:update_chol}
+      \input{figures/algorithms/update_chol.tex}
+    \end{algorithm}
+  \end{minipage}
+  \caption{Algorithms for updates in single-target selection.}
+  \label{fig:alg_update}
+\end{figure}
 
 Both approaches have a time complexity of \( \BigO(N s^2) \) to select
 \( s \) points out of \( N \) candidates, differing in space complexity.
