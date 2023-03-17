@@ -1117,7 +1117,8 @@ of \cite{schafer2021sparse} for additional details.
 
 \begin{figure}[t]
   \centering
-  \input{figures/sarcos/sarcos.tex}
+  % \input{figures/sarcos/sarcos.tex}
+  \includegraphics{figures/precompiled/sarcos.pdf}
   \caption{
     The first 5,000 points of the SARCOS training
     data, visualizing the first two features.
@@ -1183,6 +1184,34 @@ As noted in \cite{gramacy2015speeding}, the simple method of
   }
   \label{fig:gp_rho}
 \end{figure}
+
+\begin{figure}[t]
+  \centering
+  % \input{figures/oco2/oco2.tex}
+  \includegraphics{figures/precompiled/oco2.pdf}
+  \caption{
+    The first 4,682 points of the OCO-2 training
+    data, visualizing the first two features.
+  }
+  \label{fig:oco2}
+\end{figure}
+
+We also use data produced by the OCO-2 project \cite{eldering2017orbiting}
+at the Jet Propulsion Laboratory, California Institute of Technology,
+obtained from the OCO-2 data archive maintained at the NASA Goddard Earth
+Science Data and Information Services Center which is available online at
+\url{https://disc.gsfc.nasa.gov/datasets?keywords=oco2}.
+OCO-2 is an orbiting satellite designed to measure atmospheric carbon dioxide.
+The path an orbiting satellite takes creates characteristic
+streaks in the data as shown in \cref{fig:oco2}.
+We preprocess the data as follows.
+
+We take data localized to the United States from the time
+period 2017-05-16 to 2017-05-31, keeping only the features of
+longitude, latitude, and time and removing any duplicates points.
+We then take the first \( 2^{16} \) points and draw \( 10^3 \)
+realizations from the Gaussian process with the same train test
+split, kernel function, and hyperparameters as the SARCOS experiment.
 
 \subsection{Preconditioning for conjugate gradient}
 \label{subsec:cg_exp}
@@ -2516,8 +2545,8 @@ Mat{\'e}rn kernel with length scale \( \ell = 1 \) and increasing smoothness
   \quad
   \includegraphics{figures/precompiled/sphere_1e-3/points_4.pdf}%
   \caption{
-    Points taken from a regular grid intersected with a circular
-    domain and noise \( 10^{-3} \).
+    Points taken from a regular grid intersected
+    with a circular domain and noise \( 10^{-3} \).
   }
 \end{figure}
 
@@ -2535,8 +2564,8 @@ Mat{\'e}rn kernel with length scale \( \ell = 1 \) and increasing smoothness
   \quad
   \includegraphics{figures/precompiled/sphere_1e-2/points_4.pdf}%
   \caption{
-    Points taken from a regular grid intersected with a circular
-    domain and noise \( 10^{-2} \).
+    Points taken from a regular grid intersected
+    with a circular domain and noise \( 10^{-2} \).
   }
 \end{figure}
 
