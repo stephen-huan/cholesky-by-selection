@@ -211,6 +211,7 @@ algorithm in compressive sensing, which seeks to approximate a target signal
 as the sparse linear combination from a given collection of signals.
 
 \paragraph{Main results}
+
 Our main contribution is a selection algorithm that
 greedily maximizes mutual information with point(s) of
 interest, conditional on all points previously selected.
@@ -1138,14 +1139,16 @@ of \cite{schafer2021sparse} for additional details.
 
 \begin{figure}[t]
   \centering
-  % \input{figures/sarcos/sarcos.tex}
-  \includegraphics{figures/precompiled/sarcos.pdf}
+  % \input{figures/datasets/sarcos/sarcos.tex}
+  \includegraphics{figures/precompiled/datasets/sarcos.pdf}
   \caption{
     The first 5,000 points of the SARCOS training
     data, visualizing the first two features.
   }
   \label{fig:sarcos}
 \end{figure}
+
+\subsubsection{SARCOS dataset}
 
 We use the SARCOS dataset \cite{vijayakumar2000locally} generated from
 an inverse dynamics problem on a 7 degrees-of-freedom robotic arm.
@@ -1178,7 +1181,7 @@ discussion in \cref{subsec:aggregated}, so the results are
 similar to Cholesky factorization (\cref{subsec:chol_exp}).
 We find that coverage is extremely accurate for all
 methods (within \( 0.1\% \) for \( \rho > 2 \)).
-Finally, the RMSE is shown in \cref{fig:gp_rho}.
+Finally, the RMSE is shown in \cref{fig:gp_sarcos_rho}.
 
 Despite an increased cost to select points, the conditional methods have
 better accuracy per unit computational cost than their unconditional
@@ -1190,8 +1193,8 @@ As noted in \cite{gramacy2015speeding}, the simple method of
 
 \begin{figure}[t]
   \centering
-  \input{figures/gp/rho_loss.tex}%
-  \input{figures/gp/rho_time_loss.tex}
+  \input{figures/gp/sarcos/rho_loss.tex}%
+  \input{figures/gp/sarcos/rho_time_loss.tex}
   \caption{
     We perform Gaussian process regression by sparse
     Cholesky factorization of the joint covariance matrix.
@@ -1203,19 +1206,21 @@ As noted in \cite{gramacy2015speeding}, the simple method of
     The right panel shows the accuracy to computational
     time trade-off over varying \( \rho \).
   }
-  \label{fig:gp_rho}
+  \label{fig:gp_sarcos_rho}
 \end{figure}
 
 \begin{figure}[t]
   \centering
-  % \input{figures/oco2/oco2.tex}
-  \includegraphics{figures/precompiled/oco2.pdf}
+  % \input{figures/datasets/oco2/oco2.tex}
+  \includegraphics{figures/precompiled/datasets/oco2.pdf}
   \caption{
-    The first 4,682 points of the OCO-2 training
-    data, visualizing the first two features.
+    Sampling 4,682 evenly spaced points from the OCO-2
+    dataset, visualizing the first two features.
   }
   \label{fig:oco2}
 \end{figure}
+
+\subsubsection{OCO-2 dataset}
 
 We also use data produced by the OCO-2 project \cite{eldering2017orbiting}
 at the Jet Propulsion Laboratory, California Institute of Technology,
@@ -1225,7 +1230,6 @@ Science Data and Information Services Center which is available online at
 OCO-2 is an orbiting satellite designed to measure atmospheric carbon dioxide.
 The path an orbiting satellite takes creates characteristic
 streaks in the data as shown in \cref{fig:oco2}.
-We preprocess the data as follows.
 
 We take data localized to the United States from the time
 period 2017-05-16 to 2017-05-31, keeping only the features of
@@ -1233,6 +1237,30 @@ longitude, latitude, and time and removing any duplicates points.
 We then take the first \( 2^{16} \) points and draw \( 10^3 \)
 realizations from the Gaussian process with the same train test
 split, kernel function, and hyperparameters as the SARCOS experiment.
+
+As shown in \cref{fig:gp_oco2_rho}, the RMSE of
+\( k \)-NN is worse than the ``KL'' baseline.
+However, in every other experiment (\cref{fig:chol_rho},
+\cref{fig:gp_sarcos_rho}, and \cref{fig:cg_iter}) \( k \)-NN does better
+than the baseline, so neither method is strictly better than the other.
+Our method, on the other hand, achieves the best accuracy
+in \emph{every} numerical experiment over a wide variety
+of geometries and tasks, a testament to its robustness.
+
+\begin{figure}[t]
+  \centering
+  \input{figures/gp/oco2/rho_loss.tex}%
+  \input{figures/gp/oco2/rho_time_loss.tex}
+  \caption{
+    We use a candidate set size scaling factor of \( \rho_s =
+    2 \) and an aggregation parameter of \( \lambda = 1.5 \).
+    The left panel shows the difference in RMSE from exact
+    Gaussian process regression with varying density \( \rho \).
+    The right panel shows the accuracy to computational
+    time trade-off over varying \( \rho \).
+  }
+  \label{fig:gp_oco2_rho}
+\end{figure}
 
 \subsection{Preconditioning for conjugate gradient}
 \label{subsec:cg_exp}
@@ -1454,6 +1482,8 @@ matrices like \cite{kyng2016approximate} is more appropriate.
 
 \section{Comparisons and conclusion}
 \label{sec:conclusion}
+
+We briefly compare our method to prior works.
 
 \subsection{Comparison to other methods}
 \label{subsec:compare}
