@@ -115,19 +115,15 @@ Alternative approaches are based on the fast Fourier
 transform \cite{graham2018analysis, stein2002fast}
 or random feature maps \cite{rahimi2007random}.
 
-\paragraph{Vecchia approximation}
+\paragraph{Vecchia approximation, Kaporin's factorization, and KL minimization}
 
-The Vecchia approximation \cite{vecchia1988estimation} decomposes
-a Gaussian distribution into the product of univariate densities,
-each of which depends on a subset of the previous variables.
-This amounts to a sparse approximation of the inverse-Cholesky
-factor of the covariance matrix \cite{katzfuss2021general}.
-Other works derive the same approximation as the optimal
-Cholesky factor for a given ordering and sparsity pattern:
-Kaporin minimizes the \( K \)-condition number \cite{kaporin1990alternative},
-Yeremin et al. the Frobenius norm subject to a diagonal scaling constraint
-\cite{yeremin2000factorized}, and Sch{\"a}fer et al. the Kullback-Leibler (KL)
-divergence \cite{schafer2021sparse}.
+Vecchia approximates the likelihood function of a Gaussian distribution by decomposing it into a product of univariate conditional densities,
+each of which depends on a subset of the previous variables \cite{vecchia1988estimation}.
+Independently from Vecchia, Kaporin derived a closed-form expression of the approximate inverse Cholesky preconditioner of a p.s.d. matrix that minimizes, subject to a sparsity constraint, the $K$-condition number of the preconditioned system \cite{kaporin1990alternative}.
+Referring to this approximation as ``factorized sparse approximate inverse (FSAI)'', Yeremin et al. show that Kaporin's inverse Cholesky factor also minimizes a Frobenius-norm error metric, subject to a diagonal scaling constraint. 
+Vecchia's likelihood approximation was observed to implicitly compute a sparse approximate inverse Cholesky factor of the covariance matrix \cite{katzfuss2021general}.
+The closed-form expression of this inverse Cholesky factor coincides with that derived by Kaporin. 
+Independently from the above works, Sch{\"a}fer et al. compute sparse inverse Cholesky factors that are optimal in Kullback-Leibler (KL) divergence \cite{schafer2021sparse}, again recovering the formula derived by Kaporin.  
 The KL divergence is also used to compute Knothe-Rosenblatt transport
 maps \cite{marzouk2016introduction}, generalizing Cholesky factors to
 non-Gaussian distributions while preserving triangularity and sparsity
