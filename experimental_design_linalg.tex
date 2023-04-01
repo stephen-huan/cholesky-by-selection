@@ -111,8 +111,8 @@ gines1998lu} and various structured matrix factorizations
 \cite{hackbusch2000sparse, hackbusch2002data, chandrasekaran2006fast,
 xia2010fast, li2012new, ambikasaran2013mathcal, ambikasaran2015fast,
 ho2016hierarchical, schafer2020compression}.
-Alternative approaches are based on the fast Fourier
-transform \cite{graham2018analysis, stein2002fast}
+Alternatives are based on fast Fourier
+transforms \cite{graham2018analysis, stein2002fast}
 or random feature maps \cite{rahimi2007random}.
 
 \paragraph{Vecchia approximation, Kaporin's factorization, and KL minimization}
@@ -126,10 +126,10 @@ the approximate inverse Cholesky preconditioner of a p.s.d. matrix that
 minimizes, subject to a sparsity constraint, the \( K \)-condition number
 of the preconditioned system \cite{kaporin1990alternative}.
 Referring to this approximation as ``factorized sparse approximate inverse
-(FSAI)'', Yeremin et al. show that Kaporin's inverse Cholesky factor also
+(FSAI),'' Yeremin et al. show that Kaporin's inverse Cholesky factor also
 minimizes a Frobenius-norm error metric, subject to a diagonal scaling
-constraint.
-Vecchia's likelihood approximation was observed to
+constraint \cite{yeremin2000factorized}.
+Vecchia's likelihood approximation was later observed to
 implicitly compute a sparse approximate inverse Cholesky
 factor of the covariance matrix \cite{katzfuss2021general}.
 The closed-form expression of this inverse Cholesky
@@ -147,34 +147,31 @@ A common feature of the above methods is that the columns of the
 Cholesky factors can be computed independently and in parallel.
 
 \paragraph{Ordering and sparsity selection by geometry}
-
-The chosen ordering and sparsity pattern significantly
-affect the quality of the resulting factor.
-Vecchia originally proposed ordering points lexicographically
-\cite{vecchia1988estimation}, but more recent work exploits space-covering
-orderings like the maximum-minimum ordering \cite{guinness2018permutation} also
-used by \cite{schafer2020compression, schafer2021sparse, katzfuss2021general,
-kang2021correlationbased, katzfuss2022scalable}.
-Cholesky factorization in the maximum-minimum ordering
-is closely related to numerical homogenization and
-operator-adapted wavelets \cite{owhadi2019operatoradapted}.
-For covariance functions that are Green's functions of
-elliptic PDEs, this allows proving the exponential accuracy
-of the resulting approximation \cite{schafer2020compression}.
-After choosing an ordering, following Vecchia's recommendation the sparsity
+The approximation quality of the above methods depends on the ordering of the rows and columns of the input matrix and the sparsity pattern of the factor.
+Vecchia originally proposed ordering points lexicographically \cite{vecchia1988estimation}. 
+The work on FSAI emphasized classical orderings from sparse linear algebra 
+such as (reverse) Cuthill-McKee, minimum degree, nested dissection, and red-black ordering \cite{benzi2000orderings}.  
+Guinness empirically studied the effect of various orderings on Vecchia's likelihood approximation \cite{guinness2018permutation}.  
+He found the random ordering and a space-filling maximum-minimum distance (maximin) ordering to perform well.
+This observation can be explained by the \emph{screening effect}, by which conditional on points near the point of interest, far away
+points are almost conditionally independent for many popular kernel functions
+\cite{stein2002screening, stein20112010} (see \cref{fig:screening}).
+Cholesky factorization is closely related to numerical homogenization and operator adapted wavelets \cite{owhadi2019operatoradapted}.
+Sch{\"a}fer et al. exploit this connection to prove exponential decay of Cholesky factors of covariance and precision matrices arising from elliptic PDEs, when developed in a multiresolution basis \cite{schafer2020compression}. 
+This setting includes the maximin ordering as a simplistic multiresolution basis akin to the ``lazy wavelet'' \cite{sweldens1996lifting} and thus provides a rigorous proof of the screening effect.
+The maximin ordering has since been used by \cite{schafer2021sparse, katzfuss2021general, kang2021correlationbased, katzfuss2022scalable}.
+Motivated by the screening effect, the sparsity
 set is often formed by selecting the closest points by Euclidean distance
 \cite{vecchia1988estimation, schafer2020compression, schafer2021sparse,
 katzfuss2022scalable}.
-This choice is often justified by the \emph{screening effect}, or the
-observation that conditional on points near the point of interest, far away
-points are almost conditionally independent for many popular kernel functions
-\cite{stein2002screening, stein20112010} (see \cref{fig:screening}).
-Methods exploiting and quantifying the screening effect achieve
-state-of-the-art \( \epsilon \)-accuracy in time complexity \( \BigO(N
+To lower the computational cost, different authors have proposed heuristics to analyze the sparsity set and identify opportunities to group similar degrees of freedom into supernodes \cite{stein2004approximating,ferronato2015novel,guinness2018permutation}.
+Sch{\"a}fer et al. devise a geometric grouping algorithm that allows to provably compute an \( \epsilon \)-accurate inverse-Cholesky factor in time complexity \( \BigO(N
 \log^{2d} (N/\epsilon)) \) using \( \BigO(N \log^{ d} (N/\epsilon)) \)
 nonzero entries of the covariance matrix \cite{schafer2021sparse}.
-However, selecting by distance ignores the conditional
-effect of adding points to the sparsity set.
+Methods based on the screening effect have improved the 
+state-of-the-art for solving elliptic differential and integral equations \cite{schafer2020compression,schafer2021sparse,chen2021multiscale}.
+However, selecting the sparsity set only based on distance ignores the possible redundancy of the selected points.
+The proposed work addresses this limitation.
 
 \begin{figure}[t]
   \centering
@@ -1578,7 +1575,7 @@ and services provided by the Partnership for an Advanced Computing Environment
 (PACE) at the Georgia Institute of Technology, Atlanta, Georgia, USA.
 HO acknowledges support from the Air Force Office of Scientific Research under
 MURI award number FA9550-20-1-0358 (Machine Learning and Physics-Based Modeling
-and Simulation) and the Department of Energy under the MMICCs SEA-CROGS award.
+and Simulation) and the Department of Energy from the Department of Energy under award number DE-SC0023163 (SEA-CROGS: Scalable, Efficient and Accelerated Causal Reasoning Operators, Graphs and Spikes for Earth and Embedded Systems).
 
 \bibliographystyle{siamplain}
 \bibliography{references}
