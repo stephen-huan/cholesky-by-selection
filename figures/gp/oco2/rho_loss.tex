@@ -7,6 +7,7 @@
     ylabel={\( \log_{10} \) RMSE},
     legend entries={KL, KL (agg.), \( k \)-NN, select, select (agg.)},
     legend pos={north east},
+    legend style={nodes={scale=0.9, transform shape}},
   ]
   \addplot table {figures/gp/oco2/rho_loss_KL.csv};
   \addplot table {figures/gp/oco2/rho_loss_KL_agg.csv};
