@@ -406,16 +406,16 @@ The joint likelihood \( \p \) can be decomposed as
   \shortintertext{
     The key assumption is that many of the conditioning points are redundant.
     Letting \( i_1, \dotsc, i_N \) denote an ordering of the points and
-    \( s_k \) the indices of points that condition the \( k \)th point
-    in the ordering, the Vecchia approximation replaces
-    \cref{eq:joint} by the sparse approximation
+    \( s_k \) the indices of points that condition the \( k \)-th point
+    in the ordering, the Vecchia approximation replaces \cref{eq:joint}
+    by the sparse approximation
   }
   \label{eq:vecchia}
   \p(\vec{y}) &\approx \p(y_{i_1}) \p(y_{i_2} \mid y_{s_2})
     \p(y_{i_3} \mid y_{s_3}) \dotsm \p(y_{i_N} \mid y_{s_N}).
 \end{align}
 The precision matrix of the resulting approximate density \cref{eq:vecchia}
-has a sparse Cholesky factor in the sense that the \( i \)th column of the
+has a sparse Cholesky factor in the sense that the \( i \)-th column of the
 factor has the sparsity pattern \( s_i \) when written in the given elimination
 ordering \cite{katzfuss2021general}.
 Another way to recover this Cholesky factor for a fixed elimination ordering
@@ -515,7 +515,7 @@ has a closed-form expression given by
 \end{align}
 where \( \CM_1, \CM_2 \in \Reals^{N \times N} \).
 Using this expression for the KL divergence and optimizing for \( L \) yields
-the following closed-form expression for the nonzero entries in the \( i \)th
+the following closed-form expression for the nonzero entries in the \( i \)-th
 column of \( L \) with sparsity pattern \( s_i \), reproduced from Theorem 2.1
 of \cite{schafer2021sparse}:
 \begin{align}
@@ -544,7 +544,7 @@ the order of the KL divergence matters):
 
 This sum is the accumulated \emph{difference} in posterior variance for
 a series of independent regression problems: each to predict the \( i
-\)th variable given a subset of the variables after it in the ordering.
+\)-th variable given a subset of the variables after it in the ordering.
 The term \( \log \left ( \CM_{i, i \mid s_i \setminus \{ i \}} \right )
 \) obtained when restricted to the variables in the sparsity pattern \(
 s_i \) is compared to the ground truth \( \log \left ( \CM_{i, i \mid i
@@ -715,7 +715,7 @@ Cholesky factor \( L \) of the precision, \( L L^{\top} \approx \CM^{-1} \).
 We first order the points by the reverse-maximin ordering described in
 \cref{subsec:ordering} and then apply the selection
 algorithm developed in \cref{sec:select} to form the sparsity pattern.
-For the \( i \)th column of \( L \), the target point is the \( i \)th point
+For the \( i \)-th column of \( L \), the target point is the \( i \)-th point
 in the ordering, the candidate points are those satisfying lower triangularity
 (after the target in the ordering), and running the selection algorithm for
 the desired number of nonzeros entries picks out indices which we add to the
@@ -763,7 +763,7 @@ s_{\tilde{i}} \) satisfying \( s_{\tilde{i}} \supseteq \tilde{i}
 \) to guarantee that the Cholesky factor has full rank.
 Let \( \tilde{s} \defeq s_{\tilde{i}} \setminus \tilde{i} \)
 be the selected entries excluding the columns in the group.
-The sparsity pattern for the \( k \)th column in the group is then the
+The sparsity pattern for the \( k \)-th column in the group is then the
 aggregated selected entries excluding the entries that violate lower
 triangularity, \( s_k \defeq \{ j \in s_{\tilde{i}} : j \succeq k \} \).
 Assuming every entry of \( \tilde{s} \) is after every index in \( \tilde{i}
@@ -1064,11 +1064,11 @@ smoothness \( \nu = 5/2 \) and length scale \( \ell = 1 \).
 
 As a baseline for comparison, we use the single-column and aggregated variants
 of the KL-minimization framework of \cite{schafer2021sparse}, which orders
-points by the reverse-maximin ordering described in \cref{subsec:ordering} and
-forms the sparsity pattern by selecting all points within a radius of \( \rho
-\ell_i \) to the \( i \)th point, where \( \rho \geq 1 \) is a tuning parameter
-for density and \( \ell_i \) is the length scale from the reverse-maximin
-ordering.
+points by the reverse-maximin ordering described in \cref{subsec:ordering}
+and forms the sparsity pattern by selecting all points within a radius of
+\( \rho \ell_i \) to the \( i \)-th point, where \( \rho \geq 1 \) is a
+tuning parameter for density and \( \ell_i \) is the length scale from the
+reverse-maximin ordering.
 We also try selecting points by \( k \)-nearest neighbors (\( k \)-NN),
 where \( k \) is chosen to match the number of nonzeros of the baseline.
 
@@ -1717,7 +1717,7 @@ Science Foundation (NSF) Grant DMS--1953005.
 % \dotsc, i_m \} \) such that \( i_1 \succ \dotsb \succ i_m \).
 % Let the selected entries be \( \tilde{s} \); we assume every selected entry is
 % after (w.r.t \( \succ \)) every index in \( \tilde{i} \) so that the sparsity
-% pattern for the \( k \)th column is \( s_k = \tilde{s} \cup \{ j \in \tilde{i}
+% pattern for the \( k \)-th column is \( s_k = \tilde{s} \cup \{ j \in \tilde{i}
 % : j \succeq k \} \).
 \begin{proof}[Proof of Equation \cref{eq:obj_mult}]
   The KL divergence \cref{eq:obj_chol}
@@ -1854,7 +1854,7 @@ Science Foundation (NSF) Grant DMS--1953005.
     }_\text{conditioned}.
     \shortintertext{
       Since \( L_{i, i} \) (and \( {L'}_{i, i} \)) is the square root
-      of the posterior variance of the \( i \)th variable from the
+      of the posterior variance of the \( i \)-th variable from the
       statistical perspective in \cref{eq:chol}, we have \( 2 \log(L_{i,
       i}) = \log(\CM_{i, i \mid s_i \setminus \{ i \}}) \) and so
     }

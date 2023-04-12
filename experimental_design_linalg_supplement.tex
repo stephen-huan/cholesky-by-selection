@@ -31,7 +31,7 @@ sparsity setting of \cref{subsec:aggregated}.
 Recall that we have aggregated the column indices \( i_1 \succ
 \dotsb \succ i_m \) into \( \tilde{i} = \{ i_1, \dotsc, i_m \} \)
 and \( s_{\tilde{i}} \) denotes the aggregated sparsity pattern.
-The sparsity pattern for the \( i \)th column of the group is all
+The sparsity pattern for the \( i \)-th column of the group is all
 those entries that satisfy lower triangularity, \( s_i \defeq \{
 j \in s_{\tilde{i}} : j \succeq i \} \subseteq s_{\tilde{i}} \).
 Because each column's sparsity pattern is a subset of the
@@ -40,9 +40,9 @@ approximation and specialize to each column efficiently.
 Assuming the sparsity entries \( s_{\tilde{i}} \) are sorted according to
 \( \prec \), let \( Q \defeq \CM_{s_{\tilde{i}}, s_{\tilde{i}}}^{-1} \) be
 the precision of the aggregated sparsity pattern and let \( k \) be the \(
-i \)th column's index in \( s_{\tilde{i}} \).
+i \)-th column's index in \( s_{\tilde{i}} \).
 Because \( s_{\tilde{i}} \) is sorted according to \(
-\prec \), the sparsity pattern for the \( i \)th column
+\prec \), the sparsity pattern for the \( i \)-th column
 \( s_i \) is exactly the entries \( k \) and after,
 \begin{align}
   \label{eq:L_precision}
@@ -56,15 +56,15 @@ Because \( s_{\tilde{i}} \) is sorted according to \(
 \end{align}
 where the first equality follows from \( Q^{-1} =
 \CM_{s_{\tilde{i}}, s_{\tilde{i}}} \) and \( s_i \) is
-the \( k \)th index of \( s_{\tilde{i}} \) and after.
+the \( k \)-th index of \( s_{\tilde{i}} \) and after.
 We turn marginalization in precision into
 conditioning in covariance by \cref{eq:inverse_cond}.
 
-So we want the \( k \)th column of \( Q
+So we want the \( k \)-th column of \( Q
 \), conditional on all columns before it.
 From \cref{eq:chol}, this can be directly read off the \(
-k \)th column of the Cholesky factor \( L = \chol(Q) \) to
-compute \cref{eq:L_col} for each \( i \in \tilde{i} \).
+k \)-th column of the Cholesky factor \( L = \chol(Q) \)
+to compute \cref{eq:L_col} for each \( i \in \tilde{i} \).
 However, computing \( Q = \CM_{s_{\tilde{i}}, s_{\tilde{i}}}^{-1} \) by
 inverting \( \CM_{s_{\tilde{i}}, s_{\tilde{i}}} \) and then additionally
 computing its Cholesky factor \( L = \chol(Q) \) is a bit wasteful.
@@ -79,7 +79,7 @@ U^{\top} = \CM_{s_{\tilde{i}}, s_{\tilde{i}}} \) so \( U^{-\top} U^{-1} =
 \CM_{s_{\tilde{i}}, s_{\tilde{i}}}^{-1} = Q \) and we see that \( L = U^{-\top}
 \) is a lower triangular factor satisfying \( L L^{\top} = Q \).
 Thus we can compute \( U \) as a Cholesky factor of the covariance
-and dynamically form the \( k \)th column of \( L \) by solving
+and dynamically form the \( k \)-th column of \( L \) by solving
 the triangular system \( L_{:, k} = U^{-\top} \vec{e}_k \).
 This method is described in Algorithm 3.2, Figure
 4, and Appendix A.2 of \cite{schafer2021sparse}.
@@ -213,10 +213,10 @@ all the indices past 1, we observe the column of the Cholesky
 factor is a conditional covariance \( \CM_{2, 1} \) divided by
 \( \chol(\CM_{1, 1})^{\top} \), the square root of the variance
 (the Cholesky factor of a scalar is its square root).
-We conclude that the \( k \)th column of the Cholesky factor equals \( \vec{u}
-\) in \cref{eq:cond_select} since iteratively conditioning on the columns \(
-i_1, i_2, \dotsc, i_{k - 1} \) is equivalent to conditioning on \( \I \) by the
-quotient rule \cref{eq:quotient_rule}.
+We conclude that the \( k \)-th column of the Cholesky factor equals \(
+\vec{u} \) in \cref{eq:cond_select} since iteratively conditioning on the
+columns \( i_1, i_2, \dotsc, i_{k - 1} \) is equivalent to conditioning
+on \( \I \) by the quotient rule \cref{eq:quotient_rule}.
 
 \subsection{Updating precision after insertion}
 \label{app:prec_insert}
@@ -437,7 +437,7 @@ On each of the \( s \) rounds of selection it takes \( \BigO(s^2)
 The second strategy exploits the iterative conditioning in Cholesky
 factorization: we maintain only the first \( \card{I} \) columns corresponding
 to selected points from the Cholesky factor of the joint covariance matrix
-between the training and target points; the \( k \)th column of this factor
+between the training and target points; the \( k \)-th column of this factor
 is precisely \( \vec{u} \) (see \cref{app:chol_stat} for details).
 Adding a new column to the end of this factor can
 be efficiently computed with left-looking in time complexity \( \BigO(N s) \)
@@ -558,13 +558,13 @@ We directly compute each individual target point's variance,
 conditional on \( j \) as well as previously selected points, and
 simply add these variances together to get the overall objective.
 
-We proceed by induction on the columns of \( L \). 
+We proceed by induction on the columns of \( L \).
 Starting at the first column, we know the candidate's unconditional variance.
 Assuming we know the candidate's variance conditional on all points prior,
 we proceed to the next column by reading the requisite
 statistical quantities from \( L \) \cref{eq:chol_partial_update}
 and conditioning \cref{eq:quotient_rule}.
-For the \( i \)th column,
+For the \( i \)-th column,
 \begin{align}
   \label{eq:partial_diag}
   \CM_{i, i \mid :i - 1} &= L_{i, i}^2 \\
@@ -577,8 +577,8 @@ For the \( i \)th column,
     \CM_{j, i \mid :i - 1}^2/\CM_{i, i \mid :i - 1} = \CM_{j, j \mid :i}
 \end{align}
 where \cref{eq:partial_induct} satisfies the conditions of the inductive
-hypothesis for the next column and \cref{eq:obj_partial} is the desired
-conditional variance when the \( i \)th point is a target.
+hypothesis for the next column and \cref{eq:obj_partial} is the
+desired conditional variance when the \( i \)-th point is a target.
 
 For each of the \( N \) candidates, it requires \( \BigO(1) \) work per column
 for \( s + m \) columns. Over \( s \) selections, the total time complexity is
