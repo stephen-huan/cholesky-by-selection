@@ -42,7 +42,7 @@
 \begin{abstract}
   Dense kernel matrices resulting from pairwise evaluations of a
   kernel function arise naturally in machine learning and statistics.
-  Previous work in constructing sparse transport maps or sparse approximate
+  Previous work in constructing sparse approximate
   inverse Cholesky factors of such matrices by minimizing Kullback-Leibler
   divergence recovers the Vecchia approximation for Gaussian processes.
   These methods rely only on the geometry of the
@@ -54,7 +54,7 @@
   complexity is \( \mathcal{O}(N k^4) \), but by maintaining a
   partial Cholesky factor we reduce this to \( \mathcal{O}(N k^2) \).
   Furthermore, for multiple (\( m \)) targets we achieve a time complexity of
-  \( \mathcal{O}(N k^2 + N m^2 + m^3) \) which is maintained in the setting of
+  \( \mathcal{O}(N k^2 + N m^2 + m^3) \), which is maintained in the setting of
   aggregated Cholesky factorization where a selected point need not condition
   every target.
   We apply the selection algorithm to image
@@ -84,7 +84,7 @@ and geostatistics \cite{rue2005gaussian}, machine learning
 through kernel methods \cite{rasmussen2006gaussian}, optimal
 experimental design \cite{mutny2022experimental}, and sensor
 placement \cite{krause2008nearoptimal}.
-Applying Gaussian process statistics to sets of \( N \) data
+Applying Gaussian process inference to sets of \( N \) data
 points requires computing with the covariance matrix \( \CM
 \in \Reals^{N \times N} \) to obtain quantities such as \(
 \CM \vec{v} \), \( \CM^{-1} \vec{v} \), \( \logdet(\CM) \).
@@ -98,8 +98,8 @@ motivating the search for faster, approximate algorithms.
 \paragraph{Existing work}
 
 Numerous methods have been proposed for fast
-approximate Gaussian process statistics.
-Popular methods are based on low-rank approximation \cite{smola2000sparse,
+approximate Gaussian process inference.
+Popular methods are based on low-rank approximations \cite{smola2000sparse,
 williams2000using, fine2001efficient, bach2002kernel, fowlkes2004spectral,
 chen2022randomly}, sparse approximations \cite{furrer2006covariance},
 or combinations thereof \cite{schwaighofer2002transductive,
@@ -110,7 +110,7 @@ Multiscale-versions of these ideas lead to wavelets \cite{beylkin1991fast,
 gines1998lu} and various structured matrix factorizations
 \cite{hackbusch2000sparse, hackbusch2002data, chandrasekaran2006fast,
 xia2010fast, li2012new, ambikasaran2013mathcal, ambikasaran2015fast,
-ho2016hierarchical, schafer2020compression}.
+ho2016hierarchical,Katzfuss2015,Jurek2020, schafer2020compression}.
 Alternatives are based on fast Fourier transforms \cite{graham2018analysis,
 stein2002fast} or random feature maps \cite{rahimi2007random}.
 
@@ -130,7 +130,7 @@ minimizes a Frobenius-norm error metric, subject to a diagonal scaling
 constraint \cite{yeremin2000factorized}.
 Vecchia's likelihood approximation was later observed to
 implicitly compute a sparse approximate inverse Cholesky
-factor of the covariance matrix \cite{katzfuss2021general}.
+factor of the covariance matrix \cite{Datta2016,katzfuss2021general}.
 The closed-form expression of this inverse Cholesky
 factor coincides with that derived by Kaporin.
 Independently from the above works, Sch{\"a}fer et al. compute sparse inverse
@@ -156,15 +156,15 @@ algebra such as (reverse) Cuthill-McKee, minimum degree, nested
 dissection, and red-black ordering \cite{benzi2000orderings}.
 Guinness empirically studied the effect of various orderings on
 Vecchia's likelihood approximation \cite{guinness2018permutation}.
-He found the random ordering and a space-filling
+He found randomly ordering and a space-filling
 maximum-minimum distance (maximin) ordering to perform well.
 This observation can be explained by the \emph{screening effect}, by
 which conditional on points near the point of interest, far away points
 are almost conditionally independent for many popular kernel functions
 \cite{stein2002screening, stein20112010} (see \cref{fig:screening}).
 Cholesky factorization is closely related to numerical homogenization
-and operator adapted wavelets \cite{owhadi2019operatoradapted}.
-Sch{\"a}fer et al. exploit this connection to prove exponential decay of
+and operator-adapted wavelets \cite{owhadi2019operatoradapted}.
+Sch{\"a}fer et al.\ exploit this connection to prove exponential decay of
 Cholesky factors of covariance and precision matrices arising from elliptic
 PDEs, when developed in a multiresolution basis \cite{schafer2020compression}.
 This setting includes the maximin ordering as a simplistic multiresolution
@@ -179,7 +179,7 @@ To lower the computational cost, different authors have proposed heuristics to
 analyze the sparsity set and identify opportunities to group similar degrees
 of freedom into supernodes \cite{stein2004approximating, ferronato2015novel,
 guinness2018permutation}.
-Sch{\"a}fer et al. devise a geometric grouping algorithm that allows to
+Sch{\"a}fer et al.\ devise a geometric grouping algorithm that allows to
 provably compute an \( \epsilon \)-accurate inverse-Cholesky factor in
 time complexity \( \BigO(N \log^{2d} (N/\epsilon)) \) using \( \BigO(N
 \log^{ d} (N/\epsilon)) \) nonzero entries of the covariance matrix
@@ -223,7 +223,7 @@ is otherwise linearly dependent on the selected measurements.
 However, these works often focus on global approximation of the entire process,
 e.g., through sparse approximation of the likelihood or covariance matrix
 \cite{liu2020when, chalupka2012framework, quinonero-candela2005unifying}.
-In contrast \cite{wada2013gaussian} uses inference \emph{directed} towards
+In contrast, \cite{wada2013gaussian} uses inference \emph{directed} towards
 a point of interest, selecting the active (sparsity) set by the kernel
 function itself like the later work \cite{kang2021correlationbased};
 \cite{gramacy2014local} and the follow-up work \cite{gramacy2015speeding}
@@ -243,7 +243,7 @@ We use this algorithm to select the sparsity pattern of sparse approximate
 Cholesky factors of precision matrices in the KL-minimization framework of
 \cite{schafer2021sparse}, improving the approximation accuracy attainable
 with a given number of nonzero entries.
-Our method extends kernel-based selection \cite{wada2013gaussian,
+Our method extends kernel-based selection \cite{wada2013gaussian,Katzfuss2020,
 kang2021correlationbased} to account for conditioning.
 It also extends directed Gaussian process regression \cite{gramacy2014local,
 gramacy2015speeding} by simultaneously targeting multiple prediction
@@ -251,16 +251,16 @@ points and providing a global approximation of the Gaussian process.
 For a single target point, naive computation of the
 mutual information criterion has time complexity \(
 \BigO(N k^4) \) to select \( k \) points out of \( N \).
-By maintaining a partial Cholesky factor we
+By maintaining a partial Cholesky factor, we
 reduce the complexity to \( \BigO(N k^2) \).
 We extend the algorithm to maximize mutual information with
 \emph{multiple} targets, re-using the same selections across
 multiple targets for efficiency while maintaining accuracy.
-For \( m \) target points we achieve a time
+For \( m \) target points, we achieve a time
 complexity of \( \BigO(N k^2 + N m^2 + m^3) \).
 If \( m \approx k \), this is \( m \) times
 faster than the single-target algorithm.
-In the setting of aggregated (or supernodal) Cholesky factorization where
+In the setting of aggregated (or supernodal) Cholesky factorization, where
 the sparsity patterns of multiple columns are determined simultaneously,
 a candidate entry may only condition a \emph{subset} of the targets.
 By efficient rank-one downdating of Cholesky factors, we capture
@@ -278,7 +278,7 @@ In \cref{sec:select}, we develop greedy algorithms to select
 the sparsity pattern independently for each regression problem.
 In \cref{sec:chol_select}, we combine the greedy selection algorithm with
 KL minimization to yield algorithms for sparse Cholesky factorization.
-In \cref{sec:extensions} we extend these results to
+In \cref{sec:extensions}, we extend these results to
 adjacent and nonadjacent aggregated factorization.
 In \cref{sec:experiments}, we present numerical experiments applying
 our method to Cholesky factorization, Gaussian process regression,
@@ -304,7 +304,8 @@ in the appendix and supplementary material.
   \caption{
     The first panel shows selecting the \( k \)-\textcolor{seagreen}{nearest
     neighbors} to the \textcolor{orange}{center point} out
-    of a dense grid of \textcolor{silver}{candidates}.
+    of a dense grid of \( 51 \times 51 \) \textcolor{silver}{candidates}
+    for \(k = 265 \).
     The next panels show selection by greedily maximizing
     conditional mutual information with the center point for a Mat{\'e}rn
     kernel with length scale \( \ell = 1 \) and increasing smoothness \(
@@ -357,12 +358,12 @@ For Gaussian processes, the closed-form posterior distribution is
   \E[\vec{y}_\Pred \mid \vec{y}_\Train] &=
     \vec{\mean}_\Pred +
     \CM_{\Pred, \Train} \CM_{\Train, \Train}^{-1}
-    (\vec{y}_\Train - \vec{\mean}_\Train) \\
+    (\vec{y}_\Train - \vec{\mean}_\Train), \\
   \label{eq:cond_cov}
   \Cov[\vec{y}_\Pred \mid \vec{y}_\Train] &=
     \CM_{\Pred, \Pred} -
     \CM_{\Pred, \Train} \CM_{\Train, \Train}^{-1}
-    \CM_{\Train, \Pred}
+    \CM_{\Train, \Pred},
  \shortintertext{
     where \( \CM_{\Train, \Train}^{-1} \defeq (\CM_{\Train, \Train})^{-1} \).
     To denote the covariance between the variables in index
@@ -397,8 +398,8 @@ Thus, we aim to compute \emph{sparse} approximate Cholesky factors.
 
 The Vecchia approximation for Gaussian processes
 \cite{vecchia1988estimation} can be viewed as computing
-sparse approximate inverse-Cholesky factors of \( \CM \).
-It decomposes the joint likelihood \( \p \) as
+sparse approximate inverse Cholesky factors of \( \CM \).
+The joint likelihood \( \p \) can be decomposed as
 \begin{align}
   \label{eq:joint}
   \p(\vec{y}) &= \p(y_1) \p(y_2 \mid y_1) \p(y_3 \mid y_1, y_2) \dotsm
@@ -407,7 +408,7 @@ It decomposes the joint likelihood \( \p \) as
     The key assumption is that many of the conditioning points are redundant.
     Letting \( i_1, \dotsc, i_N \) denote an ordering of the points and
     \( s_k \) the indices of points that condition the \( k \)th point
-    in the ordering, the Vecchia approximation proposes replacing
+    in the ordering, the Vecchia approximation replaces
     \cref{eq:joint} by the sparse approximation
   }
   \label{eq:vecchia}
@@ -443,7 +444,7 @@ covariance encodes marginal independence.
 The same phenomenon is observed by \cite{spantini2018inference}
 working with the more general transport maps.
 Covariance matrices arising from kernel functions are often fully
-dense, but the approximate factors of their precisions can be
+dense, but the approximate factors of their inverses can be
 sparse if their ordering and sparsity pattern are chosen carefully.
 
 \subsection{Ordering and sparsity pattern}
@@ -459,9 +460,9 @@ space-covering orderings leads to significantly better
 approximation quality \cite{guinness2018permutation}.
 Specifically, we use the maximum-minimum (maximin) ordering
 \cite{guinness2018permutation}, which has become popular for the
-Vecchia approximation \cite{katzfuss2021general} and Cholesky
+Vecchia approximation \cite{katzfuss2021general,Katzfuss2018,Cao2022} and Cholesky
 factorization \cite{schafer2020compression, schafer2021sparse,
-kang2021correlationbased, katzfuss2022scalable}.
+kang2021correlationbased, katzfuss2022scalable,Cao2023}.
 The reverse-maximin ordering \( i_1, \dotsc, i_N \) on a set of \( N \) points
 \( \{ \vec{x}_i \}_{i = 1}^N \) is defined by first selecting the last index \(
 i_N \) arbitrarily and then choosing for \( k = N - 1, N - 2, \dotsc, 1 \) the
@@ -474,7 +475,7 @@ index
 where \( -\Order \defeq \{ 1, \dotsc, N \} \setminus \Order \)
 and \( \Order_n \defeq \{ i_n, i_{n + 1}, \dotsc, i_N \} \),
 i.e. select the point farthest from previously selected points.
-The ordering is reversed for factorizing the precision.
+% The ordering is reversed for factorizing the precision.
 We write \( i \prec j \) if \( i \) precedes \( j \) in the ordering and
 define \( \ell_{i_k} \defeq \min_{j \in \Order_{k + 1}} \norm{\vec{x}_{i_k}
 - \vec{x}_j} \), a length scale monotonically shrinking with decreasing
@@ -496,7 +497,7 @@ As the expected difference between true and approximate log-densities, the
 KL divergence naturally judges the quality of an approximating distribution.
 We identify the positive-definite matrix \( \CM \in \Reals^{N \times N} \)
 as the covariance matrix of a centered Gaussian process \( \N(\vec{0}, \CM)
-\) which we seek to approximate by a sparse approximate Cholesky factor \(
+\), which we seek to approximate by a sparse approximate Cholesky factor \(
 L \in \SpSet \) of its precision, \( \N(\vec{0}, (L L^{\top})^{-1}) \).
 We compare these distributions by the KL divergence as \cite{schafer2021sparse}
 does, specializing the generic optimization problem \cref{eq:generic_obj} to
@@ -529,9 +530,8 @@ where the notation for \( \CM_{s_i, s_i}^{-1} \) is from
 We enforce the convention that \( i \) is the first entry
 of \( s_i \), also implying that \( L \) is of full rank.
 Plugging the optimal \( L \) \cref{eq:L_col} back into the KL divergence
-\cref{eq:kl}, we obtain the objective as a function of the sparsity pattern.
-See \cref{app:kl_L} for details; importantly,
-the order of the KL divergence matters.
+\cref{eq:kl}, we obtain the objective as a function of the sparsity pattern (see \cref{app:kl_L} for details; importantly,
+the order of the KL divergence matters):
 \begin{align}
   \label{eq:obj_chol}
   2 \KL*{\N(\vec{0}, \CM)}{\N(\vec{0}, (L L^{\top})^{-1})} &=
@@ -539,13 +539,13 @@ the order of the KL divergence matters.
       \left [
         \log \left ( \CM_{i, i \mid s_i \setminus \{ i \}} \right ) -
         \log \left ( \CM_{i, i \mid i + 1:} \right )
-      \right ]
+      \right ].
 \end{align}
 
 This sum is the accumulated \emph{difference} in posterior variance for a
 series of independent regression problems: each to predict the \( i \)th
-variable given a subset of the variables after it in the ordering. The error
-\( \log \left ( \CM_{i, i \mid s_i \setminus \{ i \}} \right ) \) made when
+variable given a subset of the variables after it in the ordering. The term
+\( \log \left ( \CM_{i, i \mid s_i \setminus \{ i \}} \right ) \) obtained when
 restricted to the variables in the sparsity pattern \( s_i \) is compared
 to the ground truth \( \log \left ( \CM_{i, i \mid i + 1:} \right ) \).
 A similar decomposition of the KL divergence into independent
@@ -588,7 +588,7 @@ in \cref{sec:chol_select} and extend it in \cref{sec:extensions}.
   \label{fig:selection}
 \end{figure}
 
-In directed Gaussian process regression we are given \( N \) points of
+In directed Gaussian process regression, we are given \( N \) points of
 training data and predict at a target point with unknown value by selecting
 the \( s \) points most ``informative'' to the target, \(s \ll N \).
 From KL-minimization, the criterion for informativity
@@ -596,11 +596,11 @@ should be to minimize the variance of the target point,
 conditional on the selected points \cref{eq:obj_chol}.
 The variance objective was first described by \cite{cohn1996neural} for optimal
 experimental design and later applied to directed Gaussian process inference
-by \cite{gramacy2014local} who refer to it as the active learning Cohn (ALC)
+by \cite{gramacy2014local}, who refer to it as the active learning Cohn (ALC)
 technique in honor of \cite{cohn1996neural}.
 In addition, the variance objective is equivalent to maximizing
 the \emph{mutual information} or \emph{information gain} with the
-target point as well as minimizing the expected mean squared error
+target point as well as to minimizing the expected mean squared error
 (see \cref{app:mutual_info}).
 The mutual information (in a slightly different context) is
 also used by \cite{krause2008nearoptimal} for sensor placement.
@@ -627,7 +627,7 @@ covariance matrix on \( y_k \) according to the posterior
 \cref{eq:quotient_rule}, resulting in the rank-one downdate
 \begin{align}
   \label{eq:cond_select}
-  \CM_{:, : \mid \I, k} &= \CM_{:, : \mid \I} - \vec{u} \vec{u}^{\top} &
+  \CM_{:, : \mid \I, k} &= \CM_{:, : \mid \I} - \vec{u} \vec{u}^{\top}, &
     \vec{u} &= \frac{\CM_{:, k \mid \I}}{\sqrt{\CM_{k, k \mid \I}}}.
 \end{align}
 The decrease in the variance of \( y_\Pred \) after
@@ -671,15 +671,14 @@ both methods are detailed in \cref{app:select}.
   \label{fig:alg_update}
 \end{figure}
 
-Both approaches have a time complexity of \( \BigO(N s^2) \) to select
-\( s \) points out of \( N \) candidates, differing in space complexity.
-The precision takes \( \BigO(s^2) \) space while the first
-\( s \) columns of the Cholesky factor of \( \CM \) uses
-\( \BigO(N s) \) space, always more memory (\( N > s \)).
+To select
+\( s \) points out of \( N \) candidates, both approaches have a time complexity of \( \BigO(N s^2) \) but differ in space complexity:
+The precision takes \( \BigO(s^2) \) space, while the first
+\( s \) columns of the Cholesky factor of \( \CM \) use
+\( \BigO(N s) \) space.
 Both algorithms use \( \BigO(N) \) space
 to store the conditional (co)variances.
-The precision algorithm uses less memory than the Cholesky algorithm.
-However, the Cholesky algorithm is easier to implement and
+The precision algorithm uses less memory than the Cholesky algorithm, but the Cholesky algorithm is easier to implement and
 roughly two times faster, which is why we use it in practice.
 
 \section{Greedy selection for global approximation by KL-minimization}
@@ -709,8 +708,8 @@ Directed Gaussian process regression infers the
 \emph{local} distribution at points of interest.
 We now turn our attention to \emph{global} approximation of the entire Gaussian
 process; given a kernel function \( \K(\vec{x}, \vec{x}') \) and a set of \(
-N \) points \( \{ \vec{x}_i \}_{i = 1}^N \) we have the covariance matrix \(
-\CM_{ij} = K(\vec{x}_i, \vec{x}_j) \) for which we seek a sparse approximate
+N \) points \( \{ \vec{x}_i \}_{i = 1}^N \), we have the covariance matrix \(
+\CM_{ij} = K(\vec{x}_i, \vec{x}_j) \), for which we seek a sparse approximate
 Cholesky factor \( L \) of the precision, \( L L^{\top} \approx \CM^{-1} \).
 We first order the points by the reverse-maximin ordering described in
 \cref{subsec:ordering} and then apply the selection
@@ -745,7 +744,7 @@ length scale from the reverse-maximin ordering \cref{eq:maximin}.
 Here we consider extensions of the basic single-column
 method to aggregated (or supernodal) Cholesky factorization
 and to determining the number of nonzeros per column.
-Numerical experiments are presented in \cref{sec:experiments}.
+
 
 \subsection{Aggregated sparsity pattern}
 \label{subsec:aggregated}
@@ -755,7 +754,7 @@ if the same sparsity pattern is reused for multiple columns,
 known as aggregated or supernodal Cholesky factorization.
 Aggregation can lead to substantial time
 and space savings \cite{schafer2021sparse}.
-For this section we focus on a single group \( \tilde{i}
+For this section, we focus on a single group \( \tilde{i}
 = \{i_1, \dotsc, i_m \} \) obtained by aggregating the
 column indices \( i_1 \succ i_2 \succ \dotsb \succ i_m \).
 Let \( \tilde{i} \) have aggregated selected entries \(
@@ -771,7 +770,7 @@ Assuming every entry of \( \tilde{s} \) is after every index in \( \tilde{i}
 This condition is guaranteed if the aggregated columns are adjacent in the
 ordering, for example; we defer handling the general case to the next section.
 The KL divergence \cref{eq:obj_chol} restricted to
-the contribution from the group \( \tilde{i} \) is
+the contribution from group \( \tilde{i} \) is
 \begin{align}
   \label{eq:obj_mult}
   \sum_{i \in \tilde{i}}
@@ -912,12 +911,12 @@ by also storing a partial Cholesky factor, the details are provided in
 In an aggregated sparsity pattern, columns are partitioned into groups and
 selecting an index for a group \( \tilde{i} \) adds it to the sparsity.
 
-We group columns by the framework of \cite{schafer2021sparse} which aggregates
+We group columns by the framework of \cite{schafer2021sparse}, which aggregates
 points that are close both geometrically as well as in the ordering.
 To select sparsity entries, the targets are all points in \( \tilde{i} \)
 and the candidates are the union of the nearest neighbors to each target.
-If every candidate \( k \) satisfies \( k \succ \max{\tilde{i}} \) which
-occurs if the group is contiguous in the ordering e.g., then every candidate
+If every candidate \( k \) satisfies \( k \succ \max{\tilde{i}} \), which
+occurs if the group is contiguous in the ordering; then every candidate
 conditions every target and so the multiple-target selection algorithm
 (\cref{subsec:mult_select}) can be directly applied.
 However, we empirically observe that forcing this condition irreparably
@@ -959,17 +958,17 @@ possible, maximizing computational efficiency since denser columns have
 an outsized impact on the computational time from the cubic scaling cost
 with the number of nonzeros.
 
-In inhomogeneous geometries where certain points benefit from
+In inhomogeneous geometries, where certain points benefit from
 more nonzeros than others, a principled way of distributing nonzeros is to
-minimize KL divergence end-to-end like was done for sparsity selection.
+minimize KL divergence end-to-end, as we proposed for sparsity selection in \cref{sec:select}.
 The \emph{local} greedy algorithms select the sparsity entry that
 minimizes prediction error at \emph{particular} columns of interest.
 In \emph{global} greedy selection, we pick from \emph{any} column the
 candidate that minimizes the overall KL divergence \cref{eq:obj_chol}.
 We maintain a priority queue containing all candidates from every
 column, keyed by the candidate's effect on the KL divergence.
-The data structure must support popping the largest element off the
-queue as well as updating the value for an element in the queue.
+The data structure must support removing the largest element from the
+queue, as well as updating the value for an element in the queue.
 Both operations have time complexity \( \BigO(\log n) \) for \( n \)
 elements if implemented as an array-backed binary heap, for example.
 
@@ -1076,11 +1075,11 @@ For our method, we run the baseline with a larger \( \rho' = \rho_s
 is a tuning parameter for the number of candidates considered.
 If not stated otherwise, \( \rho_s = 2 \) is used in the following experiments.
 We then use the single-column and partial variants of the conditional
-selection algorithm described in \cref{sec:select} to subsample the
+selection algorithm described in \cref{sec:select} to select the
 actual sparsity entries from the candidate set; in these experiments,
 each column receives \( k \) nonzeros where \( k \) is chosen to match
 the original density \( \rho \) of the baseline factor.
-In this setting we found that using the global
+In this setting, we found that using the global
 selection procedure described in \cref{subsec:global_greedy} to
 determine the number of nonzeros for each column led to little
 improvement in accuracy at a significant performance penalty.
@@ -1109,7 +1108,7 @@ However, they do not achieve better accuracy per
 unit time cost from the increased cost of selection.
 Aggregation results in better accuracy per unit time cost but worse accuracy
 per nonzero entry, which may impact their computational efficiency in
-downstream tasks which depend on factor density like preconditioning.
+downstream tasks that depend on factor density, such as preconditioning.
 
 \pgfplotsset{
   cycle list={
@@ -1153,7 +1152,7 @@ downstream tasks which depend on factor density like preconditioning.
 \label{subsec:gp_exp}
 
 For Gaussian process regression we use the ``predictions points first''
-method of \cite{schafer2021sparse} which computes a sparse Cholesky factor
+method of \cite{schafer2021sparse}, which computes a sparse Cholesky factor
 of the joint covariance matrix between the training and prediction points,
 where prediction points are ordered before training points.
 The desired posterior mean and covariance can then be
@@ -1180,7 +1179,7 @@ Given 7 joint positions, velocities, and accelerations for 21 features
 in total, the goal is to infer the torque of just the first joint.
 The dataset is available online at \url{https://gaussianprocess.org/gpml/data/}
 and consists of 44,484 training points and 4,449
-testing points which we then preprocess as follows.
+testing points, which we then preprocess as follows.
 
 We only use the first 3 features of the data and
 remove the 73 duplicate points this projection causes.
@@ -1220,11 +1219,8 @@ As noted in \cite{gramacy2015speeding}, the simple method of
   \input{figures/gp/sarcos/rho_loss.tex}%
   \input{figures/gp/sarcos/rho_time_loss.tex}
   \caption{
-    We perform Gaussian process regression by sparse
+    We perform Gaussian process regression on the SARCOS dataset by sparse
     Cholesky factorization of the joint covariance matrix.
-    Like Cholesky factorization in \cref{subsec:chol_exp}, we
-    use a candidate set size scaling factor of \( \rho_s = 2
-    \) and an aggregation parameter of \( \lambda = 1.5 \).
     The left panel shows the difference in RMSE from exact Gaussian process
     regression using the same training points with varying density \( \rho \).
     The right panel shows the accuracy to computational
@@ -1249,15 +1245,15 @@ As noted in \cite{gramacy2015speeding}, the simple method of
 We also use data produced by the OCO-2 project \cite{eldering2017orbiting}
 at the Jet Propulsion Laboratory, California Institute of Technology,
 obtained from the OCO-2 data archive maintained at the NASA Goddard Earth
-Science Data and Information Services Center which is available online at
+Science Data and Information Services Center, which is available online at
 \url{https://disc.gsfc.nasa.gov/datasets?keywords=oco2}.
-OCO-2 is an orbiting satellite designed to measure atmospheric carbon dioxide.
+OCO-2 is a polar-orbiting satellite designed to measure atmospheric carbon dioxide.
 The path an orbiting satellite takes creates characteristic
 streaks in the data as shown in \cref{fig:oco2}.
 
 We take data localized to the United States from the time
 period 2017-05-16 to 2017-05-31, keeping only the features of
-longitude, latitude, and time and removing any duplicates points.
+longitude, latitude, and time and removing any duplicate points.
 We then take the first \( 2^{16} \) points and draw \( 10^3 \)
 realizations from the Gaussian process with the same train test
 split, kernel function, and hyperparameters as the SARCOS experiment.
@@ -1265,7 +1261,7 @@ split, kernel function, and hyperparameters as the SARCOS experiment.
 As shown in \cref{fig:gp_oco2_rho}, the RMSE of
 \( k \)-NN is worse than the ``KL'' baseline.
 However, in every other experiment (\cref{fig:chol_rho},
-\cref{fig:gp_sarcos_rho}, and \cref{fig:cg_iter}) \( k \)-NN does better
+\cref{fig:gp_sarcos_rho}, and \cref{fig:cg_iter}), \( k \)-NN does better
 than the baseline, so neither method is strictly better than the other.
 Our method, on the other hand, achieves the best accuracy
 in \emph{every} numerical experiment over a wide variety
@@ -1276,8 +1272,7 @@ of geometries and tasks, a testament to its robustness.
   \input{figures/gp/oco2/rho_loss.tex}%
   \input{figures/gp/oco2/rho_time_loss.tex}
   \caption{
-    We use a candidate set size scaling factor of \( \rho_s =
-    2 \) and an aggregation parameter of \( \lambda = 1.5 \).
+    We perform Gaussian process regression on the OCO-2 dataset.
     The left panel shows the difference in RMSE from exact
     Gaussian process regression with varying density \( \rho \).
     The right panel shows the accuracy to computational
@@ -1571,7 +1566,7 @@ on selected points recovers \cite{kang2021correlationbased}.
 \subsection{Conclusion}
 
 In this work, we develop an algorithm for directed Gaussian process
-regression which greedily selects training points that maximize
+regression, which greedily selects training points that maximize
 mutual information with a target point, conditional on all points
 previously selected to avoid redundancy.
 We show that using conditional selection to pick the sparsity pattern of
@@ -1597,6 +1592,7 @@ under MURI award number FA9550-20-1-0358 (Machine Learning and Physics-Based
 Modeling and Simulation) and from the Department of Energy under award number
 DE-SC0023163 (SEA-CROGS: Scalable, Efficient and Accelerated Causal Reasoning
 Operators, Graphs and Spikes for Earth and Embedded Systems).
+MK was partially supported by National Science Foundation (NSF) Grant DMS--1953005.
 
 \bibliographystyle{siamplain}
 \bibliography{references}

@@ -52,6 +52,22 @@
   langid = {english}
 }
 
+@article{Datta2016,
+   abstract = {Spatial process models for analyzing geostatistical data entail computations that become prohibitive as the number of spatial locations become large. This manuscript develops a class of highly scalable Nearest Neighbor Gaussian Process (NNGP) mod- els to provide fully model-based inference for large geostatistical datasets. We es- tablish that the NNGP is a well-defined spatial process providing legitimate finite- dimensional Gaussian densities with sparse precision matrices. We embed the NNGP as a dimension-reducing prior within a rich hierarchical modeling framework and develop computationally efficient Markov chain Monte Carlo (MCMC) algorithms avoiding the storage or decomposition of large matrices. The floating point operations (flops) per it- eration of this algorithm is linear in the number of spatial locations, thereby delivering substantial scalability. We illustrate the computational and inferential benefits of the NNGP using simulation experiments and also infer on forest biomass from a massive United States Forest Inventory dataset.},
+   author = {Abhirup Datta and Sudipto Banerjee and Andrew O. Finley and Alan E. Gelfand},
+   doi = {10.1080/01621459.2015.1044091},
+   issn = {0162-1459},
+   issue = {514},
+   journal = {Journal of the American Statistical Association},
+   keywords = {bayesian methods,composite likelihood,dimension reduction,hierarchical,markov chain monte carlo,models,nearest neighbors,predictive process,reduced-rank,spatial cross-covariance functions},
+   pages = {800-812},
+   title = {Hierarchical nearest-neighbor Gaussian process models for large geostatistical datasets},
+   volume = {111},
+   url = {http://arxiv.org/abs/1406.7343},
+   year = {2016},
+}
+
+
 @misc{gramacy2014local,
   title = {Local {{Gaussian}} Process Approximation for Large Computer Experiments},
   author = {Gramacy, Robert B. and Apley, Daniel W.},
@@ -137,18 +153,14 @@
   doi = {10.1109/MCSE.2007.55}
 }
 
-@misc{kang2021correlationbased,
-  title = {Correlation-Based Sparse Inverse {{Cholesky}} Factorization for Fast {{Gaussian-process}} Inference},
-  author = {Kang, Myeongjong and Katzfuss, Matthias},
-  year = {2021},
-  month = dec,
-  number = {arXiv:2112.14591},
-  eprint = {2112.14591},
-  eprinttype = {arxiv},
-  primaryclass = {stat},
-  publisher = {{arXiv}},
-  archiveprefix = {arXiv},
-  langid = {english}
+@article{kang2021correlationbased,
+   author = {Myeongjong Kang and Matthias Katzfuss},
+   issue = {56},
+   journal = {Statistics and Computing},
+   pages = {1-17},
+   title = {Correlation-based sparse inverse Cholesky factorization for fast Gaussian-process inference},
+   volume = {33},
+   year = {2023},
 }
 
 @article{kaporin1990alternative,
@@ -171,6 +183,50 @@
   publisher = {{Institute of Mathematical Statistics}},
   issn = {0883-4237, 2168-8745},
   doi = {10.1214/19-STS755}
+}
+
+@article{Katzfuss2018,
+    title = {{Vecchia approximations of Gaussian-process predictions}},
+    year = {2020},
+    journal = {Journal of Agricultural, Biological, and Environmental Statistics},
+    author = {Katzfuss, Matthias and Guinness, Joseph and Gong, Wenlong and Zilber, Daniel},
+    number = {3},
+    pages = {383--414},
+    volume = {25},
+    doi = {10.1007/s13253-020-00401-7}
+}
+
+@article{Cao2023,
+    title = {{Variational sparse inverse Cholesky approximation for latent Gaussian processes via double Kullback-Leibler minimization}},
+    year = {2023},
+    journal = {arXiv:2301.13303},
+    author = {Cao, Jian and Kang, Myeongjong and Jimenez, Felix and Sang, Huiyan and Sch{\"{a}}fer, Florian and Katzfuss, Matthias},
+    month = {1},
+    arxivId = {2301.13303}
+}
+
+@article{Cao2022,
+    title = {{Scalable Gaussian-process regression and variable selection using Vecchia approximations}},
+    year = {2022},
+    journal = {Journal of Machine Learning Research},
+    author = {Cao, Jian and Guinness, Joseph and Genton, Marc G. and Katzfuss, Matthias},
+    number = {348},
+    pages = {1--30},
+    volume = {23}
+}
+
+@article{Katzfuss2020,
+    title = {{Scaled Vecchia approximation for fast computer-model emulation}},
+    year = {2022},
+    journal = {SIAM/ASA Journal on Uncertainty Quantification},
+    author = {Katzfuss, Matthias and Guinness, Joseph and Lawrence, Earl},
+    number = {2},
+    pages = {537--554},
+    volume = {10},
+    url = {http://arxiv.org/abs/2005.00386},
+    doi = {10.1137/20M1352156},
+    arxivId = {2005.00386},
+    keywords = {computer experiment, fisher scoring, gaussian process, maximin ordering, nearest, neighbors, sparse inverse cholesky}
 }
 
 @misc{katzfuss2022scalable,
@@ -679,6 +735,33 @@
   pages={477--501},
   year={2013},
   publisher={Springer}
+}
+
+@article{Katzfuss2015,
+    title = {{A multi-resolution approximation for massive spatial datasets}},
+    year = {2017},
+    journal = {Journal of the American Statistical Association},
+    author = {Katzfuss, Matthias},
+    number = {517},
+    month = {2},
+    pages = {201--214},
+    volume = {112},
+    doi = {10.1080/01621459.2015.1123632},
+    issn = {0162-1459},
+    arxivId = {1507.04789}
+}
+
+@article{Jurek2020,
+    title = {{Hierarchical sparse Cholesky decomposition with applications to high-dimensional spatio-temporal filtering}},
+    year = {2022},
+    journal = {Statistics and Computing},
+    author = {Jurek, Marcin and Katzfuss, Matthias},
+    pages = {15},
+    volume = {32},
+    url = {http://arxiv.org/abs/2006.16901},
+    doi = {10.1007/s11222-021-10077-9},
+    arxivId = {2006.16901},
+    keywords = {data assimilation, hierarchical matrix, incomplete cholesky decomposition, spatio-temporal statistics, state-space model, tion, vecchia approxima-}
 }
 
 @article{ambikasaran2015fast,
