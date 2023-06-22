@@ -1,9 +1,9 @@
 \begin{tikzpicture}[baseline, scale=0.75]
-  \begin{loglogaxis}[
+  \begin{semilogyaxis}[
     grid={major},
     % title={RMSE with increasing \( \rho \)
     %   (\( N = 65536, \rho_s = 2, \lambda = 1.5 \))},
-    xlabel={\( \log_{10} \) Nonzeros (nnz)},
+    xlabel={Nonzeros (nnz)},
     ylabel={\( \log_{10} \) RMSE},
     legend entries={KL, KL (agg.), \( k \)-NN, select, select (agg.)},
     legend pos={north east},
@@ -14,5 +14,5 @@
   \addplot table {figures/gp/oco2/rho_loss_select-KNN.csv};
   \addplot table {figures/gp/oco2/rho_loss_select.csv};
   \addplot table {figures/gp/oco2/rho_loss_select_agg.csv};
-  \end{loglogaxis}
+  \end{semilogyaxis}
 \end{tikzpicture}
