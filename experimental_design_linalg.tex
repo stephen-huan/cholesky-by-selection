@@ -195,7 +195,7 @@ The proposed work addresses this limitation.
   \centering
   \input{figures/screening/uncond.tex}%
   \input{figures/screening/cond.tex}
-  \caption{
+  \caption{%
     An illustration of the screening effect with the Mat{\'e}rn kernel with
     length scale \( \ell = 1 \) and smoothness \( \nu = 1/2 \).
     The first panel shows the \textcolor{lightblue}{unconditional
@@ -301,7 +301,7 @@ in the appendix and supplementary material.
   \includegraphics{figures/precompiled/grid_1e-5/points_3.pdf}%
   \quad
   \includegraphics{figures/precompiled/grid_1e-5/points_4.pdf}%
-  \caption{
+  \caption{%
     The first panel shows selecting the \( k \)-\textcolor{seagreen}{nearest
     neighbors} to the \textcolor{orange}{center point} out of a dense grid
     of \( 51 \times 51 \) \textcolor{silver}{candidates} for \(k = 265 \).
@@ -473,7 +473,7 @@ index
 \end{align}
 where \( -\Order \defeq \{ 1, \dotsc, N \} \setminus \Order \)
 and \( \Order_n \defeq \{ i_n, i_{n + 1}, \dotsc, i_N \} \),
-i.e. select the point farthest from previously selected points.
+i.e., select the point farthest from previously selected points.
 % The ordering is reversed for factorizing the precision.
 We write \( i \prec j \) if \( i \) precedes \( j \) in the ordering and
 define \( \ell_{i_k} \defeq \min_{j \in \Order_{k + 1}} \norm{\vec{x}_{i_k}
@@ -568,7 +568,7 @@ in \cref{sec:chol_select} and extend it in \cref{sec:extensions}.
   \centering
   \input{figures/selection/knn.tex}%
   \input{figures/selection/cknn.tex}
-  \caption{
+  \caption{%
     Here, the \textcolor{lightblue}{blue} points are the
     \textcolor{lightblue}{candidates}, the \textcolor{orange}{orange}
     point is the \textcolor{orange}{target} point to predict
@@ -690,7 +690,7 @@ roughly two times faster, which is why we use it in practice.
   \input{figures/cholesky_factor.tex}%
   \qquad
   \input{figures/points/selected_points.tex}
-  \caption{
+  \caption{%
     For a column of a Cholesky factor in isolation, the
     \textcolor{orange}{target} point is the \textcolor{orange}{diagonal}
     entry, \textcolor{lightblue}{candidates} are \textcolor{lightblue}{below}
@@ -1020,7 +1020,7 @@ subtracted, easily computed as the sum of the squared ``diagonal'' entries
 of \( L \) corresponding to target points from \cref{eq:partial_diag}.
 
 % One heuristical improvement is to measure ``bang for the buck'',
-% i.e. to consider that the number of nonzeros added from selecting
+% i.e., to consider that the number of nonzeros added from selecting
 % a candidate varies depending on the number of targets conditioned.
 % The KL divergence adds a candidate's effect on each target together,
 % so candidates conditioning more targets tend to decrease the KL
@@ -1126,7 +1126,7 @@ downstream tasks that depend on factor density, such as preconditioning.
   \centering
   \input{figures/cholesky/n_kl_div.tex}%
   \input{figures/cholesky/n_time.tex}
-  \caption{
+  \caption{%
     Accuracy (left) and computational time (right) of
     Cholesky factorization methods with varying number
     of points \( N \) and fixed density \( \rho = 2 \).
@@ -1166,7 +1166,7 @@ of \cite{schafer2021sparse} for additional details.
   \centering
   % \input{figures/datasets/sarcos/sarcos.tex}
   \includegraphics{figures/precompiled/datasets/sarcos.pdf}
-  \caption{
+  \caption{%
     The first 5,000 points of the SARCOS training
     data, visualizing the first two features.
   }
@@ -1220,7 +1220,7 @@ As noted in \cite{gramacy2015speeding}, the simple method of
   \centering
   \input{figures/gp/sarcos/rho_loss.tex}%
   \input{figures/gp/sarcos/rho_time_loss.tex}
-  \caption{
+  \caption{%
     We perform Gaussian process regression on the SARCOS dataset by
     sparse Cholesky factorization of the joint covariance matrix.
     The left panel shows the difference in RMSE from exact Gaussian process
@@ -1235,7 +1235,7 @@ As noted in \cite{gramacy2015speeding}, the simple method of
   \centering
   % \input{figures/datasets/oco2/oco2.tex}
   \includegraphics{figures/precompiled/datasets/oco2.pdf}
-  \caption{
+  \caption{%
     Sampling 4,682 evenly spaced points from the OCO-2
     dataset, visualizing the first two features.
   }
@@ -1274,7 +1274,7 @@ of geometries and tasks, a testament to its robustness.
   \centering
   \input{figures/gp/oco2/rho_loss.tex}%
   \input{figures/gp/oco2/rho_time_loss.tex}
-  \caption{
+  \caption{%
     We perform Gaussian process regression on the OCO-2 dataset.
     The left panel shows the difference in RMSE from exact
     Gaussian process regression with varying density \( \rho \).
@@ -1291,7 +1291,7 @@ of geometries and tasks, a testament to its robustness.
   \centering
   \input{figures/cg/n_iter-res.tex}%
   \input{figures/cg/nnz_nnz.tex}
-  \caption{
+  \caption{%
     We use the conjugate gradient preconditioned by sparse Cholesky factors to
     solve the symmetric positive-definite system \( \CM \vec{x} = \vec{y} \).
     The left panel shows iteration progress for \( N =
@@ -1307,7 +1307,7 @@ of geometries and tasks, a testament to its robustness.
   \centering
   \input{figures/cg/rho_iter.tex}%
   \input{figures/cg/rho_time.tex}
-  \caption{
+  \caption{%
     The left panel shows how the number of iterations for the
     conjugate gradient to converge decreases with increasing
     preconditioner density \( \rho \) for \( N = 2^{16} \) points.
@@ -1375,7 +1375,7 @@ accurate methods even if they are slower to form the preconditioner.
   \centering
   \input{figures/mnist/accuracy_k.tex}%
   \input{figures/mnist/time_k.tex}
-  \caption{
+  \caption{%
     We compare selection by Euclidean distance (\( k \)-NN) to
     conditional selection (C\( k \)-NN) in image classification.
     From the MNIST database \( N = 10^3 \) training images and \( m = 10^2
@@ -1431,7 +1431,7 @@ unconditional covariance decays monotonically with distance.
   \centering
   \input{figures/recover/accuracy_n.tex}%
   \input{figures/recover/accuracy_s.tex}
-  \caption{
+  \caption{%
     We attempt to recover a sparse Cholesky factor \(
     L \) of the precision matrix \( Q = L L^{\top} \).
     ``C\( k \)-NN'' minimizes the conditional variance of the target
@@ -1451,7 +1451,7 @@ unconditional covariance decays monotonically with distance.
   \centering
   \input{figures/recover/accuracy_noise.tex}%
   \input{figures/recover/accuracy_noise_cknn.tex}
-  \caption{
+  \caption{%
     We add noise sampled i.i.d. from \( \N(0, \var)
     \) to the measurements \( Q \).
     The left panel shows accuracy with varying noise for \( N
@@ -1748,7 +1748,7 @@ Science Foundation (NSF) Grant DMS--1953005.
 \begin{figure}[t]
   \centering
   \input{figures/partial_factor.tex}
-  \caption{
+  \caption{%
     Illustration of the Cholesky factorization of
     a partially conditioned covariance matrix.
     Here \textcolor{darksilver}{grey} denotes fully unconditional,
