@@ -479,6 +479,10 @@ We write \( i \prec j \) if \( i \) precedes \( j \) in the ordering and
 define \( \ell_{i_k} \defeq \min_{j \in \Order_{k + 1}} \norm{\vec{x}_{i_k}
 - \vec{x}_j} \), a length scale monotonically shrinking with decreasing
 position in the ordering.
+For robustness, we define the \( p \)-maximin ordering as replacing the
+inner \( \min \) in \cref{eq:maximin} with the \( p \)-th smallest distance
+(\( \infty \) if \( \card{\Order_{k + 1}} < p \)), generalizing the maximin
+ordering (\( p = 1 \)).
 
 Vecchia also originally proposed to select the sparsity set by Euclidean
 distance \cite{vecchia1988estimation}, which, unlike the lexicographic
@@ -1173,6 +1177,8 @@ of \cite{schafer2021sparse} for additional details.
   \label{fig:sarcos}
 \end{figure}
 
+For both datasets we use a \( 2 \)-maximin ordering (\cref{subsec:ordering}).
+
 \subsubsection{SARCOS dataset}
 
 We use the SARCOS dataset \cite{vijayakumar2000locally} generated from
@@ -1263,12 +1269,12 @@ split, kernel function, and hyperparameters as the SARCOS experiment.
 
 As shown in \cref{fig:gp_oco2_rho}, the RMSE of
 \( k \)-NN is worse than the ``KL'' baseline.
-However, in every other experiment (\cref{fig:chol_rho},
-\cref{fig:gp_sarcos_rho}, and \cref{fig:cg_iter}), \( k \)-NN does better
-than the baseline, so neither method is strictly better than the other.
+However, in nearly every other experiment (\cref{fig:chol_rho}
+and \cref{fig:cg_iter}), \( k \)-NN does better than the
+baseline, so neither method is strictly better than the other.
 Our method, on the other hand, achieves the best accuracy
-in \emph{every} numerical experiment over a wide variety
-of geometries and tasks, a testament to its robustness.
+in \emph{every} numerical experiment we tried over a wide
+variety of geometries and tasks, a testament to its robustness.
 
 \begin{figure}[t]
   \centering
@@ -1336,9 +1342,9 @@ condition but to a less extreme extent.
 Rather than generate a right-hand side \( \vec{y} \) directly, we first
 sample a solution \( \vec{x} \sim \N(\vec{0}, \Id_N) \) and then compute
 \( \vec{y} = \CM \vec{x} \) so that \( \vec{y} \) is realistically smooth.
-When computing the preconditioner \( L \) by sparse Cholesky
-factorization, we use a candidate set size scaling factor of \(
-\rho_s = 2 \) and an aggregation parameter of \( \lambda = 1.5 \).
+When computing the preconditioner \( L \) by sparse Cholesky factorization,
+we use a \( 2 \)-maximin ordering, a candidate set size scaling factor of
+\( \rho_s = 2 \), and an aggregation parameter of \( \lambda = 1.5 \).
 We then run the conjugate gradient algorithm with \( L \) as a preconditioner
 until reaching a relative tolerance of \( 10^{-12} \).
 
