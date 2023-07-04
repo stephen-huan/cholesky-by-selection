@@ -1157,6 +1157,8 @@ downstream tasks that depend on factor density, such as preconditioning.
     density \( \rho \) and the right panel shows the accuracy
     to computational time trade-off over varying \( \rho \).
     The number of points is \( N = 2^{16} \).
+    The regular grid is one of the most advantageous settings for the \( \rho
+    \)-ball and \( k \)-NN methods, but we still see a slight improvement.
   }
   \label{fig:chol_rho}
 \end{figure}
@@ -1234,8 +1236,9 @@ As noted in \cite{gramacy2015speeding}, the simple method of
   \input{figures/gp/sarcos/rho_loss.tex}%
   \input{figures/gp/sarcos/rho_time_loss.tex}
   \caption{%
-    We perform Gaussian process regression on the SARCOS dataset by
-    sparse Cholesky factorization of the joint covariance matrix.
+    We perform Gaussian process regression on the (modified)
+    SARCOS dataset (as visualized in \cref{fig:sarcos}) by sparse
+    Cholesky factorization of the joint covariance matrix.
     The left panel shows the difference in RMSE from exact Gaussian process
     regression using the same training points with varying density \( \rho \).
     The right panel shows the accuracy to computational
@@ -1274,21 +1277,22 @@ We then take the first \( 2^{16} \) points and draw \( 10^3 \)
 realizations from the Gaussian process with the same train test
 split, kernel function, and hyperparameters as the SARCOS experiment.
 
-As shown in \cref{fig:gp_oco2_rho}, the RMSE of
-\( k \)-NN is worse than the ``KL'' baseline.
+As shown in \cref{fig:gp_oco2_rho}, the RMSE of \( k
+\)-NN is worse than the ``\( \rho \)-ball'' baseline.
 However, in nearly every other experiment (\cref{fig:chol_rho}
 and \cref{fig:cg_iter}), \( k \)-NN does better than the
 baseline, so neither method is strictly better than the other.
-Our method, on the other hand, achieves the best accuracy
-in \emph{every} numerical experiment we tried over a wide
-variety of geometries and tasks, a testament to its robustness.
+Our method, on the other hand, achieves the best accuracy (for a fixed
+sparsity level) in \emph{every} numerical experiment we tried over a
+wide variety of geometries and tasks, a testament to its robustness.
 
 \begin{figure}[t]
   \centering
   \input{figures/gp/oco2/rho_loss.tex}%
   \input{figures/gp/oco2/rho_time_loss.tex}
   \caption{%
-    We perform Gaussian process regression on the OCO-2 dataset.
+    We perform Gaussian process regression on the (modified)
+    OCO-2 dataset (as visualized in \cref{fig:oco2}).
     The left panel shows the difference in RMSE from exact
     Gaussian process regression with varying density \( \rho \).
     The right panel shows the accuracy to computational
