@@ -265,8 +265,12 @@ faster than the single-target algorithm.
 In the setting of aggregated (or supernodal) Cholesky factorization, where
 the sparsity patterns of multiple columns are determined simultaneously,
 a candidate entry may only condition a \emph{subset} of the targets.
-By efficient rank-one downdating of Cholesky factors, we capture
-this structure at the same time complexity for multiple targets.
+By rank-one downdating\footnote{%
+  Given \( L = \chol(\CM) \), a \emph{rank-one downdate} of
+  \( \CM \) by a vector \( \vec{u} \) efficiently computes
+  \( \chol(\CM - \vec{u} \vec{u}^{\top}) \) from \( L \).
+} of Cholesky factors, we capture this structure
+at the same time complexity for multiple targets.
 Finally, we show how to adaptively determine the number of nonzeros
 per column in order to minimize the overall KL divergence by
 maintaining a global priority queue shared between all columns.
