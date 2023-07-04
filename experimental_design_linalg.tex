@@ -66,12 +66,14 @@
 
 % REQUIRED
 \begin{keywords}
-  Gaussian process, Cholesky factorization, Vecchia approximation, factorized sparse approximate inverse, orthogonal matching pursuit, optimal experimental design
+  Gaussian process, Cholesky factorization, Vecchia
+  approximation, factorized sparse approximate inverse,
+  orthogonal matching pursuit, optimal experimental design
 \end{keywords}
 
 % REQUIRED
 \begin{AMS}
-  % 68Q25, 68R10, 68U05, 
+  % 68Q25, 68R10, 68U05
   65F08, 65F55, 62-08
 \end{AMS}
 
@@ -116,10 +118,10 @@ stein2002fast} or random feature maps \cite{rahimi2007random}.
 
 \paragraph{Vecchia approximation, Kaporin's factorization, and KL minimization}
 
-Vecchia approximates the likelihood function of a Gaussian
-distribution by decomposing it into a product of univariate
-conditional densities, each of which depends on a subset of
-the previously ordered variables \cite{vecchia1988estimation}.
+Vecchia approximates the likelihood function of a Gaussian distribution
+by decomposing it into a product of univariate conditional densities,
+each of which depends on a subset of the previously ordered variables
+\cite{vecchia1988estimation}.
 Independently from Vecchia, Kaporin derived a closed-form expression of
 the approximate inverse Cholesky preconditioner of a p.s.d. matrix that
 minimizes, subject to a sparsity constraint, the \( K \)-condition number
@@ -175,9 +177,10 @@ katzfuss2021general, kang2021correlationbased, katzfuss2022scalable}.
 Motivated by the screening effect, the sparsity set is often formed by
 selecting the closest points by Euclidean distance \cite{vecchia1988estimation,
 schafer2020compression, schafer2021sparse, katzfuss2022scalable}.
-To lower the computational cost, different authors have proposed heuristics to
-analyze the sparsity set and identify opportunities to group similar points into supernodes \cite{stein2004approximating, ferronato2015novel,
-guinness2018permutation}.
+To lower the computational cost, different authors have proposed
+heuristics to analyze the sparsity set and identify opportunities to
+group similar points into supernodes \cite{stein2004approximating,
+ferronato2015novel, guinness2018permutation}.
 Sch{\"a}fer et al.\ devise a geometric grouping algorithm that allows to
 provably compute an \( \epsilon \)-accurate inverse-Cholesky factor in
 time complexity \( \BigO(N \log^{2d} (N/\epsilon)) \) using \( \BigO(N
@@ -328,12 +331,12 @@ we will denote as \( f(\vec{x}) \sim \GP(\mean(\vec{x}), \K(\vec{x},
 
 In many applications of Gaussian processes, we
 wish to infer unknown data given known data.
-Given the training dataset \( \mathcal{D} = \{ (\vec{x}_i, y_i) \}_{i =
-1}^N \), where the inputs \( \vec{x}_i \in \Reals^D \) are collected in the
-matrix \( X_\Train = [\vec{x}_1, \dotsc, \vec{x}_N]^{\top} \in \Reals^{N
-\times D} \) and the measurements \( y_i = f(\vec{x}_i) \) at those points are collected in the
-vector \( \vec{y}_\Train = [y_1, \dotsc, y_N]^{\top} \in \Reals^N \), we
-wish to predict the values at \( m \) new points \( X_\Pred \in \Reals^{m
+Given the training dataset \( \mathcal{D} = \{ (\vec{x}_i, y_i) \}_{i = 1}^N
+\), where the inputs \( \vec{x}_i \in \Reals^D \) are collected in the matrix
+\( X_\Train = [\vec{x}_1, \dotsc, \vec{x}_N]^{\top} \in \Reals^{N \times D} \)
+and the measurements \( y_i = f(\vec{x}_i) \) at those points are collected
+in the vector \( \vec{y}_\Train = [y_1, \dotsc, y_N]^{\top} \in \Reals^N \),
+we wish to predict the values at \( m \) new points \( X_\Pred \in \Reals^{m
 \times D} \) for which \( \vec{y}_\Pred \in \Reals^m \) is unknown.
 We assume the function \( f(\vec{x}) \) that maps input points to their
 outputs is distributed according to a Gaussian process with zero mean
@@ -545,8 +548,8 @@ the order of the KL divergence matters):
       \right ].
 \end{align}
 
-This sum is the accumulated \emph{difference} in posterior log variance for
-a series of independent regression problems: each to predict the \( i
+This sum is the accumulated \emph{difference} in posterior log variance
+for a series of independent regression problems: each to predict the \( i
 \)-th variable given a subset of the variables after it in the ordering.
 The term \( \log \left ( \CM_{i, i \mid s_i \setminus \{ i \}} \right )
 \) obtained when restricted to the variables in the sparsity pattern \(
@@ -745,8 +748,8 @@ length scale from the reverse-maximin ordering \cref{eq:maximin}.
 \section{Extensions}
 \label{sec:extensions}
 
-We now consider extensions of the single-column
-method to aggregated (or supernodal) Cholesky factorization
+We now consider extensions of the single-column method
+to aggregated (or supernodal) Cholesky factorization
 and determining the number of nonzeros per column.
 
 
@@ -905,10 +908,10 @@ conditions \emph{every} target point.
 However, candidates
 can also condition only a subset of the targets in the aggregated
 Cholesky factorization setting of \cref{subsubsec:partial}.
-Proper ``partial'' selection accounting for this matches
-the asymptotic time and space complexities of the multiple-target algorithm
-by storing a partial Cholesky factor. Details are provided in
-\cref{subsec:partial_select} and \cref{alg:select_partial}.
+Proper ``partial'' selection accounting for this matches the asymptotic time
+and space complexities of the multiple-target algorithm by storing a partial
+Cholesky factor. Details are provided in \cref{subsec:partial_select} and
+\cref{alg:select_partial}.
 
 \subsection{Aggregated Cholesky}
 
@@ -1365,10 +1368,10 @@ matrix-vector products.
 The time-optimal density for conditional methods is sparser than
 their unconditional counterparts due to using fewer iterations at
 the same sparsity and it being more expensive to select nonzeros.
-It is difficult to compare the total computational time of the methods,
-because increasing the number of iterations (e.g., by demanding better
-tolerance or using matrices with worse condition numbers) will prefer more
-accurate methods even if they are slower to form the preconditioner.
+It is difficult to compare the total computational time of the methods, because
+increasing the number of iterations (e.g., by demanding better tolerance or
+using matrices with worse condition numbers) will prefer more accurate methods
+even if they are slower to form the preconditioner.
 
 \pgfplotsset{
   cycle list={
@@ -1484,8 +1487,8 @@ Q \) or the covariance matrix \( Q^{-1} \) depending on
 which results in higher accuracy in reconstructing \( L \).
 For a recovered sparsity pattern \( X \) and ground truth \( Y \) we report
 \( \card{X \cap Y}/\card{X \cup Y} \), the intersection over union (IOU).
-Using the KL divergence \cref{eq:L_obj} of the recovered
-Cholesky factor is mostly equivalent to IOU.
+Using the KL divergence \cref{eq:L_obj} of the
+recovered Cholesky factor is mostly equivalent to IOU.
 
 As shown in \cref{fig:recover_acc}, C\( k \)-NN maintains a near-perfect
 recovery accuracy much higher than the unconditional baselines.
@@ -1602,7 +1605,8 @@ DE-SC0023163 (SEA-CROGS: Scalable, Efficient and Accelerated Causal Reasoning
 Operators, Graphs and Spikes for Earth and Embedded Systems).
 MK was partially supported by National
 Science Foundation (NSF) Grant DMS--1953005.
-FS gratefully acknowledges support from the Office of Naval Research under grant N00014-23-1-2545 (PM Dr.\ Reza Malek-Madani).
+FS gratefully acknowledges support from the Office of Naval
+Research under grant N00014-23-1-2545 (PM Dr.\ Reza Malek-Madani).
 
 \bibliographystyle{siamplain}
 \bibliography{references}
