@@ -5,7 +5,10 @@
     %   (\( N = 65536 \rho_s = 2, \lambda = 1.5 \))},
     xlabel={Time (seconds)},
     % ylabel={\( \log_{10} \) RMSE},
-    % legend entries={KL, KL (agg.), \( k \)-NN, select, select (agg.)},
+    % legend entries={%
+    %   \( \rho \)-ball, \( \rho \)-ball (agg.),
+    %   \( k \)-NN, select, select (agg.)
+    % },
     % legend pos={north east},
   ]
   \addplot table {figures/gp/oco2/rho_time_KL_loss.csv};
