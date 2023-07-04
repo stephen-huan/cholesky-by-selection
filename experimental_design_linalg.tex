@@ -61,18 +61,18 @@
   classification and recovery of sparse Cholesky factors.
   By minimizing Kullback-Leibler divergence, we apply the algorithm to Cholesky
   factorization, Gaussian process regression, and preconditioning with the
-  conjugate gradient, improving over \( k \)-nearest neighbors particularly in
-  high dimensional, unusual, or otherwise messy geometries.
+  conjugate gradient, improving over \( k \)-nearest neighbors selection.
 \end{abstract}
 
 % REQUIRED
 \begin{keywords}
-  \todo{to do}
+  Gaussian process, Cholesky factorization, Vecchia approximation, factorized sparse approximate inverse, orthogonal matching pursuit, optimal experimental design
 \end{keywords}
 
 % REQUIRED
 \begin{AMS}
-  % 68Q25, 68R10, 68U05
+  % 68Q25, 68R10, 68U05, 
+  65F08, 65F55, 62-08
 \end{AMS}
 
 \section{Introduction}
@@ -119,7 +119,7 @@ stein2002fast} or random feature maps \cite{rahimi2007random}.
 Vecchia approximates the likelihood function of a Gaussian
 distribution by decomposing it into a product of univariate
 conditional densities, each of which depends on a subset of
-the previous variables \cite{vecchia1988estimation}.
+the previously ordered variables \cite{vecchia1988estimation}.
 Independently from Vecchia, Kaporin derived a closed-form expression of
 the approximate inverse Cholesky preconditioner of a p.s.d. matrix that
 minimizes, subject to a sparsity constraint, the \( K \)-condition number
@@ -156,7 +156,7 @@ algebra such as (reverse) Cuthill-McKee, minimum degree, nested
 dissection, and red-black ordering \cite{benzi2000orderings}.
 Guinness empirically studied the effect of various orderings on
 Vecchia's likelihood approximation \cite{guinness2018permutation}.
-He found randomly ordering and a space-filling
+He found a random ordering and a space-filling
 maximum-minimum distance (maximin) ordering to perform well.
 This observation can be explained by the \emph{screening effect}, by
 which conditional on points near the point of interest, far away points
@@ -176,8 +176,7 @@ Motivated by the screening effect, the sparsity set is often formed by
 selecting the closest points by Euclidean distance \cite{vecchia1988estimation,
 schafer2020compression, schafer2021sparse, katzfuss2022scalable}.
 To lower the computational cost, different authors have proposed heuristics to
-analyze the sparsity set and identify opportunities to group similar degrees
-of freedom into supernodes \cite{stein2004approximating, ferronato2015novel,
+analyze the sparsity set and identify opportunities to group similar points into supernodes \cite{stein2004approximating, ferronato2015novel,
 guinness2018permutation}.
 Sch{\"a}fer et al.\ devise a geometric grouping algorithm that allows to
 provably compute an \( \epsilon \)-accurate inverse-Cholesky factor in
@@ -217,10 +216,10 @@ sparse Gaussian process inference \cite{smola2000sparse, herbrich2002fast,
 seeger2003fast}.
 Similar algorithms have also been developed in the context of
 sensor placement \cite{krause2008nearoptimal, clark2018greedy}
-and experimental design \cite{mutny2022experimental} where it is
+and experimental design \cite{mutny2022experimental}, where it is
 assumed the target phenomenon is modeled by a Gaussian process or
 is otherwise linearly dependent on the selected measurements.
-However, these works often focus on the global approximation of the entire process,
+However, these works often focus on global approximation of the entire process,
 e.g., through sparse approximation of the likelihood or covariance matrix
 \cite{liu2020when, chalupka2012framework, quinonero-candela2005unifying}.
 In contrast, \cite{wada2013gaussian} uses inference \emph{directed} towards
@@ -330,9 +329,9 @@ we will denote as \( f(\vec{x}) \sim \GP(\mean(\vec{x}), \K(\vec{x},
 In many applications of Gaussian processes, we
 wish to infer unknown data given known data.
 Given the training dataset \( \mathcal{D} = \{ (\vec{x}_i, y_i) \}_{i =
-1}^N \) where the inputs \( \vec{x}_i \in \Reals^D \) are collected in the
+1}^N \), where the inputs \( \vec{x}_i \in \Reals^D \) are collected in the
 matrix \( X_\Train = [\vec{x}_1, \dotsc, \vec{x}_N]^{\top} \in \Reals^{N
-\times D} \) and the measurements at those points are collected in the
+\times D} \) and the measurements \( y_i = f(\vec{x}_i) \) at those points are collected in the
 vector \( \vec{y}_\Train = [y_1, \dotsc, y_N]^{\top} \in \Reals^N \), we
 wish to predict the values at \( m \) new points \( X_\Pred \in \Reals^{m
 \times D} \) for which \( \vec{y}_\Pred \in \Reals^m \) is unknown.
@@ -546,7 +545,7 @@ the order of the KL divergence matters):
       \right ].
 \end{align}
 
-This sum is the accumulated \emph{difference} in posterior variance for
+This sum is the accumulated \emph{difference} in posterior log variance for
 a series of independent regression problems: each to predict the \( i
 \)-th variable given a subset of the variables after it in the ordering.
 The term \( \log \left ( \CM_{i, i \mid s_i \setminus \{ i \}} \right )
@@ -746,9 +745,9 @@ length scale from the reverse-maximin ordering \cref{eq:maximin}.
 \section{Extensions}
 \label{sec:extensions}
 
-Here we consider extensions of the basic single-column
+We now consider extensions of the single-column
 method to aggregated (or supernodal) Cholesky factorization
-and to determining the number of nonzeros per column.
+and determining the number of nonzeros per column.
 
 
 \subsection{Aggregated sparsity pattern}
@@ -906,9 +905,9 @@ conditions \emph{every} target point.
 However, candidates
 can also condition only a subset of the targets in the aggregated
 Cholesky factorization setting of \cref{subsubsec:partial}.
-Proper ``partial'' selection accounting for this structure is able to match
+Proper ``partial'' selection accounting for this matches
 the asymptotic time and space complexities of the multiple-target algorithm
-by also storing a partial Cholesky factor, the details are provided in
+by storing a partial Cholesky factor. Details are provided in
 \cref{subsec:partial_select} and \cref{alg:select_partial}.
 
 \subsection{Aggregated Cholesky}
@@ -946,6 +945,7 @@ Over \( N/m \) groups the time complexity for both selection and entry
 computation is \( \BigO(\frac{N}{m} (C s^2 + C m^2 + m^3 + s^3)) \),
 simplifying to \( \BigO(\frac{N C s^2}{m}) \) assuming \( m = \BigO(s) \),
 a \( m \) times improvement over non-aggregated factorization.
+For \(m \approx s\), this complexity further simplifies to \( \BigO(N C s) \).
 Better time complexity yields denser and thereby
 more accurate factors in the same amount of time.
 However, the sparsity pattern is no longer tailored to particular columns
@@ -1365,9 +1365,9 @@ matrix-vector products.
 The time-optimal density for conditional methods is sparser than
 their unconditional counterparts due to using fewer iterations at
 the same sparsity and it being more expensive to select nonzeros.
-It is hard to directly compare the total computational time of the methods
-because simply increasing the number of iterations, e.g., by demanding better
-tolerance or by using matrices with worse condition numbers, will prefer more
+It is difficult to compare the total computational time of the methods,
+because increasing the number of iterations (e.g., by demanding better
+tolerance or using matrices with worse condition numbers) will prefer more
 accurate methods even if they are slower to form the preconditioner.
 
 \pgfplotsset{
@@ -1485,7 +1485,7 @@ which results in higher accuracy in reconstructing \( L \).
 For a recovered sparsity pattern \( X \) and ground truth \( Y \) we report
 \( \card{X \cap Y}/\card{X \cup Y} \), the intersection over union (IOU).
 Using the KL divergence \cref{eq:L_obj} of the recovered
-Cholesky factor seems mostly equivalent to IOU.
+Cholesky factor is mostly equivalent to IOU.
 
 As shown in \cref{fig:recover_acc}, C\( k \)-NN maintains a near-perfect
 recovery accuracy much higher than the unconditional baselines.
@@ -1591,7 +1591,6 @@ We support these claims through extensive numerical
 experimentation in a variety of problems.
 
 \section*{Acknowledgments}
-\todo{add more funding information}
 
 This research was supported in part by research cyberinfrastructure resources
 and services provided by the Partnership for an Advanced Computing Environment
@@ -1603,6 +1602,7 @@ DE-SC0023163 (SEA-CROGS: Scalable, Efficient and Accelerated Causal Reasoning
 Operators, Graphs and Spikes for Earth and Embedded Systems).
 MK was partially supported by National
 Science Foundation (NSF) Grant DMS--1953005.
+FS gratefully acknowledges support from the Office of Naval Research under grant N00014-23-1-2545 (PM Dr.\ Reza Malek-Madani).
 
 \bibliographystyle{siamplain}
 \bibliography{references}
@@ -1610,8 +1610,6 @@ Science Foundation (NSF) Grant DMS--1953005.
 \newpage
 
 \appendix
-
-\todo{add proofs, if any, in appendix}
 
 \section{Derivations in KL-minimization}
 
