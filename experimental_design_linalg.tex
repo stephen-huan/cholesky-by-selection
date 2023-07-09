@@ -1206,10 +1206,10 @@ the 44,411 remaining training points into 90\% training points (\( N = 39,969
 \)) and 10\% prediction points (\( m = 4,442 \)).
 Since the robot arm moves smoothly, the geometry of the dataset consists
 of relatively continuous overlapping paths as shown in \cref{fig:sarcos}.
-We then use a Mat{\'e}rn kernel with smoothness \( \nu = 3/2 \) and length
-scale \( \ell = 1 \) and draw \( 10^3 \) realizations from the resulting
+We use a Mat{\'e}rn kernel with smoothness \( \nu = 3/2 \) and length
+scale \( \ell = 1 \), drawing \( 10^3 \) realizations from the resulting
 Gaussian process for the target variable, ignoring the original objective
-to ensure that the target variable is exactly Gaussian.
+to ensure that the target is exactly Gaussian.
 
 We consider three accuracy metrics for Gaussian process regression:
 the log determinant of the posterior prediction covariance matrix,
@@ -1568,9 +1568,9 @@ which is efficiently calculated by maintaining a QR factorization.
 In contrast, our selection algorithm uses a kernel function to evaluate inner
 products, so orthogonalization becomes conditioning, the residual norm
 becomes variance, and the QR factorization becomes a Cholesky factorization.
-A major difference from OMP is that the computational time of conditioning
+A difference from OMP is that the computational time of conditioning
 dominates that of evaluating the kernel function since the feature space
-is relatively low-dimensional (often 2 or 3 in spatial statistics).
+is low-dimensional (often 2 or 3 in spatial statistics).
 
 \paragraph{Sparse Cholesky factorization}
 
@@ -1617,6 +1617,7 @@ FS gratefully acknowledges support from the Office of Naval
 Research under grant N00014-23-1-2545 (PM Dr.\ Reza Malek-Madani).
 JG was partially supported by the National Science Foundation
 under grant numbers DMS--1916208 and DMS--1953088.
+FS thanks Joel Tropp for fruitful discussions on JT's  proposal to use matching pursuit algorithms for selecting sparsity patterns of Cholesky factors.
 
 \bibliographystyle{siamplain}
 \bibliography{references}
