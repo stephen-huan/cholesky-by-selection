@@ -1,0 +1,424 @@
+\begin{thebibliography}{10}
+
+\bibitem{ambikasaran2013mathcal}
+{\sc S.~Ambikasaran and E.~Darve}, {\em An {$\mathcal O(N\log N)$} fast direct
+  solver for partial hierarchically semi-separable matrices}, Journal of
+  Scientific Computing, 57 (2013), pp.~477--501.
+
+\bibitem{ambikasaran2015fast}
+{\sc S.~Ambikasaran, D.~Foreman-Mackey, L.~Greengard, D.~W. Hogg, and
+  M.~O’Neil}, {\em Fast direct methods for {G}aussian processes}, IEEE
+  transactions on pattern analysis and machine intelligence, 38 (2015),
+  pp.~252--265.
+
+\bibitem{bach2002kernel}
+{\sc F.~R. Bach and M.~I. Jordan}, {\em Kernel independent component analysis},
+  Journal of machine learning research, 3 (2002), pp.~1--48.
+
+\bibitem{banerjee2008gaussian}
+{\sc S.~Banerjee, A.~E. Gelfand, A.~O. Finley, and H.~Sang}, {\em Gaussian
+  predictive process models for large spatial data sets}, Journal of the Royal
+  Statistical Society: Series B (Statistical Methodology), 70 (2008),
+  pp.~825--848.
+
+\bibitem{behnel2011cython}
+{\sc S.~Behnel, R.~Bradshaw, C.~Citro, L.~Dalcin, D.~S. Seljebotn, and
+  K.~Smith}, {\em Cython: {{The Best}} of {{Both Worlds}}}, Computing in
+  Science \& Engineering, 13 (2011), pp.~31--39,
+  \url{https://doi.org/10.1109/MCSE.2010.118}.
+
+\bibitem{benzi2000orderings}
+{\sc M.~Benzi and M.~Tuma}, {\em Orderings for factorized sparse approximate
+  inverse preconditioners}, SIAM Journal on Scientific Computing, 21 (2000),
+  pp.~1851--1868.
+
+\bibitem{beylkin1991fast}
+{\sc G.~Beylkin, R.~Coifman, and V.~Rokhlin}, {\em Fast wavelet transforms and
+  numerical algorithms i}, Communications on pure and applied mathematics, 44
+  (1991), pp.~141--183.
+
+\bibitem{Cao2022}
+{\sc J.~Cao, J.~Guinness, M.~G. Genton, and M.~Katzfuss}, {\em {Scalable
+  Gaussian-process regression and variable selection using Vecchia
+  approximations}}, Journal of Machine Learning Research, 23 (2022), pp.~1--30.
+
+\bibitem{Cao2023}
+{\sc J.~Cao, M.~Kang, F.~Jimenez, H.~Sang, F.~Sch{\"{a}}fer, and M.~Katzfuss},
+  {\em {Variational sparse inverse Cholesky approximation for latent Gaussian
+  processes via double Kullback-Leibler minimization}}, arXiv:2301.13303,
+  (2023).
+
+\bibitem{chalupka2012framework}
+{\sc K.~Chalupka, C.~K.~I. Williams, and I.~Murray}, {\em A {{Framework}} for
+  {{Evaluating Approximation Methods}} for {{Gaussian Process Regression}}},
+  Nov. 2012, \url{https://doi.org/10.48550/arXiv.1205.6326},
+  \url{https://arxiv.org/abs/1205.6326}.
+
+\bibitem{chandrasekaran2006fast}
+{\sc S.~Chandrasekaran, M.~Gu, and T.~Pals}, {\em A fast {ULV} decomposition
+  solver for hierarchically semiseparable representations}, SIAM Journal on
+  Matrix Analysis and Applications, 28 (2006), pp.~603--622.
+
+\bibitem{chen2021multiscale}
+{\sc J.~Chen, F.~Sch{\"a}fer, J.~Huang, and M.~Desbrun}, {\em Multiscale
+  cholesky preconditioning for ill-conditioned problems}, ACM Transactions on
+  Graphics (TOG), 40 (2021), pp.~1--13.
+
+\bibitem{chen2022randomly}
+{\sc Y.~Chen, E.~N. Epperly, J.~A. Tropp, and R.~J. Webber}, {\em Randomly
+  pivoted {C}holesky: Practical approximation of a kernel matrix with few entry
+  evaluations}, arXiv preprint arXiv:2207.06503,  (2022).
+
+\bibitem{clark2018greedy}
+{\sc E.~Clark, T.~Askham, S.~L. Brunton, and J.~N. Kutz}, {\em Greedy {{Sensor
+  Placement}} with {{Cost Constraints}}}, arXiv:1805.03717 [math],  (2018),
+  \url{https://arxiv.org/abs/1805.03717}.
+
+\bibitem{cohn1996neural}
+{\sc D.~A. Cohn}, {\em Neural {{Network Exploration Using Optimal Experiment
+  Design}}}, Neural Networks, 9 (1996), pp.~1071--1083,
+  \url{https://doi.org/10.1016/0893-6080(95)00137-9}.
+
+\bibitem{Datta2016}
+{\sc A.~Datta, S.~Banerjee, A.~O. Finley, and A.~E. Gelfand}, {\em Hierarchical
+  nearest-neighbor gaussian process models for large geostatistical datasets},
+  Journal of the American Statistical Association, 111 (2016), pp.~800--812,
+  \url{https://doi.org/10.1080/01621459.2015.1044091},
+  \url{http://arxiv.org/abs/1406.7343}.
+
+\bibitem{eldering2017orbiting}
+{\sc A.~Eldering, C.~W. O'Dell, P.~O. Wennberg, D.~Crisp, M.~R. Gunson,
+  C.~Viatte, C.~Avis, A.~Braverman, R.~Castano, A.~Chang, L.~Chapsky, C.~Cheng,
+  B.~Connor, L.~Dang, G.~Doran, B.~Fisher, C.~Frankenberg, D.~Fu, R.~Granat,
+  J.~Hobbs, R.~A.~M. Lee, L.~Mandrake, J.~McDuffie, C.~E. Miller, V.~Myers,
+  V.~Natraj, D.~O'Brien, G.~B. Osterman, F.~Oyafuso, V.~H. Payne, H.~R.
+  Pollock, I.~Polonsky, C.~M. Roehl, R.~Rosenberg, F.~Schwandner, M.~Smyth,
+  V.~Tang, T.~E. Taylor, C.~To, D.~Wunch, and J.~Yoshimizu}, {\em The
+  {{Orbiting Carbon Observatory-2}}: First 18 months of science data products},
+  Atmospheric Measurement Techniques, 10 (2017), pp.~549--563,
+  \url{https://doi.org/10.5194/amt-10-549-2017}.
+
+\bibitem{ferronato2015novel}
+{\sc M.~Ferronato, C.~Janna, and G.~Gambolati}, {\em A novel factorized sparse
+  approximate inverse preconditioner with supernodes}, Procedia Computer
+  Science, 51 (2015), pp.~266--275.
+
+\bibitem{fine2001efficient}
+{\sc S.~Fine and K.~Scheinberg}, {\em Efficient {SVM} training using low-rank
+  kernel representations}, Journal of Machine Learning Research, 2 (2001),
+  pp.~243--264.
+
+\bibitem{fowlkes2004spectral}
+{\sc C.~Fowlkes, S.~Belongie, F.~Chung, and J.~Malik}, {\em Spectral grouping
+  using the {N}ystrom method}, IEEE transactions on pattern analysis and
+  machine intelligence, 26 (2004), pp.~214--225.
+
+\bibitem{furrer2006covariance}
+{\sc R.~Furrer, M.~G. Genton, and D.~Nychka}, {\em Covariance tapering for
+  interpolation of large spatial datasets}, Journal of Computational and
+  Graphical Statistics, 15 (2006), pp.~502--523.
+
+\bibitem{gines1998lu}
+{\sc D.~Gines, G.~Beylkin, and J.~Dunn}, {\em {LU} factorization of
+  non-standard forms and direct multiresolution solvers}, Applied and
+  Computational Harmonic Analysis, 5 (1998), pp.~156--201.
+
+\bibitem{graham2018analysis}
+{\sc I.~G. Graham, F.~Y. Kuo, D.~Nuyens, R.~Scheichl, and I.~H. Sloan}, {\em
+  Analysis of circulant embedding methods for sampling stationary random
+  fields}, SIAM Journal on Numerical Analysis, 56 (2018), pp.~1871--1895.
+
+\bibitem{gramacy2014local}
+{\sc R.~B. Gramacy and D.~W. Apley}, {\em Local {{Gaussian}} process
+  approximation for large computer experiments}, Oct. 2014,
+  \url{https://arxiv.org/abs/1303.0383}.
+
+\bibitem{gramacy2015speeding}
+{\sc R.~B. Gramacy and B.~Haaland}, {\em Speeding up neighborhood search in
+  local {{Gaussian}} process prediction}, Jan. 2015,
+  \url{https://arxiv.org/abs/1409.0074}.
+
+\bibitem{guinness2018permutation}
+{\sc J.~Guinness}, {\em Permutation and {{Grouping Methods}} for {{Sharpening
+  Gaussian Process Approximations}}}, Technometrics, 60 (2018), pp.~415--429,
+  \url{https://doi.org/10.1080/00401706.2018.1437476},
+  \url{https://arxiv.org/abs/1609.05372}.
+
+\bibitem{hackbusch2002data}
+{\sc W.~Hackbusch and S.~B{\"o}rm}, {\em Data-sparse approximation by adaptive
+  {$\mathcal{H}^2$}-matrices}, Computing, 69 (2002), pp.~1--35.
+
+\bibitem{hackbusch2000sparse}
+{\sc W.~Hackbusch and B.~N. Khoromskij}, {\em A sparse {$\mathcal{H}$}-matrix
+  arithmetic.}, Computing, 64 (2000), pp.~21--47.
+
+\bibitem{harris2020array}
+{\sc C.~R. Harris, K.~J. Millman, S.~J. {van der Walt}, R.~Gommers,
+  P.~Virtanen, D.~Cournapeau, E.~Wieser, J.~Taylor, S.~Berg, N.~J. Smith,
+  R.~Kern, M.~Picus, S.~Hoyer, M.~H. {van Kerkwijk}, M.~Brett, A.~Haldane,
+  J.~F. {del R{\'i}o}, M.~Wiebe, P.~Peterson, P.~{G{\'e}rard-Marchant},
+  K.~Sheppard, T.~Reddy, W.~Weckesser, H.~Abbasi, C.~Gohlke, and T.~E.
+  Oliphant}, {\em Array programming with {{NumPy}}}, Nature, 585 (2020),
+  pp.~357--362, \url{https://doi.org/10.1038/s41586-020-2649-2}.
+
+\bibitem{herbrich2002fast}
+{\sc R.~Herbrich, N.~Lawrence, and M.~Seeger}, {\em Fast {{Sparse Gaussian
+  Process Methods}}: {{The Informative Vector Machine}}}, in Advances in
+  {{Neural Information Processing Systems}}, vol.~15, {MIT Press}, 2002.
+
+\bibitem{ho2016hierarchical}
+{\sc K.~L. Ho and L.~Ying}, {\em Hierarchical interpolative factorization for
+  elliptic operators: {I}ntegral equations}, Communications on Pure and Applied
+  Mathematics, 7 (2016), pp.~1314--1353.
+
+\bibitem{hunter2007matplotlib}
+{\sc J.~D. Hunter}, {\em Matplotlib: {{A 2D Graphics Environment}}}, Computing
+  in Science \& Engineering, 9 (2007), pp.~90--95,
+  \url{https://doi.org/10.1109/MCSE.2007.55}.
+
+\bibitem{Jurek2020}
+{\sc M.~Jurek and M.~Katzfuss}, {\em {Hierarchical sparse Cholesky
+  decomposition with applications to high-dimensional spatio-temporal
+  filtering}}, Statistics and Computing, 32 (2022), p.~15,
+  \url{https://doi.org/10.1007/s11222-021-10077-9},
+  \url{http://arxiv.org/abs/2006.16901}.
+
+\bibitem{kang2021correlationbased}
+{\sc M.~Kang and M.~Katzfuss}, {\em Correlation-based sparse inverse cholesky
+  factorization for fast gaussian-process inference}, Statistics and Computing,
+  33 (2023), pp.~1--17.
+
+\bibitem{kaporin1990alternative}
+{\sc I.~E. Kaporin}, {\em An alternative approach to estimating the convergence
+  rate of the {{CG}} method}, Numerical Methods and Software, Yu. A. Kuznetsov,
+  ed., Dept. of Numerical Mathematics, USSR Academy of Sciences, Moscow,
+  (1990), pp.~55--72.
+
+\bibitem{Katzfuss2015}
+{\sc M.~Katzfuss}, {\em {A multi-resolution approximation for massive spatial
+  datasets}}, Journal of the American Statistical Association, 112 (2017),
+  pp.~201--214, \url{https://doi.org/10.1080/01621459.2015.1123632}.
+
+\bibitem{katzfuss2021general}
+{\sc M.~Katzfuss and J.~Guinness}, {\em A {{General Framework}} for {{Vecchia
+  Approximations}} of {{Gaussian Processes}}}, Statistical Science, 36 (2021),
+  pp.~124--141, \url{https://doi.org/10.1214/19-STS755}.
+
+\bibitem{Katzfuss2018}
+{\sc M.~Katzfuss, J.~Guinness, W.~Gong, and D.~Zilber}, {\em {Vecchia
+  approximations of Gaussian-process predictions}}, Journal of Agricultural,
+  Biological, and Environmental Statistics, 25 (2020), pp.~383--414,
+  \url{https://doi.org/10.1007/s13253-020-00401-7}.
+
+\bibitem{Katzfuss2020}
+{\sc M.~Katzfuss, J.~Guinness, and E.~Lawrence}, {\em {Scaled Vecchia
+  approximation for fast computer-model emulation}}, SIAM/ASA Journal on
+  Uncertainty Quantification, 10 (2022), pp.~537--554,
+  \url{https://doi.org/10.1137/20M1352156},
+  \url{http://arxiv.org/abs/2005.00386}.
+
+\bibitem{katzfuss2022scalable}
+{\sc M.~Katzfuss and F.~Sch{\"a}fer}, {\em Scalable {{Bayesian}} transport maps
+  for high-dimensional non-{{Gaussian}} spatial fields}, Feb. 2022,
+  \url{https://arxiv.org/abs/2108.04211}.
+
+\bibitem{krause2008nearoptimal}
+{\sc A.~Krause, A.~Singh, and C.~Guestrin}, {\em Near-{{Optimal Sensor
+  Placements}} in {{Gaussian Processes}}: {{Theory}}, {{Efficient Algorithms}}
+  and {{Empirical Studies}}}, The Journal of Machine Learning Research, 9
+  (2008), pp.~235--284.
+
+\bibitem{krause2015more}
+{\sc O.~Krause and C.~Igel}, {\em A {{More Efficient Rank-one Covariance Matrix
+  Update}} for {{Evolution Strategies}}}, in Proceedings of the 2015 {{ACM
+  Conference}} on {{Foundations}} of {{Genetic Algorithms XIII}}, {{FOGA}} '15,
+  {New York, NY, USA}, Jan. 2015, {Association for Computing Machinery},
+  pp.~129--136, \url{https://doi.org/10.1145/2725494.2725496}.
+
+\bibitem{lecun1998gradientbased}
+{\sc Y.~Lecun, L.~Bottou, Y.~Bengio, and P.~Haffner}, {\em Gradient-based
+  learning applied to document recognition}, Proceedings of the IEEE, 86
+  (1998), pp.~2278--2324, \url{https://doi.org/10.1109/5.726791}.
+
+\bibitem{li2012new}
+{\sc S.~Li, M.~Gu, C.~J. Wu, and J.~Xia}, {\em New efficient and robust {HSS}
+  {C}holesky factorization of {SPD} matrices}, SIAM Journal on Matrix Analysis
+  and Applications, 33 (2012), pp.~886--904.
+
+\bibitem{liu2020when}
+{\sc H.~Liu, Y.-S. Ong, X.~Shen, and J.~Cai}, {\em When {{Gaussian Process
+  Meets Big Data}}: {{A Review}} of {{Scalable GPs}}}, IEEE Transactions on
+  Neural Networks and Learning Systems, 31 (2020), pp.~4405--4423,
+  \url{https://doi.org/10.1109/TNNLS.2019.2957109}.
+
+\bibitem{marzouk2016introduction}
+{\sc Y.~Marzouk, T.~Moselhy, M.~Parno, and A.~Spantini}, {\em An introduction
+  to sampling via measure transport}, arXiv:1602.05023 [math, stat],  (2016),
+  pp.~1--41, \url{https://doi.org/10.1007/978-3-319-11259-6_23-1},
+  \url{https://arxiv.org/abs/1602.05023}.
+
+\bibitem{mutny2022experimental}
+{\sc M.~Mutn{\'y} and A.~Krause}, {\em Experimental {{Design}} for {{Linear
+  Functionals}} in {{Reproducing Kernel Hilbert Spaces}}}, May 2022,
+  \url{https://arxiv.org/abs/2205.13627}.
+
+\bibitem{owhadi2019operatoradapted}
+{\sc H.~Owhadi and C.~Scovel}, {\em Operator-{{Adapted Wavelets}}, {{Fast
+  Solvers}}, and {{Numerical Homogenization}}: {{From}} a {{Game Theoretic
+  Approach}} to {{Numerical Approximation}} and {{Algorithm Design}}},
+  Cambridge {{Monographs}} on {{Applied}} and {{Computational Mathematics}},
+  {Cambridge University Press}, {Cambridge}, 2019,
+  \url{https://doi.org/10.1017/9781108594967}.
+
+\bibitem{pedregosa2011scikitlearn}
+{\sc F.~Pedregosa, G.~Varoquaux, A.~Gramfort, V.~Michel, B.~Thirion, O.~Grisel,
+  M.~Blondel, P.~Prettenhofer, R.~Weiss, V.~Dubourg, J.~Vanderplas, A.~Passos,
+  D.~Cournapeau, M.~Brucher, M.~Perrot, and {\'E}.~Duchesnay}, {\em
+  Scikit-learn: {{Machine Learning}} in {{Python}}}, Journal of Machine
+  Learning Research, 12 (2011), pp.~2825--2830.
+
+\bibitem{quinonero-candela2005unifying}
+{\sc J.~{Qui{\~n}onero-Candela} and C.~E. Rasmussen}, {\em A {{Unifying View}}
+  of {{Sparse Approximate Gaussian Process Regression}}}, Journal of Machine
+  Learning Research, 6 (2005), pp.~1939--1959.
+
+\bibitem{rahimi2007random}
+{\sc A.~Rahimi and B.~Recht}, {\em Random features for large-scale kernel
+  machines}, Advances in neural information processing systems, 20 (2007).
+
+\bibitem{rasmussen2006gaussian}
+{\sc C.~E. Rasmussen and C.~K.~I. Williams}, {\em Gaussian Processes for
+  Machine Learning}, Adaptive Computation and Machine Learning, {MIT Press},
+  {Cambridge, Mass}, 2006.
+
+\bibitem{rue2005gaussian}
+{\sc H.~Rue and L.~Held}, {\em Gaussian {{Markov Random Fields}}: {{Theory}}
+  and {{Applications}}}, {Chapman and Hall/CRC}, {New York}, Feb. 2005,
+  \url{https://doi.org/10.1201/9780203492024}.
+
+\bibitem{sang2012full}
+{\sc H.~Sang and J.~Z. Huang}, {\em A full scale approximation of covariance
+  functions for large spatial data sets}, Journal of the Royal Statistical
+  Society: Series B (Statistical Methodology), 74 (2012), pp.~111--132.
+
+\bibitem{schafer2021sparse}
+{\sc F.~Sch{\"a}fer, M.~Katzfuss, and H.~Owhadi}, {\em Sparse {{Cholesky}}
+  factorization by {{Kullback-Leibler}} minimization}, arXiv:2004.14455 [cs,
+  math, stat],  (2021), \url{https://arxiv.org/abs/2004.14455}.
+
+\bibitem{schafer2020compression}
+{\sc F.~Sch{\"a}fer, T.~J. Sullivan, and H.~Owhadi}, {\em Compression,
+  inversion, and approximate {{PCA}} of dense kernel matrices at near-linear
+  computational complexity}, arXiv:1706.02205 [cs, math],  (2020),
+  \url{https://arxiv.org/abs/1706.02205}.
+
+\bibitem{schwaighofer2002transductive}
+{\sc A.~Schwaighofer and V.~Tresp}, {\em Transductive and inductive methods for
+  approximate {G}aussian process regression}, Advances in neural information
+  processing systems, 15 (2002).
+
+\bibitem{seeger2003fast}
+{\sc M.~Seeger and C.~K.~I. Williams}, {\em Fast {{Forward Selection}} to
+  {{Speed Up Sparse Gaussian Process Regression}}}, in In {{Workshop}} on
+  {{AI}} and {{Statistics}} 9, 2003.
+
+\bibitem{smola2000sparse}
+{\sc A.~Smola and P.~Bartlett}, {\em Sparse {{Greedy Gaussian Process
+  Regression}}}, in Advances in {{Neural Information Processing Systems}},
+  vol.~13, {MIT Press}, 2000.
+
+\bibitem{spantini2018inference}
+{\sc A.~Spantini, D.~Bigoni, and Y.~Marzouk}, {\em Inference via
+  low-dimensional couplings}, July 2018,
+  \url{https://doi.org/10.48550/arXiv.1703.06131},
+  \url{https://arxiv.org/abs/1703.06131}.
+
+\bibitem{stein2002fast}
+{\sc M.~L. Stein}, {\em Fast and exact simulation of fractional {B}rownian
+  surfaces}, Journal of Computational and Graphical Statistics, 11 (2002),
+  pp.~587--599.
+
+\bibitem{stein2002screening}
+{\sc M.~L. Stein}, {\em The screening effect in {{Kriging}}}, The Annals of
+  Statistics, 30 (2002), pp.~298--323,
+  \url{https://doi.org/10.1214/aos/1015362194}.
+
+\bibitem{stein20112010}
+{\sc M.~L. Stein}, {\em 2010 {{Rietz}} lecture: {{When}} does the screening
+  effect hold?}, The Annals of Statistics, 39 (2011), pp.~2795--2819,
+  \url{https://doi.org/10.1214/11-AOS909}.
+
+\bibitem{stein2004approximating}
+{\sc M.~L. Stein, Z.~Chi, and L.~J. Welty}, {\em Approximating likelihoods for
+  large spatial data sets}, Journal of the Royal Statistical Society: Series B
+  (Statistical Methodology), 66 (2004), pp.~275--296.
+
+\bibitem{sun2019emulating}
+{\sc F.~Sun, R.~B. Gramacy, B.~Haaland, E.~Lawrence, and A.~Walker}, {\em
+  Emulating satellite drag from large simulation experiments}, June 2019,
+  \url{https://doi.org/10.48550/arXiv.1712.00182},
+  \url{https://arxiv.org/abs/1712.00182}.
+
+\bibitem{sweldens1996lifting}
+{\sc W.~Sweldens}, {\em The lifting scheme: A custom-design construction of
+  biorthogonal wavelets}, Applied and computational harmonic analysis, 3
+  (1996), pp.~186--200.
+
+\bibitem{tropp2007signal}
+{\sc J.~A. Tropp and A.~C. Gilbert}, {\em Signal {{Recovery From Random
+  Measurements Via Orthogonal Matching Pursuit}}}, IEEE Transactions on
+  Information Theory, 53 (2007), pp.~4655--4666,
+  \url{https://doi.org/10.1109/TIT.2007.909108}.
+
+\bibitem{tropp2006algorithms}
+{\sc J.~A. Tropp, A.~C. Gilbert, and M.~J. Strauss}, {\em Algorithms for
+  simultaneous sparse approximation. {{Part I}}: {{Greedy}} pursuit}, Signal
+  Processing, 86 (2006), pp.~572--588,
+  \url{https://doi.org/10.1016/j.sigpro.2005.05.030}.
+
+\bibitem{vecchia1988estimation}
+{\sc A.~V. Vecchia}, {\em Estimation and {{Model Identification}} for
+  {{Continuous Spatial Processes}}}, Journal of the Royal Statistical Society:
+  Series B (Methodological), 50 (1988), pp.~297--312,
+  \url{https://doi.org/10.1111/j.2517-6161.1988.tb01729.x}.
+
+\bibitem{vijayakumar2000locally}
+{\sc S.~Vijayakumar and S.~Schaal}, {\em Locally weighted projection
+  regression: {{An O}} (n) algorithm for incremental real time learning in high
+  dimensional space}, Proceedings of the Seventeenth International Conference
+  on Machine Learning (ICML 2000),  (2000), pp.~1079--1086.
+
+\bibitem{virtanen2020scipy}
+{\sc P.~Virtanen, R.~Gommers, T.~E. Oliphant, M.~Haberland, T.~Reddy,
+  D.~Cournapeau, E.~Burovski, P.~Peterson, W.~Weckesser, J.~Bright, S.~J. {van
+  der Walt}, M.~Brett, J.~Wilson, K.~J. Millman, N.~Mayorov, A.~R.~J. Nelson,
+  E.~Jones, R.~Kern, E.~Larson, C.~J. Carey, {\.I}.~Polat, Y.~Feng, E.~W.
+  Moore, J.~VanderPlas, D.~Laxalde, J.~Perktold, R.~Cimrman, I.~Henriksen,
+  E.~A. Quintero, C.~R. Harris, A.~M. Archibald, A.~H. Ribeiro, F.~Pedregosa,
+  and P.~{van Mulbregt}}, {\em {{SciPy}} 1.0: Fundamental algorithms for
+  scientific computing in {{Python}}}, Nature Methods, 17 (2020), pp.~261--272,
+  \url{https://doi.org/10.1038/s41592-019-0686-2}.
+
+\bibitem{wada2013gaussian}
+{\sc T.~Wada, Y.~Matsumura, S.~Maeda, and H.~Shibuya}, {\em Gaussian {{Process
+  Regression}} with {{Dynamic Active Set}} and {{Its Application}} to {{Anomaly
+  Detection}}}, in Proceedings of the {{International Conference}} on {{Data
+  Science}} ({{ICDATA}}), 2013, p.~7.
+
+\bibitem{williams2000using}
+{\sc C.~Williams and M.~Seeger}, {\em Using the {N}ystr{\"o}m method to speed
+  up kernel machines}, Advances in neural information processing systems, 13
+  (2000).
+
+\bibitem{xia2010fast}
+{\sc J.~Xia, S.~Chandrasekaran, M.~Gu, and X.~S. Li}, {\em Fast algorithms for
+  hierarchically semiseparable matrices}, Numerical Linear Algebra with
+  Applications, 17 (2010), pp.~953--976.
+
+\bibitem{yeremin2000factorized}
+{\sc A.~Y. Yeremin, L.~Y. Kolotilina, and A.~A. Nikishin}, {\em Factorized
+  sparse approximate inverse preconditionings. {{III}}. {{Iterative}}
+  construction of preconditioners}, Journal of Mathematical Sciences, 101
+  (2000), pp.~3237--3254, \url{https://doi.org/10.1007/BF02672769}.
+
+\end{thebibliography}
