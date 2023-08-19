@@ -1,0 +1,53 @@
+<html>
+
+
+
+<!-- Template file for SIAM Supplementary Materials index.
+
+     Replace all-caps strings below by appropriate text. -->
+
+
+
+<body>
+
+
+
+<p><b>Index of Supplementary Materials</b></p>
+
+
+
+<p>Title of paper: <i>Sparse Cholesky factorization by greedy conditional selection</i></p>
+
+
+
+<p>Authors: <i> Stephen Huan, Joseph Guinness, Matthias Katzfuss, Houman Owhadi, and Florian Schaefer</i></p>
+
+
+
+
+
+<!-- Repeat the lines below as many times as needed. -->
+
+
+
+<p>File: <a href="experimental_design_linalg_supplement.pdf">experimental_design_linalg_supplement.pdf	</a></p>  <!-- same name twice -->
+
+
+
+<p>Type: Derivations, algorithmic details, and additional figures </p>
+
+
+
+<p>Contents: The supplementary material provides additional details on the derivation of the proposed method, its different algorithmic variants, and additional figures to illustrate the effects of selection on different data sets. </p>
+
+
+
+<!-- Repeat the lines above as many times as needed. -->
+
+
+
+
+
+</body>
+
+</html>
