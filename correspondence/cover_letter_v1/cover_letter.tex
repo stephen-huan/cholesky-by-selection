@@ -1,0 +1,43 @@
+\documentclass[10pt]{article}
+
+% Logo Options: gt, coc, cse, cs, ic, scp
+\usepackage[cse]{gt-letterhead}
+\usepackage[style=numeric]{biblatex}
+\addbibresource{refs.bib}
+
+% footer
+\fromdept{College of Computing}
+
+\toaddress{Peter Challenor, Ph.D. and Sebastian Reich, Ph.D.,\\
+SIAM/ASA Journal on Uncertainty Quantification}
+
+% header
+\fromdate{October 1, 2023}
+
+% closing address
+\closing{Sincerely}
+\signaturefile{sig.pdf}
+\fromname{Dr.\ Florian Sch{\"a}fer \\Assistant Professor}
+\fromemail{\href{mailto:fts@gatech.edu}{fts@gatech.edu}}
+\fromweb{\href{https://f-t-s.github.io/}{https://f-t-s.github.io/}}
+\postscript{\printbibliography}
+
+\begin{document}
+Dear Drs. Challenor and Reich,
+
+My co-authors Stephen Huan, Joseph Guinness, Matthias Katzfuss, Houman Owhadi, and myself are submitting the paper entitled ``Sparse Cholesky factorization by greedy conditional selection'' to the \emph{SIAM/ASA Journal on Uncertainty Quantification}. 
+
+The paper builds on prior work \cite{schafer2020sparse} by a subset of those authors that proposed an algorithm for computing the Kullback-Leibler optimal approximate sparse Cholesky factorization of inverse-covariance matrices of Gaussian vectors. 
+Where \cite{schafer2020sparse} used static sparsity sets, the current work constructs sparsity sets by greedily selecting the most informative entry, after accounting for the information contained in the previously selected entries.
+We devise an efficient algorithm for performing this selection. 
+Where a naive approach for selecting $k$ entries from $N$ candidates has complexity $\mathcal{O}(Nk^4)$, our method updates partial Cholesky factors to achieve computational cost $\mathcal{O}(Nk^2)$, resulting in a practical algorithm.
+Our numerical experiments show that the targeted selection of sparsity entries improves the accuracy vs. complexity tradeoff in approximate Gaussian process regression. 
+Our method also provides highly efficient preconditioners for kernel matrices arising in Gaussian process regression and, due to its connections to orthogonal matching pursuit, can recover sparse Cholesky factors with high probability.
+
+We want to inform you that we have previously submitted this work to SIMODS. The handling editor expressed ``great interest'' in our work but deemed it to be a better topical fit for SIMAX or JUQ, thus returning it without review.  
+We believe that our work is an excellent fit for JUQ since it uses statistical measures of uncertainty for the targeted refinement of a computational approximation method. 
+The resulting methodology targets the efficient computation with covariance matrices of Gaussian processes. This problem is central to numerous existing approaches in uncertainty quantification.
+
+We suggest Helmut Harbrecht or Jonathan Weare as handling editors. (Youssef Marzouk and Tim Sullivan are closest to the submitted work, but they are current/former collaborators.)
+
+\end{document}
