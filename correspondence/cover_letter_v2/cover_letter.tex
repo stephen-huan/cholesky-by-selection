@@ -5,6 +5,8 @@
 \usepackage[style=numeric]{biblatex}
 \addbibresource{refs.bib}
 
+\newcommand*{\todo}[1]{{\color{red} #1}}
+
 % footer
 \fromdept{College of Computing}
 
@@ -29,7 +31,125 @@ response are with respect to the revised draft.
 
 \subsection{Responses to Referee \# 1}
 
+Thank you for appreciating the relevance of our results and for providing suggestions for
+improving our work. Please see below for our responses to your comments, in the
+order in which they were raised.
+
+\subsubsection*{Major comments}
+
+``\textit{1) The manuscript cites 74 references, which seems a bit exaggerated.
+Unfortunately, several key references addressing similar topics
+are missing:...}''
+
+In our original submission, the discussion of related work was more narrowly scoped, but we are happy to include a discussion of a broader class of alternative methods for computing with dense covariance matrices and appreciate your pointers to relevant related works. We have added \todo{add numbers} discussing \todo{add description.} 
+
+``\textit{2) With regard to the references mentioned above, which cover Nystrom
+approximation, fast multipole method and sparse Cholesky factorization,
+the advantages of and drawbacks of the presented method should be
+clearly stated, particularly in terms of the (overall) computational
+cost.
+}''
+
+We have included such a discussion in \todo{add section}. 
+
+``\textit{3) The numerical results all with less than $10^5$ data points are way
+behind the state of the art and it should be justified why no larger
+problems, which actually require sparsification, have been considered.}''
+
+We have included results on larger problems in \todo{add section}.  
+
+``\textit{ 4) In Subsection 6.3, it would be informative to also consider the
+spectral error $\|I-\Theta LL^T\|_2$, which gives an indication on the
+quality of the approximate precision matrix.
+}''
+
+We have included plots of these quantities in \todo{add section}.
+
+\subsubsection*{Minor comments}
+
+``\textit{l 68. Define the term precision matrix.}''
+
+We have added the definition in \todo{where?}
+
+``\textit{l 127. What is the covariance matrix of a Gaussian process?
+}''
+
+We have changed this to ``covariance matrix of a multivariate Gaussian. \todo{do!}
+
+``\textit{l 144. What information does the formula $\Theta_{Tr,Tr}^{-1}$... convey?}''
+
+\todo{address}
+
+
+``\textit{l 188. Is the reverse-maximin ordering the same as the maximin ordering?}''
+
+It is the reverse of the maximin ordering, meaning if the maximin ordering is $1 , \ldots, N$, the reverse maximin ordering is $N \ldots 1$. We have clarified this in \todo{where?}.
+
+``\textit{Figure 9. (and later) Remove $log_10$ from the $x/y$ axis label (or actually
+use the exponents as ticks).}''
+
+Done! \todo{do!}
+
+``\textit{Figure 11. (and later) The compression rate $\mathrm{nnz}/N^2$ might be a better
+measure here.}''
+
+Good point, we have made this change. \todo{Do!}
+
+``\textit{Subsection 6.3. The cost of the matrix-vector product by the covariance
+matrix is $O(N^2)$. It should be mentioned how this can be mitigated.
+Otherwise, the example seems to be very academic.
+}''
+
+Good point, we have addressed this by \todo{how?}.
+
+
 \subsection{Responses to Referee \# 2}
+
+Thank you for your detailed comments and suggestions. 
+We are glad to learn that you find our method interesting and dealing with a relevant problem. 
+In the following, we address your comments in the order in which they were raised. 
+
+``\textit{In [54], the authors have shown that the
+minimization problem has an explicit solution, i.e. there is an explicit formula for the sparse Cholesky matrix, given the sparsity pattern, see formula
+(2.1).
+The new content of this paper, when compared to [54], is that the authors
+provide a closed solution formula of the iterated minimization problem, see
+formula (2.2) and its proof in Appendix A.1.}''
+
+We admit we are slightly confused what the referee means here. 
+Formulas (2.1) and (2.2) in the first version of our submission are, as we indicate, the standard formulas for the conditional mean and covariance of a multivariate Gaussian.
+The closed form solution of the KL optimization was, as we indicate in line 215 (in the first version of our submission), derived by the prior work [54] (numbering as in first submission).
+Appendix A.1 computes the loss attained by this minimizer.
+
+``\textit{to stay
+computational competitive, the possible candidates of indices have to be
+artificially restricted, see the last paragraph before Section 5. Here, the authors only say that they proceed as in [54], which is reasonable, but as the
+index selection is the key topic in this paper, a more elaborate discussion
+would have been useful.}''
+
+We have added a more detailed discussion in \todo{add where?}.
+
+``\textit{Next, there is no discussion of or comparison to other popular methods for
+computing with covariance matrices such as far field and multipole expansions and H-matrices. 
+At least a numerical comparison would be important.}''
+
+We have added a more detailed discussion to methods other than sparse inverse Cholesky factorization in \todo{where?}.
+We have also added a numerical comparison against Cholesky factorization in hierarchical matrix format in \todo{where?}.
+
+``\textit{The numerical examples are interesting but I miss (or might have missed) a
+more sophisticated discussion of the accuracy of the approximate Cholesky
+factorization not only in the Kullback-Leibler divergence but a standard matrix norm.}''
+
+We have added plots of operator norms of the error in \todo{where?}
+In the setting of the rigorous results [54] (numbering with respect to first submitted version), a small error in KL divergence implies a small operator norm error, we have added a brief discussion of this in \todo{where?}.
+
+``\textit{The title of the paper seems to be too generic and should reflect
+that precision matrices of Gaussian processes are considered. The literature
+should be updated. Finally, the paper is obviously an extension of [54]; I
+have some doubts that the extension is scientifically significant enough to
+grant publication.}'' 
+
+\todo{Shall we add anything here? Shall we change the title of the paper?}
 
 
 \printbibliography}
