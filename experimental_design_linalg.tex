@@ -1365,6 +1365,14 @@ we use a \( 2 \)-maximin ordering, a candidate set size scaling factor of
 We then run the conjugate gradient algorithm with \( L \) as a preconditioner
 until reaching a relative tolerance of \( 10^{-12} \).
 
+To accelerate the matrix-vector product \( \CM \vec{x} \), both the
+fast multipole method (e.g.\ \texttt{BBFMM3D} and \texttt{PBBFMM3D}
+\cite{fong2009blackbox, wang2021pbbfmm3d}) and \( \mathcal{H} \)-matrix
+approximations (e.g.\ \texttt{HLIBpro} \cite{borm2003introduction,
+kriemann2005parallel, grasedyck2008parallel}) can be used.
+In these experiments, we use \texttt{HLIBpro} with default settings
+and a relative accuracy of \( \varepsilon = 10^{-6} \).
+
 As shown in \cref{fig:cg_iter}, the conditional methods converge
 in half the iterations of their unconditional counterparts
 and aggregation barely reduces the number of iterations.
