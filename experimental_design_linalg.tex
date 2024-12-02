@@ -1571,6 +1571,31 @@ In addition, integration of the algorithm into Cholesky factorization
 (\cref{sec:chol_select}) provides a global approximation of the Gaussian
 process (\cref{subsec:gp_exp}) beyond directed local approximation.
 
+\paragraph{%
+  Fast multipole method, \( \mathcal{H}
+  \)-matrices, and Nystr{\"o}m approximation%
+}
+The fast multipole method (FMM) proposes a hierarchical decomposition of the
+space then approximates far interactions with a polynomial, assuming the
+kernel function is smooth \cite{fong2009blackbox, wang2021pbbfmm3d}. The
+main advantage is that computing matrix-vector \( \CM \vec{x} \) products
+is fast but an inverse \( \CM^{-1} \vec{x} \) can be awkward to handle.
+Our method can be used in tandem with a FMM in a
+preconditioned conjugate gradient to compute inverses.
+\( \mathcal{H} \)-matrices \cite{borm2003introduction, kriemann2005parallel,
+grasedyck2008parallel, kriemann2013lu} are a general matrix approximation which
+hierarchically decomposes matrices into low-rank blocks and has been deployed
+on kernel matrices \cite{litvinenko2019hlibcov}.
+Unlike \( \mathcal{H} \)-matrices, our method is guaranteed to retain
+positivity, is embarrassingly parallel, and generally simpler.
+The Nystr{\"o}m approximation \cite{williams2000using,
+chen2022randomly} is a low-rank approximation often formed
+from the first \( k \) columns of the Cholesky factor.
+This is equivalent up to diagonal to assuming variables are conditionally
+independent after conditioning on the first \( k \) variables, and from
+this perspective our method generalizes the Nystr{\"o}m approximation to
+varying conditional independence structures.
+
 \paragraph{Orthogonal matching pursuit (OMP)}
 
 Our selection algorithm can be viewed as the covariance equivalent
