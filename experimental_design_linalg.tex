@@ -748,6 +748,12 @@ of the point of interest as \cite{gramacy2014local} does;
 specifically, we use the framework of \cite{schafer2021sparse}
 which considers all points within a radius proportional to the
 length scale from the reverse-maximin ordering \cref{eq:maximin}.
+Other possibilities include replacing the Euclidean distance with a correlation
+distance \cite{kang2021correlationbased}, additionally including the last
+points in the ordering to exploit spectral decay of the covariance matrix as
+in the Nystr{\"o}m approximation, and randomly sampling points.
+We defer a detailed comparison of different candidate sets to future work, but
+generally the method flexibly integrates different candidates by selection.
 
 \section{Extensions}
 \label{sec:extensions}
